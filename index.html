@@ -14,24 +14,35 @@
 <link rel="icon" href="data:,">
 <title>Dashboard</title>
 <style>
-:root{--bg:#0b0f14;--panel:#151b23;--panel2:#1d252f;--line:#252e3a;--text:#ece9e1;--sub:#8794a3;--acc:#8fd0e8;--warm:#f0a35e;--bad:#e8685f;--good:#4ade80}
+:root{--bg:#0b0f14;--panel:#151b23;--panel2:#1d252f;--line:#252e3a;--text:#ece9e1;--sub:#8794a3;--acc:#8fd0e8;--warm:#f0a35e;--bad:#e8685f;--good:#4ade80;--px:0px;--py:0px;--dim:1}
 *{box-sizing:border-box;margin:0;-webkit-tap-highlight-color:transparent}
 html,body{height:100%;overflow:hidden;overscroll-behavior:none;background:var(--bg);color:var(--text);touch-action:pan-y;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;font-family:"Hiragino Sans","Noto Sans JP","Yu Gothic UI",system-ui,sans-serif}
 body{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
-#app{height:100%;display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:2.4vmin;padding:2.4vmin}
 
-/* clock (はみ出し修正版) */
+/* 焼き付き防止：ピクセルシフト＆輝度制御を適用 */
+#app{
+  height:100%;
+  display:grid;
+  grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);
+  gap:2.4vmin;
+  padding:3vmin;
+  transform:translate3d(var(--px),var(--py),0);
+  opacity:var(--dim);
+  transition:transform 4s ease-in-out, opacity 1.5s ease;
+}
+
+/* clock */
 .clock{position:relative;container-type:size;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4vh;min-width:0}
 .flips{--h:min(48vh,17vw);display:flex;gap:calc(var(--h)*.05)}
 @supports (container-type:size){.flips{--h:min(52cqh,35cqw)}}
 .flip{
   position:relative;
   perspective:calc(var(--h)*3);
-  width:calc(var(--h)*.84); /* 幅を広げて2桁をしっかり格納 */
+  width:calc(var(--h)*.84);
   height:var(--h);
   border-radius:calc(var(--h)*.08);
   box-shadow:0 .6vmin 1.8vmin #0009,inset 0 0 0 1px #ffffff0d;
-  font:700 calc(var(--h)*.50)/1 "SF Pro Display","Helvetica Neue",Roboto,sans-serif; /* 文字サイズを適正化 */
+  font:700 calc(var(--h)*.50)/1 "SF Pro Display","Helvetica Neue",Roboto,sans-serif;
   font-variant-numeric:tabular-nums;
   letter-spacing:-.02em;
 }
@@ -79,7 +90,7 @@ body{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-i
 .hr i{display:block;font-style:normal;font-size:4.8vmin;margin:.6vmin 0}
 .hr small{color:var(--acc);font-size:2.2vmin}
 
-/* Train Info (新設) */
+/* Train Info */
 .train-list{display:flex;flex-direction:column;gap:1.8vmin;overflow-y:auto;flex:1;padding-right:1vmin}
 .train-item{display:grid;grid-template-columns:1fr auto;align-items:center;padding:2vmin 2.4vmin;background:var(--panel2);border-radius:1.4vmin;border-left:5px solid var(--good)}
 .train-item.delay{border-left-color:var(--bad)}
@@ -91,13 +102,11 @@ body{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-i
 /* Calendar, News, Quake */
 .ev{display:grid;grid-template-columns:minmax(14vmin,max-content) 1fr;gap:2.4vmin;align-items:baseline;padding:2vmin 0;border-top:1px solid var(--line);font-size:3.8vmin}
 .ev time{color:var(--acc);font-variant-numeric:tabular-nums}
-.ev.now time{color:var(--warm)}
-.ev small{display:block;color:var(--sub);font-size:2.6vmin;margin-top:.4vmin}
 .nw{flex:1;min-height:0;display:flex;align-items:center;gap:3vmin;padding:1.4vmin 0;border-top:1px solid var(--line)}
 .nw div{flex:1;min-width:0}
-.nw p{font-size:3.6vmin;line-height:1.35;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
-.nw small{color:var(--sub);font-size:2.6vmin}
-.nw img{height:min(17vmin,100%);aspect-ratio:1;padding:.8vmin;background:#fff;border-radius:1vmin;image-rendering:pixelated}
+.nw p{font-size:3.4vmin;line-height:1.35;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.nw small{color:var(--sub);font-size:2.4vmin;margin-top:4px;display:block}
+.nw img{height:min(16vmin,100%);aspect-ratio:1;padding:.8vmin;background:#fff;border-radius:1vmin;image-rendering:pixelated}
 .eq{display:grid;grid-template-columns:19vmin 1fr auto;gap:2.4vmin;align-items:center;padding:2vmin 0;border-top:1px solid var(--line)}
 .mag{font-size:7vmin;font-weight:700;line-height:1}
 .m-hi{color:var(--bad)}.m-mid{color:var(--warm)}
@@ -108,18 +117,36 @@ body{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-i
 #edge{position:fixed;left:0;top:0;bottom:0;width:22px;z-index:20;padding:0;border:0;background:none}
 #edge::after{content:"";position:absolute;left:5px;top:50%;width:4px;height:48px;margin-top:-24px;border-radius:2px;background:#ffffff26}
 #scrim{position:fixed;inset:0;z-index:30;background:#000a;opacity:0;pointer-events:none;transition:opacity .4s}
-#drawer{position:fixed;left:0;top:0;bottom:0;z-index:40;width:min(440px,88vw);padding:28px 24px;display:flex;flex-direction:column;gap:18px;overflow:auto;font-size:16px;background:var(--panel);transform:translateX(-100%);transition:transform .42s cubic-bezier(.22,1,.36,1)}
+#drawer{position:fixed;left:0;top:0;bottom:0;z-index:40;width:min(460px,90vw);padding:24px;display:flex;flex-direction:column;gap:16px;overflow-y:auto;font-size:14px;background:var(--panel);transform:translateX(-100%);transition:transform .42s cubic-bezier(.22,1,.36,1)}
 body.open #drawer{transform:none;box-shadow:0 0 5vmin #000c}
 body.open #scrim{opacity:1;pointer-events:auto}
-#drawer h3{font-size:20px}
+#drawer h3{font-size:19px}
 #drawer label{display:flex;flex-direction:column;gap:6px;color:var(--sub)}
 #drawer .chk{flex-direction:row;align-items:center;gap:10px;color:var(--text)}
-#drawer fieldset{display:flex;flex-direction:column;gap:12px;border:0}
-#drawer legend{margin-bottom:10px;color:var(--sub)}
-#drawer input[type=number],#drawer input[type=text]{font:inherit;color:var(--text);background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:10px;user-select:text;-webkit-user-select:text}
-#drawer input[type=checkbox]{width:22px;height:22px;accent-color:var(--acc)}
-#drawer button{font:inherit;padding:12px;border-radius:8px;border:1px solid var(--line);background:var(--panel2);color:var(--text);cursor:pointer}
+#drawer fieldset{display:flex;flex-direction:column;gap:10px;border:0}
+#drawer legend{margin-bottom:6px;color:var(--sub);font-weight:600}
+#drawer input[type=number],#drawer input[type=text],#drawer select{font:inherit;color:var(--text);background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:9px;user-select:text;-webkit-user-select:text}
+#drawer input[type=checkbox]{width:20px;height:20px;accent-color:var(--acc)}
+#drawer button{font:inherit;padding:11px;border-radius:8px;border:1px solid var(--line);background:var(--panel2);color:var(--text);cursor:pointer}
 #drawer #save{background:var(--acc);color:#08202b;border:0;font-weight:600}
+
+/* データ取得元パネル */
+.source-info{
+  background:var(--panel2);
+  border:1px solid var(--line);
+  border-radius:10px;
+  padding:12px 14px;
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  font-size:12.5px;
+  line-height:1.45;
+}
+.source-info h4{font-size:13px;color:var(--text);margin-bottom:2px}
+.source-row{display:flex;flex-direction:column;border-top:1px solid var(--line);padding-top:6px}
+.source-row:first-of-type{border-top:0;padding-top:0}
+.source-row strong{color:var(--acc);font-weight:600}
+.source-url{color:var(--sub);font-family:monospace;font-size:11.5px;word-break:break-all}
 </style>
 </head>
 <body>
@@ -137,9 +164,9 @@ body.open #scrim{opacity:1;pointer-events:auto}
     <div id="pager">
       <article class="card" data-k="weather" data-t="天気"><h2>天気と3時間ごとの予報</h2><div class="body" id="b-weather"></div></article>
       <article class="card" data-k="train" data-t="鉄道"><h2>鉄道運行情報</h2><div class="body" id="b-train"></div></article>
-      <article class="card" data-k="calendar" data-t="予定"><h2>カレンダーの予定</h2><div class="body" id="b-calendar"></div></article>
-      <article class="card" data-k="news" data-t="ニュース"><h2>ニュース（QRコードで記事を開く）</h2><div class="body" id="b-news"></div></article>
+      <article class="card" data-k="news" data-t="ニュース"><h2 id="h-news">ニュース（QRコードで記事を開く）</h2><div class="body" id="b-news"></div></article>
       <article class="card" data-k="quake" data-t="地震情報"><h2>地震情報</h2><div class="body" id="b-quake"></div></article>
+      <article class="card" data-k="calendar" data-t="予定"><h2>カレンダーの予定</h2><div class="body" id="b-calendar"></div></article>
     </div>
     <div id="dots"></div>
   </section>
@@ -154,18 +181,74 @@ body.open #scrim{opacity:1;pointer-events:auto}
     <legend>表示するカード</legend>
     <label class="chk"><input type="checkbox" data-k="weather">天気</label>
     <label class="chk"><input type="checkbox" data-k="train">鉄道運行情報</label>
-    <label class="chk"><input type="checkbox" data-k="calendar">予定</label>
     <label class="chk"><input type="checkbox" data-k="news">ニュース</label>
     <label class="chk"><input type="checkbox" data-k="quake">地震情報</label>
+    <label class="chk"><input type="checkbox" data-k="calendar">予定</label>
   </fieldset>
-  <label>監視する路線（カンマ区切り・空欄で遅延一覧）
-    <input id="sTrains" type="text" placeholder="例: 総武線, 山手線, 東西線">
+
+  <fieldset>
+    <legend>🛡️ 画面の焼き付き防止・減光設定</legend>
+    <label class="chk"><input type="checkbox" id="sBurnShift">自動ピクセルシフト（1分毎に±6px微動）</label>
+    <label class="chk"><input type="checkbox" id="sNightDim">夜間自動減光（ナイトモード）</label>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:4px">
+      <label>減光開始（時）<input id="sNightStart" type="number" min="0" max="23" inputmode="numeric"></label>
+      <label>減光終了（時）<input id="sNightEnd" type="number" min="0" max="23" inputmode="numeric"></label>
+    </div>
+  </fieldset>
+
+  <label>監視する路線（カンマ区切り・空欄で全国の遅延一覧）
+    <input id="sTrains" type="text" placeholder="例: 総武線, 東西線, 京葉線">
   </label>
-  <label>緯度<input id="sLat" type="number" step="any" inputmode="decimal"></label>
-  <label>経度<input id="sLon" type="number" step="any" inputmode="decimal"></label>
+
+  <label>ニュース配信元プリセット
+    <select id="sNewsPreset">
+      <option value="https://www3.nhk.or.jp/rss/news/cat0.xml">NHK ニュース（主要・NHK ONE）</option>
+      <option value="https://www3.nhk.or.jp/rss/news/cat1.xml">NHK ニュース（社会）</option>
+      <option value="https://www3.nhk.or.jp/rss/news/cat3.xml">NHK ニュース（科学・文化・IT）</option>
+      <option value="https://www3.nhk.or.jp/rss/news/cat5.xml">NHK ニュース（経済）</option>
+      <option value="https://news.yahoo.co.jp/rss/topics/top-picks.xml">Yahoo!ニュース（主要トピックス）</option>
+      <option value="https://news.yahoo.co.jp/rss/topics/it.xml">Yahoo!ニュース（IT・テクノロジー）</option>
+      <option value="https://rss.itmedia.co.jp/rss/2.0/news_bursts.xml">ITmedia NEWS</option>
+      <option value="custom">カスタム（下の欄に直接URLを入力）</option>
+    </select>
+  </label>
+
+  <label>ニュース RSS フィード URL
+    <input id="sNewsRss" type="text" placeholder="https://www3.nhk.or.jp/rss/news/cat0.xml">
+  </label>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+    <label>緯度<input id="sLat" type="number" step="any" inputmode="decimal"></label>
+    <label>経度<input id="sLon" type="number" step="any" inputmode="decimal"></label>
+  </div>
+
   <button id="save">保存して更新</button>
   <button id="fs">全画面にする</button>
   <button id="close">閉じる</button>
+
+  <div class="source-info">
+    <h4>📡 データ取得元（API・情報源一覧）</h4>
+    <div class="source-row">
+      <strong>🌤️ 天気・気温・降水確率</strong>
+      <span>Open-Meteo Weather Forecast API（気象庁・GFS等の統合気象モデル）</span>
+      <span class="source-url">https://api.open-meteo.com/v1/forecast</span>
+    </div>
+    <div class="source-row">
+      <strong>🚃 鉄道運行情報・遅延検知</strong>
+      <span>鉄道遅延情報のjson（リアルタイム鉄道遅延集計データ）</span>
+      <span class="source-url">https://tetsudo.rti-giken.jp/free/delay.json</span>
+    </div>
+    <div class="source-row">
+      <strong>📰 ニュース記事・QRコード</strong>
+      <span>上記で指定したRSSフィード（NHK ONE / Yahoo! 等）＋ QR Server API</span>
+      <span class="source-url" id="info-rss-url">https://www3.nhk.or.jp/rss/news/cat0.xml</span>
+    </div>
+    <div class="source-row">
+      <strong>🌋 地震情報（震度・震源・規模）</strong>
+      <span>P2P地震情報 JSON API v2（気象庁発表の地震・震度データ）</span>
+      <span class="source-url">https://api.p2pquake.net/v2/history?codes=551</span>
+    </div>
+  </div>
 </aside>
 
 <script>
@@ -174,13 +257,69 @@ body.open #scrim{opacity:1;pointer-events:auto}
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const KC='dash.cfg', KD='dash.cache';
 const QR='https://api.qrserver.com/v1/create-qr-code/?margin=0&size=240x240&data=';
-const DEF={auto:12,show:{weather:true,train:true,calendar:false,news:true,quake:true},lat:35.6812,lon:139.7671,trains:'総武線, 中央線, 山手線'};
+
+const DEF={
+  auto:12,
+  show:{weather:true,train:true,news:true,quake:true,calendar:false},
+  lat:35.6908,
+  lon:139.9984,
+  trains:'総武線, 東西線, 京葉線',
+  newsRss:'https://www3.nhk.or.jp/rss/news/cat0.xml',
+  burnShift:true,
+  nightDim:true,
+  nightStart:23,
+  nightEnd:6
+};
+
 const ls={get(k){try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
 const cfg=Object.assign({},DEF,ls.get(KC));cfg.show=Object.assign({},DEF.show,cfg.show);
 const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const pad=n=>String(n).padStart(2,'0');
 const num=v=>v==null||isNaN(v)?'--':Math.round(v);
 const empty=s=>`<div class="empty">${esc(s)}</div>`;
+
+/* ---- 焼き付き防止：ピクセルシフト ＆ 夜間/アイドル減光 ---- */
+let shiftStep=0;
+let lastActive=Date.now();
+const shiftCoords=[
+  [0,0],[4,-3],[6,0],[4,3],[0,5],[-4,3],[-6,0],[-4,-3]
+];
+
+function updateBurnInProtection(){
+  const root=document.documentElement.style;
+  // 1. ピクセルシフト（8方向へ緩やかに巡回）
+  if(cfg.burnShift){
+    const [dx,dy]=shiftCoords[shiftStep%shiftCoords.length];
+    root.setProperty('--px', dx+'px');
+    root.setProperty('--py', dy+'px');
+    shiftStep++;
+  }else{
+    root.setProperty('--px','0px');
+    root.setProperty('--py','0px');
+  }
+
+  // 2. 夜間ディマー＆アイドル微減光
+  const hr=new Date().getHours();
+  let isNight=false;
+  if(cfg.nightDim){
+    if(cfg.nightStart > cfg.nightEnd){
+      isNight = (hr >= cfg.nightStart || hr < cfg.nightEnd);
+    }else if(cfg.nightStart < cfg.nightEnd){
+      isNight = (hr >= cfg.nightStart && hr < cfg.nightEnd);
+    }
+  }
+  const isIdle = (Date.now() - lastActive) > 300000; // 5分無操作
+  const targetDim = isNight ? 0.35 : (isIdle ? 0.90 : 1.0);
+  root.setProperty('--dim', targetDim);
+}
+
+['touchstart','pointerdown','wheel','keydown'].forEach(ev=>{
+  addEventListener(ev,()=>{
+    lastActive=Date.now();
+    updateBurnInProtection();
+  },{passive:true});
+});
+setInterval(updateBurnInProtection, 60000);
 
 function wxCode(c){
   c=+c;
@@ -237,24 +376,24 @@ const R={
       </div>
     `).join('')}</div>`;
   },
-  calendar(a){
-    if(!a||!a.length)return empty('直近の予定はありません');
-    return a.slice(0,5).map(e=>`<div class="ev"><time>${esc(e.time||'予定')}</time><div>${esc(e.title)}</div></div>`).join('');
-  },
   news(a){
-    if(!a||!a.length)return empty('ニュースを取得中…');
+    if(!a||!a.length) return empty('ニュースを取得できませんでした（設定からURLをご確認ください）');
     return a.slice(0,3).map(n=>{
       const q=n.url?QR+encodeURIComponent(n.url):'';
-      return `<div class="nw"><div><p>${esc(n.title)}</p><small>${esc(n.source||'ニュース')}</small></div>${q?`<img alt="" src="${esc(q)}">`:''}</div>`;
+      return `<div class="nw"><div><p>${esc(n.title)}</p><small>${esc(n.source||'')} ${esc(n.date||'')}</small></div>${q?`<img alt="" src="${esc(q)}">`:''}</div>`;
     }).join('');
   },
   quake(a){
-    if(!a||!a.length)return empty('直近の地震情報はありません');
+    if(!a||!a.length) return empty('直近の地震情報はありません');
     return a.slice(0,4).map(q=>{
       const m=+q.mag,c=m>=6?'m-hi':m>=4.5?'m-mid':'',d=new Date(q.time);
       const t=isNaN(d)?esc(q.time||''):`${d.getMonth()+1}/${d.getDate()} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
       return `<div class="eq"><div class="mag ${c}">M${isNaN(m)?'-':m.toFixed(1)}</div><div><p>${esc(q.place)}</p><small>${t}${q.depth!=null?' ・深さ '+esc(q.depth)+'km':''}</small></div>${q.intensity?`<span class="int">震度${esc(q.intensity)}</span>`:''}</div>`;
     }).join('');
+  },
+  calendar(a){
+    if(!a||!a.length) return empty('直近の予定はありません');
+    return a.slice(0,5).map(e=>`<div class="ev"><time>${esc(e.time||'予定')}</time><div>${esc(e.title)}</div></div>`).join('');
   }
 };
 
@@ -266,47 +405,109 @@ function apply(data){
   if(data.weather&&data.weather.temp!=null) $('#temp').textContent=num(data.weather.temp)+'°C';
 }
 
-/* ---- Direct API fetch (GitHub Pages完結) ---- */
+/* ---- ニュースRSS多重取得 ---- */
+function formatPubDate(str){
+  if(!str) return '';
+  const d=new Date(str.replace(/-/g,'/'));
+  const d2=isNaN(d)?new Date(str):d;
+  return isNaN(d2)?'':`${d2.getMonth()+1}/${d2.getDate()} ${pad(d2.getHours())}:${pad(d2.getMinutes())}`;
+}
+
+function parseXmlString(xmlText){
+  const parser=new DOMParser();
+  const xml=parser.parseFromString(xmlText,"text/xml");
+  const feedTitle=xml.querySelector("channel > title, feed > title")?.textContent||"";
+  const items=Array.from(xml.querySelectorAll("item, entry")).slice(0,5);
+  return items.map(item=>{
+    const title=item.querySelector("title")?.textContent?.trim()||"タイトルなし";
+    let link=item.querySelector("link")?.textContent?.trim()||item.querySelector("link")?.getAttribute("href")||"";
+    const pub=item.querySelector("pubDate, updated, date")?.textContent||"";
+    return {title, url:link, date:formatPubDate(pub), source:feedTitle};
+  });
+}
+
+async function fetchNewsWithFallback(rssUrl){
+  if(!rssUrl) return [];
+  try{
+    const r1=await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`);
+    if(r1.ok){
+      const j=await r1.json();
+      if(j.status==='ok' && j.items && j.items.length>0){
+        const src=j.feed?.title||'';
+        return j.items.slice(0,5).map(it=>({
+          title:it.title,
+          url:it.link,
+          date:formatPubDate(it.pubDate),
+          source:src
+        }));
+      }
+    }
+  }catch(e){}
+
+  try{
+    const r2=await fetch(`https://corsproxy.io/?${encodeURIComponent(rssUrl)}`);
+    if(r2.ok){
+      const txt=await r2.text();
+      const parsed=parseXmlString(txt);
+      if(parsed.length>0) return parsed;
+    }
+  }catch(e){}
+
+  try{
+    const r3=await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(rssUrl)}`);
+    if(r3.ok){
+      const j=await r3.json();
+      if(j.contents){
+        const parsed=parseXmlString(j.contents);
+        if(parsed.length>0) return parsed;
+      }
+    }
+  }catch(e){}
+
+  return [];
+}
+
+/* ---- Direct API fetch ---- */
 const st={ok:true,t:0};let busy=false,wl=null;
 function status(){
   const el=$('#stat'),d=new Date(st.t),tm=st.t?`${pad(d.getHours())}:${pad(d.getMinutes())}`:'--:--';
   el.className=st.ok?'':'err';
-  el.textContent=(st.ok?`${tm} 更新`:`${tm} 更新試行中`)+(wl?'':' ・画面維持オフ');
+  el.textContent=(st.ok?`${tm} 更新`:`${tm} 更新試行中`)+(wl?'':' ・画面維持オフ')+(cfg.burnShift?' ・焼付防止ON':'');
 }
 
 async function load(){
   if(busy)return;busy=true;
+  $('#info-rss-url').textContent=cfg.newsRss||'未設定';
   try{
-    // 1. 天気 (Open-Meteo API: 登録・キー不要・CORS制限なし)
-    const wxUrl=`https://api.open-meteo.com/v1/forecast?latitude=${cfg.lat}&longitude=${cfg.lon}&current=temperature_2m,weather_code&hourly=temperature_2m,weather_code,precipitation_probability&daily=temperature_2m_max,temperature_2m_min&timezone=Asia%2FTokyo&forecast_days=2`;
-    const wxRes=await fetch(wxUrl).then(r=>r.json());
-    
-    const curCode=wxRes.current.weather_code;
-    const curInfo=wxCode(curCode);
-    const nowHour=new Date().getHours();
-    
-    const hourly=[];
-    for(let i=nowHour;i<nowHour+18;i+=3){
-      if(wxRes.hourly.time[i]){
-        const c=wxRes.hourly.weather_code[i];
-        hourly.push({
-          time:wxRes.hourly.time[i],
-          temp:wxRes.hourly.temperature_2m[i],
-          pop:wxRes.hourly.precipitation_probability[i],
-          icon:wxCode(c).ic
-        });
+    let weatherData=null;
+    try{
+      const wxUrl=`https://api.open-meteo.com/v1/forecast?latitude=${cfg.lat}&longitude=${cfg.lon}&current=temperature_2m,weather_code&hourly=temperature_2m,weather_code,precipitation_probability&daily=temperature_2m_max,temperature_2m_min&timezone=Asia%2FTokyo&forecast_days=2`;
+      const wxRes=await fetch(wxUrl).then(r=>r.json());
+      const curCode=wxRes.current.weather_code;
+      const curInfo=wxCode(curCode);
+      const nowHour=new Date().getHours();
+      
+      const hourly=[];
+      for(let i=nowHour;i<nowHour+18;i+=3){
+        if(wxRes.hourly.time[i]){
+          hourly.push({
+            time:wxRes.hourly.time[i],
+            temp:wxRes.hourly.temperature_2m[i],
+            pop:wxRes.hourly.precipitation_probability[i],
+            icon:wxCode(wxRes.hourly.weather_code[i]).ic
+          });
+        }
       }
-    }
-    const weatherData={
-      temp:wxRes.current.temperature_2m,
-      desc:curInfo.desc,
-      icon:curInfo.ic,
-      hi:wxRes.daily.temperature_2m_max[0],
-      lo:wxRes.daily.temperature_2m_min[0],
-      hourly:hourly
-    };
+      weatherData={
+        temp:wxRes.current.temperature_2m,
+        desc:curInfo.desc,
+        icon:curInfo.ic,
+        hi:wxRes.daily.temperature_2m_max[0],
+        lo:wxRes.daily.temperature_2m_min[0],
+        hourly:hourly
+      };
+    }catch(e){}
 
-    // 2. 鉄道遅延情報 (rti-giken: CORSフリー)
     let trainData=[];
     try{
       const delayList=await fetch('https://tetsudo.rti-giken.jp/free/delay.json').then(r=>r.json());
@@ -322,9 +523,10 @@ async function load(){
       } else {
         trainData=delayList.slice(0,5).map(t=>({name:t.name, company:t.company, delay:true}));
       }
-    }catch(_){}
+    }catch(e){}
 
-    // 3. 地震情報 (P2P地震情報 API: CORSフリー)
+    const newsData=await fetchNewsWithFallback(cfg.newsRss);
+
     let quakeData=[];
     try{
       const qRes=await fetch('https://api.p2pquake.net/v2/history?codes=551&limit=4').then(r=>r.json());
@@ -336,26 +538,20 @@ async function load(){
         depth:q.earthquake.hypocenter.depth>=0?q.earthquake.hypocenter.depth:'-',
         intensity:intMap[q.earthquake.maxScale]||''
       }));
-    }catch(_){}
-
-    // 4. ニュース (NHK主要ニュース)
-    let newsData=[
-      {title:'NHKニュース・主要ヘッドライン', source:'NHK', url:'https://www3.nhk.or.jp/news/'}
-    ];
+    }catch(e){}
 
     const aggregated={
       weather:weatherData,
       train:trainData,
-      calendar:[],
       news:newsData,
-      quake:quakeData
+      quake:quakeData,
+      calendar:[]
     };
 
     apply(aggregated);
     st.ok=true;st.t=Date.now();
     ls.set(KD,{t:st.t,data:aggregated});
   }catch(e){
-    console.warn(e);
     st.ok=false;
   }finally{
     busy=false;status();
@@ -409,7 +605,7 @@ function setAuto(){
 
 function applyCfg(){
   $$('.card').forEach(c=>{c.hidden=!cfg.show[c.dataset.k]});
-  cur=0;pager.scrollTop=0;buildDots();setAuto();
+  cur=0;pager.scrollTop=0;buildDots();setAuto();updateBurnInProtection();status();
 }
 
 /* ---- drawer ---- */
@@ -417,16 +613,40 @@ const open=v=>{document.body.classList.toggle('open',v);if(v)fill()};
 function fill(){
   $('#sAuto').value=cfg.auto;$('#sLat').value=cfg.lat;$('#sLon').value=cfg.lon;
   $('#sTrains').value=cfg.trains||'';
+  $('#sNewsRss').value=cfg.newsRss||'';
+  $('#sBurnShift').checked=!!cfg.burnShift;
+  $('#sNightDim').checked=!!cfg.nightDim;
+  $('#sNightStart').value=cfg.nightStart;
+  $('#sNightEnd').value=cfg.nightEnd;
+  $('#info-rss-url').textContent=cfg.newsRss||'未設定';
+
+  const presetEl=$('#sNewsPreset');
+  const match=Array.from(presetEl.options).some(opt=>opt.value===cfg.newsRss);
+  presetEl.value=match?cfg.newsRss:'custom';
+
   $$('#drawer [data-k]').forEach(c=>{c.checked=!!cfg.show[c.dataset.k]});
 }
+
+$('#sNewsPreset').onchange=e=>{
+  if(e.target.value!=='custom'){
+    $('#sNewsRss').value=e.target.value;
+  }
+};
+
 $('#edge').onclick=()=>open(true);
 $('#scrim').onclick=$('#close').onclick=()=>open(false);
 $('#save').onclick=()=>{
   const a=parseInt($('#sAuto').value,10),la=parseFloat($('#sLat').value),lo=parseFloat($('#sLon').value);
+  const ns=parseInt($('#sNightStart').value,10),ne=parseInt($('#sNightEnd').value,10);
   cfg.auto=isNaN(a)||a<0?0:a;
   if(!isNaN(la))cfg.lat=la;
   if(!isNaN(lo))cfg.lon=lo;
   cfg.trains=$('#sTrains').value.trim();
+  cfg.newsRss=$('#sNewsRss').value.trim();
+  cfg.burnShift=$('#sBurnShift').checked;
+  cfg.nightDim=$('#sNightDim').checked;
+  if(!isNaN(ns)&&ns>=0&&ns<=23)cfg.nightStart=ns;
+  if(!isNaN(ne)&&ne>=0&&ne<=23)cfg.nightEnd=ne;
   $$('#drawer [data-k]').forEach(c=>{cfg.show[c.dataset.k]=c.checked});
   if(!Object.values(cfg.show).some(Boolean))cfg.show.weather=true;
   ls.set(KC,cfg);applyCfg();open(false);load();
