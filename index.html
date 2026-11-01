@@ -16,10 +16,9 @@
 <style>
 :root{--bg:#0b0f14;--panel:#151b23;--panel2:#1d252f;--line:#252e3a;--text:#ece9e1;--sub:#8794a3;--acc:#8fd0e8;--warm:#f0a35e;--bad:#e8685f;--good:#4ade80;--px:0px;--py:0px;--dim:1}
 *{box-sizing:border-box;margin:0;-webkit-tap-highlight-color:transparent}
-html,body{height:100%;overflow:hidden;overscroll-behavior:none;background:var(--bg);color:var(--text);touch-action:pan-y;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;font-family:"Hiragino Sans","Noto Sans JP","Yu Gothic UI",system-ui,sans-serif}
+html,body{height:100%;overflow:hidden;overscroll-behavior:none;background:var(--bg);color:var(--text);touch-action:manipulation;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;font-family:"Hiragino Sans","Noto Sans JP","Yu Gothic UI",system-ui,sans-serif}
 body{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
 
-/* 焼き付き防止：ピクセルシフト＆輝度制御を適用 */
 #app{
   height:100%;
   display:grid;
@@ -64,18 +63,18 @@ body{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-i
 #stat{position:absolute;left:1vmin;bottom:0;font-size:max(2.1vmin,11px);color:var(--sub)}
 #stat.err{color:var(--warm)}
 
-/* cards */
+/* cards (縦ページャー) */
 .stage{position:relative;min-width:0;min-height:0}
-#pager{position:relative;height:100%;overflow-y:auto;scroll-snap-type:y mandatory;scrollbar-width:none;overscroll-behavior:contain;border-radius:2vmin}
+#pager{position:relative;height:100%;overflow-y:auto;scroll-snap-type:y mandatory;scrollbar-width:none;overscroll-behavior:contain;border-radius:2vmin;touch-action:pan-y}
 #pager::-webkit-scrollbar{display:none}
-.card{height:100%;scroll-snap-align:start;scroll-snap-stop:always;display:flex;flex-direction:column;gap:2vmin;padding:3vmin 5vmin 3vmin 4vmin;overflow:hidden;background:var(--panel);border-radius:2vmin;box-shadow:inset 0 0 0 1px var(--line)}
-.card{will-change:transform,opacity}
+.card{height:100%;scroll-snap-align:start;scroll-snap-stop:always;display:flex;flex-direction:column;gap:1.8vmin;padding:3vmin 5vmin 3vmin 4vmin;overflow:hidden;background:var(--panel);border-radius:2vmin;box-shadow:inset 0 0 0 1px var(--line)}
 .card[hidden]{display:none}
+.card-hdr{display:flex;justify-content:space-between;align-items:center}
 .card h2{font-size:max(2.6vmin,13px);font-weight:600;color:var(--sub)}
 .body{flex:1;min-height:0;display:flex;flex-direction:column}
 .empty{margin:auto;color:var(--sub);font-size:3.4vmin;text-align:center}
-#dots{position:absolute;right:1.2vmin;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:2vmin}
-#dots button{position:relative;width:1.2vmin;height:1.2vmin;min-width:8px;min-height:8px;padding:0;border:0;border-radius:50%;background:#ffffff33}
+#dots{position:absolute;right:1.2vmin;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:2vmin;z-index:10}
+#dots button{position:relative;width:1.2vmin;height:1.2vmin;min-width:8px;min-height:8px;padding:0;border:0;border-radius:50%;background:#ffffff33;cursor:pointer}
 #dots button::before{content:"";position:absolute;inset:-12px}
 #dots button.on{background:var(--acc)}
 
@@ -99,14 +98,86 @@ body{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-i
 .train-badge{font-size:2.8vmin;font-weight:700;padding:.6vmin 1.6vmin;border-radius:1vmin;background:rgba(74,222,128,0.15);color:var(--good)}
 .train-item.delay .train-badge{background:rgba(232,104,95,0.15);color:var(--bad)}
 
-/* Calendar, News, Quake */
+/* News (横スクロールカルーセル・Panoramaスタイル) */
+.nw-wrap{position:relative;flex:1;min-height:0;display:flex;flex-direction:column;justify-content:space-between}
+.nw-track{
+  flex:1;
+  display:flex;
+  overflow-x:auto;
+  scroll-snap-type:x mandatory;
+  scrollbar-width:none;
+  overscroll-behavior-x:contain;
+  touch-action:pan-x;
+  gap:2.4vmin;
+}
+.nw-track::-webkit-scrollbar{display:none}
+.nw-slide{
+  flex:0 0 100%;
+  width:100%;
+  height:100%;
+  scroll-snap-align:start;
+  scroll-snap-stop:always;
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+  background:var(--panel2);
+  border-radius:1.6vmin;
+  padding:2.8vmin 3.2vmin;
+  border:1px solid var(--line);
+}
+.nw-top{display:flex;justify-content:space-between;align-items:center;gap:2vmin}
+.nw-idx{font-size:2.4vmin;font-weight:700;color:var(--acc);background:rgba(143,208,232,0.12);padding:.4vmin 1.4vmin;border-radius:99px}
+.nw-src{font-size:2.4vmin;color:var(--sub);font-weight:600}
+.nw-title{
+  font-size:clamp(16px, 4.2vmin, 28px);
+  font-weight:700;
+  line-height:1.4;
+  color:var(--text);
+  display:-webkit-box;
+  -webkit-line-clamp:3;
+  -webkit-box-orient:vertical;
+  overflow:hidden;
+  margin:auto 0;
+}
+.nw-btm{
+  display:grid;
+  grid-template-columns:1fr auto;
+  gap:2.4vmin;
+  align-items:flex-end;
+  padding-top:1.6vmin;
+  border-top:1px solid var(--line);
+}
+.nw-desc{
+  font-size:clamp(12px, 2.7vmin, 18px);
+  color:var(--sub);
+  line-height:1.45;
+  display:-webkit-box;
+  -webkit-line-clamp:2;
+  -webkit-box-orient:vertical;
+  overflow:hidden;
+  margin-bottom:1vmin;
+}
+.nw-meta{display:flex;justify-content:space-between;align-items:center;font-size:max(2.2vmin,11px);color:#6e7b8b}
+.nw-qr{
+  width:clamp(64px, 15vmin, 110px);
+  height:clamp(64px, 15vmin, 110px);
+  padding:6px;
+  background:#fff;
+  border-radius:1vmin;
+  object-fit:contain;
+  flex-shrink:0;
+}
+.nw-dots{display:flex;justify-content:center;gap:1.4vmin;padding-top:1.6vmin}
+.nw-dots button{
+  width:1.8vmin;height:.8vmin;min-width:14px;min-height:5px;
+  border:0;border-radius:99px;padding:0;
+  background:#ffffff26;cursor:pointer;transition:all .25s;
+}
+.nw-dots button.on{background:var(--acc);width:3.6vmin;min-width:26px}
+
+/* Quake & Calendar */
 .ev{display:grid;grid-template-columns:minmax(14vmin,max-content) 1fr;gap:2.4vmin;align-items:baseline;padding:2vmin 0;border-top:1px solid var(--line);font-size:3.8vmin}
 .ev time{color:var(--acc);font-variant-numeric:tabular-nums}
-.nw{flex:1;min-height:0;display:flex;align-items:center;gap:3vmin;padding:1.4vmin 0;border-top:1px solid var(--line)}
-.nw div{flex:1;min-width:0}
-.nw p{font-size:3.4vmin;line-height:1.35;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
-.nw small{color:var(--sub);font-size:2.4vmin;margin-top:4px;display:block}
-.nw img{height:min(16vmin,100%);aspect-ratio:1;padding:.8vmin;background:#fff;border-radius:1vmin;image-rendering:pixelated}
 .eq{display:grid;grid-template-columns:19vmin 1fr auto;gap:2.4vmin;align-items:center;padding:2vmin 0;border-top:1px solid var(--line)}
 .mag{font-size:7vmin;font-weight:700;line-height:1}
 .m-hi{color:var(--bad)}.m-mid{color:var(--warm)}
@@ -130,7 +201,6 @@ body.open #scrim{opacity:1;pointer-events:auto}
 #drawer button{font:inherit;padding:11px;border-radius:8px;border:1px solid var(--line);background:var(--panel2);color:var(--text);cursor:pointer}
 #drawer #save{background:var(--acc);color:#08202b;border:0;font-weight:600}
 
-/* データ取得元パネル */
 .source-info{
   background:var(--panel2);
   border:1px solid var(--line);
@@ -162,11 +232,11 @@ body.open #scrim{opacity:1;pointer-events:auto}
   </section>
   <section class="stage">
     <div id="pager">
-      <article class="card" data-k="weather" data-t="天気"><h2>天気と3時間ごとの予報</h2><div class="body" id="b-weather"></div></article>
-      <article class="card" data-k="train" data-t="鉄道"><h2>鉄道運行情報</h2><div class="body" id="b-train"></div></article>
-      <article class="card" data-k="news" data-t="ニュース"><h2 id="h-news">ニュース（QRコードで記事を開く）</h2><div class="body" id="b-news"></div></article>
-      <article class="card" data-k="quake" data-t="地震情報"><h2>地震情報</h2><div class="body" id="b-quake"></div></article>
-      <article class="card" data-k="calendar" data-t="予定"><h2>カレンダーの予定</h2><div class="body" id="b-calendar"></div></article>
+      <article class="card" data-k="weather" data-t="天気"><div class="card-hdr"><h2>天気と3時間ごとの予報</h2></div><div class="body" id="b-weather"></div></article>
+      <article class="card" data-k="train" data-t="鉄道"><div class="card-hdr"><h2>鉄道運行情報</h2></div><div class="body" id="b-train"></div></article>
+      <article class="card" data-k="news" data-t="ニュース"><div class="card-hdr"><h2>トピックニュース（左右スワイプで切替）</h2></div><div class="body" id="b-news"></div></article>
+      <article class="card" data-k="quake" data-t="地震情報"><div class="card-hdr"><h2>地震情報</h2></div><div class="body" id="b-quake"></div></article>
+      <article class="card" data-k="calendar" data-t="予定"><div class="card-hdr"><h2>カレンダーの予定</h2></div><div class="body" id="b-calendar"></div></article>
     </div>
     <div id="dots"></div>
   </section>
@@ -200,6 +270,14 @@ body.open #scrim{opacity:1;pointer-events:auto}
     <input id="sTrains" type="text" placeholder="例: 総武線, 東西線, 京葉線">
   </label>
 
+  <label>ニュース表示件数（横スクロール）
+    <select id="sNewsCount">
+      <option value="3">3件（推奨）</option>
+      <option value="5">5件</option>
+      <option value="7">7件</option>
+    </select>
+  </label>
+
   <label>ニュース配信元プリセット
     <select id="sNewsPreset">
       <option value="https://www3.nhk.or.jp/rss/news/cat0.xml">NHK ニュース（主要・NHK ONE）</option>
@@ -230,7 +308,7 @@ body.open #scrim{opacity:1;pointer-events:auto}
     <h4>📡 データ取得元（API・情報源一覧）</h4>
     <div class="source-row">
       <strong>🌤️ 天気・気温・降水確率</strong>
-      <span>Open-Meteo Weather Forecast API（気象庁・GFS等の統合気象モデル）</span>
+      <span>Open-Meteo Weather Forecast API</span>
       <span class="source-url">https://api.open-meteo.com/v1/forecast</span>
     </div>
     <div class="source-row">
@@ -240,12 +318,12 @@ body.open #scrim{opacity:1;pointer-events:auto}
     </div>
     <div class="source-row">
       <strong>📰 ニュース記事・QRコード</strong>
-      <span>上記で指定したRSSフィード（NHK ONE / Yahoo! 等）＋ QR Server API</span>
+      <span>指定RSSフィード ＋ QR Server API</span>
       <span class="source-url" id="info-rss-url">https://www3.nhk.or.jp/rss/news/cat0.xml</span>
     </div>
     <div class="source-row">
       <strong>🌋 地震情報（震度・震源・規模）</strong>
-      <span>P2P地震情報 JSON API v2（気象庁発表の地震・震度データ）</span>
+      <span>P2P地震情報 JSON API v2</span>
       <span class="source-url">https://api.p2pquake.net/v2/history?codes=551</span>
     </div>
   </div>
@@ -255,7 +333,7 @@ body.open #scrim{opacity:1;pointer-events:auto}
 (()=>{
 'use strict';
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
-const KC='dash.cfg', KD='dash.cache';
+const KC='dash.cfg.v2', KD='dash.cache.v2'; // 古い壊れたキャッシュを無効化するためv2へ更新
 const QR='https://api.qrserver.com/v1/create-qr-code/?margin=0&size=240x240&data=';
 
 const DEF={
@@ -265,6 +343,7 @@ const DEF={
   lon:139.9984,
   trains:'総武線, 東西線, 京葉線',
   newsRss:'https://www3.nhk.or.jp/rss/news/cat0.xml',
+  newsCount:3,
   burnShift:true,
   nightDim:true,
   nightStart:23,
@@ -274,6 +353,7 @@ const DEF={
 const ls={get(k){try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
 const cfg=Object.assign({},DEF,ls.get(KC));cfg.show=Object.assign({},DEF.show,cfg.show);
 const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const stripHtml=s=>String(s==null?'':s).replace(/<[^>]*>/g,'').replace(/\s+/g,' ').trim();
 const pad=n=>String(n).padStart(2,'0');
 const num=v=>v==null||isNaN(v)?'--':Math.round(v);
 const empty=s=>`<div class="empty">${esc(s)}</div>`;
@@ -281,13 +361,10 @@ const empty=s=>`<div class="empty">${esc(s)}</div>`;
 /* ---- 焼き付き防止：ピクセルシフト ＆ 夜間/アイドル減光 ---- */
 let shiftStep=0;
 let lastActive=Date.now();
-const shiftCoords=[
-  [0,0],[4,-3],[6,0],[4,3],[0,5],[-4,3],[-6,0],[-4,-3]
-];
+const shiftCoords=[[0,0],[4,-3],[6,0],[4,3],[0,5],[-4,3],[-6,0],[-4,-3]];
 
 function updateBurnInProtection(){
   const root=document.documentElement.style;
-  // 1. ピクセルシフト（8方向へ緩やかに巡回）
   if(cfg.burnShift){
     const [dx,dy]=shiftCoords[shiftStep%shiftCoords.length];
     root.setProperty('--px', dx+'px');
@@ -298,7 +375,6 @@ function updateBurnInProtection(){
     root.setProperty('--py','0px');
   }
 
-  // 2. 夜間ディマー＆アイドル微減光
   const hr=new Date().getHours();
   let isNight=false;
   if(cfg.nightDim){
@@ -308,7 +384,7 @@ function updateBurnInProtection(){
       isNight = (hr >= cfg.nightStart && hr < cfg.nightEnd);
     }
   }
-  const isIdle = (Date.now() - lastActive) > 300000; // 5分無操作
+  const isIdle = (Date.now() - lastActive) > 300000;
   const targetDim = isNight ? 0.35 : (isIdle ? 0.90 : 1.0);
   root.setProperty('--dim', targetDim);
 }
@@ -356,6 +432,43 @@ function tick(){
   setTimeout(tick,1005-d.getMilliseconds());
 }
 
+/* ---- ニュース横カルーセルの初期化とイベント紐付け ---- */
+function initNewsCarousel(){
+  const track=$('#nwTrack');
+  const dotsWrap=$('#nwDots');
+  if(!track||!dotsWrap)return;
+  const slides=[...track.querySelectorAll('.nw-slide')];
+  const btns=[...dotsWrap.querySelectorAll('button')];
+
+  btns.forEach((btn,idx)=>{
+    btn.onclick=()=>{
+      touched=Date.now();
+      track.scrollTo({left:idx*track.clientWidth, behavior:'smooth'});
+    };
+  });
+
+  track.addEventListener('scroll',()=>{
+    const idx=Math.round(track.scrollLeft / Math.max(1,track.clientWidth));
+    btns.forEach((b,i)=>b.classList.toggle('on',i===idx));
+  },{passive:true});
+
+  // ホイールでの横送りサポート（Shiftなしでもカード内なら横移動可能に）
+  track.addEventListener('wheel',e=>{
+    if(Math.abs(e.deltaX)>Math.abs(e.deltaY)) return;
+    if(slides.length<=1) return;
+    const atStart = track.scrollLeft <= 4;
+    const atEnd = track.scrollLeft >= (track.scrollWidth - track.clientWidth - 4);
+    if((e.deltaY>0 && !atEnd) || (e.deltaY<0 && !atStart)){
+      e.preventDefault();
+      e.stopPropagation();
+      touched=Date.now();
+      const curIdx=Math.round(track.scrollLeft / Math.max(1,track.clientWidth));
+      const nextIdx=Math.max(0, Math.min(slides.length-1, curIdx + (e.deltaY>0?1:-1)));
+      track.scrollTo({left:nextIdx*track.clientWidth, behavior:'smooth'});
+    }
+  },{passive:false});
+}
+
 /* ---- renderers ---- */
 const R={
   weather(w){
@@ -377,11 +490,43 @@ const R={
     `).join('')}</div>`;
   },
   news(a){
-    if(!a||!a.length) return empty('ニュースを取得できませんでした（設定からURLをご確認ください）');
-    return a.slice(0,3).map(n=>{
-      const q=n.url?QR+encodeURIComponent(n.url):'';
-      return `<div class="nw"><div><p>${esc(n.title)}</p><small>${esc(n.source||'')} ${esc(n.date||'')}</small></div>${q?`<img alt="" src="${esc(q)}">`:''}</div>`;
+    const valid = (a||[]).filter(n=>n && n.title);
+    if(!valid.length) return empty('ニュースを取得しています…（設定からURLを確認できます）');
+    const limit = cfg.newsCount || 3;
+    const list = valid.slice(0, limit);
+
+    const slidesHtml = list.map((n, idx)=>{
+      const q = n.url ? QR+encodeURIComponent(n.url) : '';
+      const desc = n.desc ? stripHtml(n.desc) : 'QRコードをスマートフォンで読み取ると記事全文が開きます。';
+      return `
+        <div class="nw-slide">
+          <div class="nw-top">
+            <span class="nw-idx">TOPIC ${idx+1} / ${list.length}</span>
+            <span class="nw-src">${esc(n.source||'NHKニュース')}</span>
+          </div>
+          <div class="nw-title">${esc(n.title)}</div>
+          <div class="nw-btm">
+            <div>
+              <div class="nw-desc">${esc(desc)}</div>
+              <div class="nw-meta">
+                <span>${esc(n.date||'最新')}</span>
+                <span>詳しい内容はQRコードから ▶</span>
+              </div>
+            </div>
+            ${q?`<img class="nw-qr" alt="QR" src="${esc(q)}">`:''}
+          </div>
+        </div>
+      `;
     }).join('');
+
+    const dotsHtml = list.map((_, idx)=>`<button class="${idx===0?'on':''}" aria-label="ニュース ${idx+1}"></button>`).join('');
+
+    return `
+      <div class="nw-wrap">
+        <div class="nw-track" id="nwTrack">${slidesHtml}</div>
+        <div class="nw-dots" id="nwDots">${dotsHtml}</div>
+      </div>
+    `;
   },
   quake(a){
     if(!a||!a.length) return empty('直近の地震情報はありません');
@@ -400,12 +545,15 @@ const R={
 function apply(data){
   if(!data)return;
   for(const k in R){
-    if(data[k]!=null) $('#b-'+k).innerHTML=R[k](data[k]);
+    if(data[k]!=null){
+      $('#b-'+k).innerHTML=R[k](data[k]);
+      if(k==='news') initNewsCarousel();
+    }
   }
   if(data.weather&&data.weather.temp!=null) $('#temp').textContent=num(data.weather.temp)+'°C';
 }
 
-/* ---- ニュースRSS多重取得 ---- */
+/* ---- ニュースRSS多重取得（見出し＋本文抜粋対応） ---- */
 function formatPubDate(str){
   if(!str) return '';
   const d=new Date(str.replace(/-/g,'/'));
@@ -416,34 +564,39 @@ function formatPubDate(str){
 function parseXmlString(xmlText){
   const parser=new DOMParser();
   const xml=parser.parseFromString(xmlText,"text/xml");
-  const feedTitle=xml.querySelector("channel > title, feed > title")?.textContent||"";
-  const items=Array.from(xml.querySelectorAll("item, entry")).slice(0,5);
+  const feedTitle=stripHtml(xml.querySelector("channel > title, feed > title")?.textContent||"NHKニュース");
+  const items=Array.from(xml.querySelectorAll("item, entry")).slice(0,10);
   return items.map(item=>{
-    const title=item.querySelector("title")?.textContent?.trim()||"タイトルなし";
+    const title=stripHtml(item.querySelector("title")?.textContent||"");
+    const desc=stripHtml(item.querySelector("description, summary, content")?.textContent||"");
     let link=item.querySelector("link")?.textContent?.trim()||item.querySelector("link")?.getAttribute("href")||"";
-    const pub=item.querySelector("pubDate, updated, date")?.textContent||"";
-    return {title, url:link, date:formatPubDate(pub), source:feedTitle};
-  });
+    const pub=item.querySelector("pubDate, updated, date")?.textContent||item.getElementsByTagName("dc:date")[0]?.textContent||"";
+    return {title, desc, url:link, date:formatPubDate(pub), source:feedTitle};
+  }).filter(it=>it.title);
 }
 
 async function fetchNewsWithFallback(rssUrl){
   if(!rssUrl) return [];
+  // 1. rss2json API
   try{
     const r1=await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`);
     if(r1.ok){
       const j=await r1.json();
       if(j.status==='ok' && j.items && j.items.length>0){
-        const src=j.feed?.title||'';
-        return j.items.slice(0,5).map(it=>({
-          title:it.title,
+        const src=stripHtml(j.feed?.title||'NHKニュース');
+        const list=j.items.map(it=>({
+          title:stripHtml(it.title),
+          desc:stripHtml(it.description||it.content||''),
           url:it.link,
           date:formatPubDate(it.pubDate),
           source:src
-        }));
+        })).filter(it=>it.title);
+        if(list.length>0) return list;
       }
     }
   }catch(e){}
 
+  // 2. corsproxy.io
   try{
     const r2=await fetch(`https://corsproxy.io/?${encodeURIComponent(rssUrl)}`);
     if(r2.ok){
@@ -453,6 +606,7 @@ async function fetchNewsWithFallback(rssUrl){
     }
   }catch(e){}
 
+  // 3. allorigins.win
   try{
     const r3=await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(rssUrl)}`);
     if(r3.ok){
@@ -540,11 +694,12 @@ async function load(){
       }));
     }catch(e){}
 
+    const prev=(ls.get(KD)||{}).data||{};
     const aggregated={
-      weather:weatherData,
-      train:trainData,
-      news:newsData,
-      quake:quakeData,
+      weather:weatherData||prev.weather,
+      train:trainData.length?trainData:(prev.train||[]),
+      news:newsData.length?newsData:(prev.news||[]),
+      quake:quakeData.length?quakeData:(prev.quake||[]),
       calendar:[]
     };
 
@@ -595,10 +750,26 @@ pager.addEventListener('scroll',()=>{
 },{passive:true});
 ['touchstart','wheel'].forEach(e=>pager.addEventListener(e,()=>{touched=Date.now()},{passive:true}));
 
+// 自動スクロール：ニュース表示中は横スライドも順番に巡回してから次のカードへ進む
 function setAuto(){
   clearInterval(timer);
   if(cfg.auto>0)timer=setInterval(()=>{
     if(Date.now()-touched<15000||document.body.classList.contains('open'))return;
+    const activeCards=vis();
+    const curCard=activeCards[cur];
+    if(curCard && curCard.dataset.k==='news'){
+      const track=$('#nwTrack');
+      if(track){
+        const slides=track.querySelectorAll('.nw-slide');
+        const nwIdx=Math.round(track.scrollLeft / Math.max(1,track.clientWidth));
+        if(nwIdx < slides.length - 1){
+          track.scrollTo({left:(nwIdx+1)*track.clientWidth, behavior:'smooth'});
+          return;
+        }else{
+          track.scrollTo({left:0, behavior:'smooth'});
+        }
+      }
+    }
     go(cur+1);
   },cfg.auto*1000);
 }
@@ -614,6 +785,7 @@ function fill(){
   $('#sAuto').value=cfg.auto;$('#sLat').value=cfg.lat;$('#sLon').value=cfg.lon;
   $('#sTrains').value=cfg.trains||'';
   $('#sNewsRss').value=cfg.newsRss||'';
+  $('#sNewsCount').value=String(cfg.newsCount||3);
   $('#sBurnShift').checked=!!cfg.burnShift;
   $('#sNightDim').checked=!!cfg.nightDim;
   $('#sNightStart').value=cfg.nightStart;
@@ -643,6 +815,7 @@ $('#save').onclick=()=>{
   if(!isNaN(lo))cfg.lon=lo;
   cfg.trains=$('#sTrains').value.trim();
   cfg.newsRss=$('#sNewsRss').value.trim();
+  cfg.newsCount=parseInt($('#sNewsCount').value,10)||3;
   cfg.burnShift=$('#sBurnShift').checked;
   cfg.nightDim=$('#sNightDim').checked;
   if(!isNaN(ns)&&ns>=0&&ns<=23)cfg.nightStart=ns;
