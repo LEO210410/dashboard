@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Dashboard">
+<meta name="application-name" content="Dashboard">
+<meta name="theme-color" content="#0b0f14">
+<meta name="color-scheme" content="dark">
+<meta name="format-detection" content="telephone=no">
+<link rel="icon" href="data:,">
+<title>Dashboard</title>
+<style>
+:root{--bg:#0b0f14;--panel:#151b23;--panel2:#1d252f;--line:#252e3a;--text:#ece9e1;--sub:#8794a3;--acc:#8fd0e8;--warm:#f0a35e;--bad:#e8685f;--good:#4ade80}
+*{box-sizing:border-box;margin:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden;overscroll-behavior:none;background:var(--bg);color:var(--text);touch-action:pan-y;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;font-family:"Hiragino Sans","Noto Sans JP","Yu Gothic UI",system-ui,sans-serif}
+body{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
+#app{height:100%;display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:2.4vmin;padding:2.4vmin}
+
+/* clock (はみ出し修正版) */
+.clock{position:relative;container-type:size;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4vh;min-width:0}
+.flips{--h:min(48vh,17vw);display:flex;gap:calc(var(--h)*.05)}
+@supports (container-type:size){.flips{--h:min(52cqh,35cqw)}}
+.flip{
+  position:relative;
+  perspective:calc(var(--h)*3);
+  width:calc(var(--h)*.84); /* 幅を広げて2桁をしっかり格納 */
+  height:var(--h);
+  border-radius:calc(var(--h)*.08);
+  box-shadow:0 .6vmin 1.8vmin #0009,inset 0 0 0 1px #ffffff0d;
+  font:700 calc(var(--h)*.50)/1 "SF Pro Display","Helvetica Neue",Roboto,sans-serif; /* 文字サイズを適正化 */
+  font-variant-numeric:tabular-nums;
+  letter-spacing:-.02em;
+}
+.flip div{position:absolute;left:0;right:0;height:50%;overflow:hidden;backface-visibility:hidden;-webkit-backface-visibility:hidden}
+.flip span{position:absolute;left:0;right:0;height:200%;display:grid;place-items:center;padding:0 2px}
+.u,.fa{top:0;background:var(--panel2);border-radius:calc(var(--h)*.08) calc(var(--h)*.08) 0 0}
+.l,.fb{top:50%;background:var(--panel);border-radius:0 0 calc(var(--h)*.08) calc(var(--h)*.08)}
+.l span,.fb span{top:-100%}
+.fa{transform-origin:50% 100%;z-index:2}
+.fb{transform-origin:50% 0;transform:rotateX(90deg);z-index:2}
+.flip.go .fa{animation:fa .3s ease-in forwards}
+.flip.go .fb{animation:fb .3s .3s ease-out forwards}
+.flip::after{content:"";position:absolute;left:0;right:0;top:50%;z-index:5;height:calc(var(--h)*.014);background:#000b;transform:translateY(-50%)}
+.flip.s{color:var(--sub)}
+@keyframes fa{to{transform:rotateX(-90deg)}}
+@keyframes fb{to{transform:none}}
+.meta{display:flex;align-items:baseline;gap:3vmin;font-size:min(4.4vh,2.4vw)}
+#temp{color:var(--acc);font-weight:600}
+#stat{position:absolute;left:1vmin;bottom:0;font-size:max(2.1vmin,11px);color:var(--sub)}
+#stat.err{color:var(--warm)}
+
+/* cards */
+.stage{position:relative;min-width:0;min-height:0}
+#pager{position:relative;height:100%;overflow-y:auto;scroll-snap-type:y mandatory;scrollbar-width:none;overscroll-behavior:contain;border-radius:2vmin}
+#pager::-webkit-scrollbar{display:none}
+.card{height:100%;scroll-snap-align:start;scroll-snap-stop:always;display:flex;flex-direction:column;gap:2vmin;padding:3vmin 5vmin 3vmin 4vmin;overflow:hidden;background:var(--panel);border-radius:2vmin;box-shadow:inset 0 0 0 1px var(--line)}
+.card{will-change:transform,opacity}
+.card[hidden]{display:none}
+.card h2{font-size:max(2.6vmin,13px);font-weight:600;color:var(--sub)}
+.body{flex:1;min-height:0;display:flex;flex-direction:column}
+.empty{margin:auto;color:var(--sub);font-size:3.4vmin;text-align:center}
+#dots{position:absolute;right:1.2vmin;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:2vmin}
+#dots button{position:relative;width:1.2vmin;height:1.2vmin;min-width:8px;min-height:8px;padding:0;border:0;border-radius:50%;background:#ffffff33}
+#dots button::before{content:"";position:absolute;inset:-12px}
+#dots button.on{background:var(--acc)}
+
+/* Weather */
+.wx-main{display:flex;align-items:center;gap:4vmin}
+.wx-ic{font-size:16vmin;line-height:1}
+.wx-t{font-size:16vmin;font-weight:700;line-height:1}
+.wx-d{font-size:4vmin}
+.wx-hl{font-size:3vmin;color:var(--sub);margin-top:.6vmin}
+.hrs{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:1.2vmin;margin-top:auto}
+.hr{background:var(--panel2);border-radius:1.4vmin;padding:1.6vmin 0;text-align:center;font-size:2.8vmin}
+.hr i{display:block;font-style:normal;font-size:4.8vmin;margin:.6vmin 0}
+.hr small{color:var(--acc);font-size:2.2vmin}
+
+/* Train Info (新設) */
+.train-list{display:flex;flex-direction:column;gap:1.8vmin;overflow-y:auto;flex:1;padding-right:1vmin}
+.train-item{display:grid;grid-template-columns:1fr auto;align-items:center;padding:2vmin 2.4vmin;background:var(--panel2);border-radius:1.4vmin;border-left:5px solid var(--good)}
+.train-item.delay{border-left-color:var(--bad)}
+.train-name{font-size:3.8vmin;font-weight:600}
+.train-comp{font-size:2.4vmin;color:var(--sub);margin-top:2px}
+.train-badge{font-size:2.8vmin;font-weight:700;padding:.6vmin 1.6vmin;border-radius:1vmin;background:rgba(74,222,128,0.15);color:var(--good)}
+.train-item.delay .train-badge{background:rgba(232,104,95,0.15);color:var(--bad)}
+
+/* Calendar, News, Quake */
+.ev{display:grid;grid-template-columns:minmax(14vmin,max-content) 1fr;gap:2.4vmin;align-items:baseline;padding:2vmin 0;border-top:1px solid var(--line);font-size:3.8vmin}
+.ev time{color:var(--acc);font-variant-numeric:tabular-nums}
+.ev.now time{color:var(--warm)}
+.ev small{display:block;color:var(--sub);font-size:2.6vmin;margin-top:.4vmin}
+.nw{flex:1;min-height:0;display:flex;align-items:center;gap:3vmin;padding:1.4vmin 0;border-top:1px solid var(--line)}
+.nw div{flex:1;min-width:0}
+.nw p{font-size:3.6vmin;line-height:1.35;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.nw small{color:var(--sub);font-size:2.6vmin}
+.nw img{height:min(17vmin,100%);aspect-ratio:1;padding:.8vmin;background:#fff;border-radius:1vmin;image-rendering:pixelated}
+.eq{display:grid;grid-template-columns:19vmin 1fr auto;gap:2.4vmin;align-items:center;padding:2vmin 0;border-top:1px solid var(--line)}
+.mag{font-size:7vmin;font-weight:700;line-height:1}
+.m-hi{color:var(--bad)}.m-mid{color:var(--warm)}
+.eq p{font-size:3.6vmin}.eq small{color:var(--sub);font-size:2.6vmin}
+.int{font-size:3.4vmin;padding:.8vmin 1.6vmin;background:var(--panel2);border-radius:1vmin}
+
+/* drawer */
+#edge{position:fixed;left:0;top:0;bottom:0;width:22px;z-index:20;padding:0;border:0;background:none}
+#edge::after{content:"";position:absolute;left:5px;top:50%;width:4px;height:48px;margin-top:-24px;border-radius:2px;background:#ffffff26}
+#scrim{position:fixed;inset:0;z-index:30;background:#000a;opacity:0;pointer-events:none;transition:opacity .4s}
+#drawer{position:fixed;left:0;top:0;bottom:0;z-index:40;width:min(440px,88vw);padding:28px 24px;display:flex;flex-direction:column;gap:18px;overflow:auto;font-size:16px;background:var(--panel);transform:translateX(-100%);transition:transform .42s cubic-bezier(.22,1,.36,1)}
+body.open #drawer{transform:none;box-shadow:0 0 5vmin #000c}
+body.open #scrim{opacity:1;pointer-events:auto}
+#drawer h3{font-size:20px}
+#drawer label{display:flex;flex-direction:column;gap:6px;color:var(--sub)}
+#drawer .chk{flex-direction:row;align-items:center;gap:10px;color:var(--text)}
+#drawer fieldset{display:flex;flex-direction:column;gap:12px;border:0}
+#drawer legend{margin-bottom:10px;color:var(--sub)}
+#drawer input[type=number],#drawer input[type=text]{font:inherit;color:var(--text);background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:10px;user-select:text;-webkit-user-select:text}
+#drawer input[type=checkbox]{width:22px;height:22px;accent-color:var(--acc)}
+#drawer button{font:inherit;padding:12px;border-radius:8px;border:1px solid var(--line);background:var(--panel2);color:var(--text);cursor:pointer}
+#drawer #save{background:var(--acc);color:#08202b;border:0;font-weight:600}
+</style>
+</head>
+<body>
+<div id="app">
+  <section class="clock">
+    <div class="flips">
+      <div class="flip" id="h"><div class="u"><span>00</span></div><div class="l"><span>00</span></div><div class="fa"><span>00</span></div><div class="fb"><span>00</span></div></div>
+      <div class="flip" id="m"><div class="u"><span>00</span></div><div class="l"><span>00</span></div><div class="fa"><span>00</span></div><div class="fb"><span>00</span></div></div>
+      <div class="flip s" id="s"><div class="u"><span>00</span></div><div class="l"><span>00</span></div><div class="fa"><span>00</span></div><div class="fb"><span>00</span></div></div>
+    </div>
+    <div class="meta"><span id="date"></span><span id="temp"></span></div>
+    <div id="stat"></div>
+  </section>
+  <section class="stage">
+    <div id="pager">
+      <article class="card" data-k="weather" data-t="天気"><h2>天気と3時間ごとの予報</h2><div class="body" id="b-weather"></div></article>
+      <article class="card" data-k="train" data-t="鉄道"><h2>鉄道運行情報</h2><div class="body" id="b-train"></div></article>
+      <article class="card" data-k="calendar" data-t="予定"><h2>カレンダーの予定</h2><div class="body" id="b-calendar"></div></article>
+      <article class="card" data-k="news" data-t="ニュース"><h2>ニュース（QRコードで記事を開く）</h2><div class="body" id="b-news"></div></article>
+      <article class="card" data-k="quake" data-t="地震情報"><h2>地震情報</h2><div class="body" id="b-quake"></div></article>
+    </div>
+    <div id="dots"></div>
+  </section>
+</div>
+
+<button id="edge" aria-label="設定を開く"></button>
+<div id="scrim"></div>
+<aside id="drawer" aria-label="設定">
+  <h3>設定</h3>
+  <label>自動スクロールの間隔（秒・0でオフ）<input id="sAuto" type="number" min="0" max="600" inputmode="numeric"></label>
+  <fieldset>
+    <legend>表示するカード</legend>
+    <label class="chk"><input type="checkbox" data-k="weather">天気</label>
+    <label class="chk"><input type="checkbox" data-k="train">鉄道運行情報</label>
+    <label class="chk"><input type="checkbox" data-k="calendar">予定</label>
+    <label class="chk"><input type="checkbox" data-k="news">ニュース</label>
+    <label class="chk"><input type="checkbox" data-k="quake">地震情報</label>
+  </fieldset>
+  <label>監視する路線（カンマ区切り・空欄で遅延一覧）
+    <input id="sTrains" type="text" placeholder="例: 総武線, 山手線, 東西線">
+  </label>
+  <label>緯度<input id="sLat" type="number" step="any" inputmode="decimal"></label>
+  <label>経度<input id="sLon" type="number" step="any" inputmode="decimal"></label>
+  <button id="save">保存して更新</button>
+  <button id="fs">全画面にする</button>
+  <button id="close">閉じる</button>
+</aside>
+
+<script>
+(()=>{
+'use strict';
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const KC='dash.cfg', KD='dash.cache';
+const QR='https://api.qrserver.com/v1/create-qr-code/?margin=0&size=240x240&data=';
+const DEF={auto:12,show:{weather:true,train:true,calendar:false,news:true,quake:true},lat:35.6812,lon:139.7671,trains:'総武線, 中央線, 山手線'};
+const ls={get(k){try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+const cfg=Object.assign({},DEF,ls.get(KC));cfg.show=Object.assign({},DEF.show,cfg.show);
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const pad=n=>String(n).padStart(2,'0');
+const num=v=>v==null||isNaN(v)?'--':Math.round(v);
+const empty=s=>`<div class="empty">${esc(s)}</div>`;
+
+function wxCode(c){
+  c=+c;
+  if(c===0) return {desc:'快晴', ic:'☀️'};
+  if(c<=2) return {desc:'晴れ時々曇', ic:'🌤️'};
+  if(c===3) return {desc:'曇り', ic:'☁️'};
+  if(c<=48) return {desc:'霧', ic:'🌫️'};
+  if(c<=57) return {desc:'小雨', ic:'🌦️'};
+  if(c<=67) return {desc:'雨', ic:'🌧️'};
+  if(c<=77) return {desc:'雪', ic:'❄️'};
+  if(c<=82) return {desc:'強い雨', ic:'🌧️'};
+  if(c>=95) return {desc:'雷雨', ic:'⛈️'};
+  return {desc:'曇り', ic:'☁️'};
+}
+
+/* ---- clock ---- */
+const cl=['h','m','s'].map(k=>{const p=$('#'+k);return{p,s:[...p.querySelectorAll('span')],t:0,x:undefined}});
+let last=['','',''],lastDay=-1;
+function fin(c){clearTimeout(c.t);c.s[1].textContent=c.s[2].textContent=c.x;c.p.classList.remove('go')}
+function put(c,x){
+  if(c.x===undefined){c.s.forEach(e=>{e.textContent=x});c.x=x;return}
+  if(c.p.classList.contains('go'))fin(c);
+  c.s[0].textContent=c.s[3].textContent=c.x=x;
+  c.p.classList.remove('go');void c.p.offsetWidth;c.p.classList.add('go');
+  c.t=setTimeout(()=>fin(c),640);
+}
+function tick(){
+  const d=new Date(),v=[pad(d.getHours()),pad(d.getMinutes()),pad(d.getSeconds())];
+  v.forEach((x,i)=>{if(x!==last[i]){put(cl[i],x);last[i]=x}});
+  if(d.getDate()!==lastDay){
+    lastDay=d.getDate();
+    $('#date').textContent=d.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'});
+  }
+  setTimeout(tick,1005-d.getMilliseconds());
+}
+
+/* ---- renderers ---- */
+const R={
+  weather(w){
+    if(!w) return empty('天気データを取得中…');
+    const hh=h=>{const d=new Date(h.time);return isNaN(d)?h.time:d.getHours()+'時'};
+    const hrs=(w.hourly||[]).slice(0,6).map(h=>`<div class="hr">${hh(h)}<i>${esc(h.icon)}</i>${num(h.temp)}°<br><small>${esc(h.pop)}%</small></div>`).join('');
+    return `<div class="wx-main"><span class="wx-ic">${esc(w.icon)}</span><span class="wx-t">${num(w.temp)}°</span><div><div class="wx-d">${esc(w.desc)}</div><div class="wx-hl">最高 ${num(w.hi)}° / 最低 ${num(w.lo)}°</div></div></div><div class="hrs">${hrs}</div>`;
+  },
+  train(t){
+    if(!t||!t.length) return empty('遅延情報はありません（全線平常運転）');
+    return `<div class="train-list">${t.map(item=>`
+      <div class="train-item ${item.delay?'delay':''}">
+        <div>
+          <div class="train-name">${esc(item.name)}</div>
+          <div class="train-comp">${esc(item.company||'鉄道情報')}</div>
+        </div>
+        <div class="train-badge">${item.delay?'遅延・運休あり':'平常運転'}</div>
+      </div>
+    `).join('')}</div>`;
+  },
+  calendar(a){
+    if(!a||!a.length)return empty('直近の予定はありません');
+    return a.slice(0,5).map(e=>`<div class="ev"><time>${esc(e.time||'予定')}</time><div>${esc(e.title)}</div></div>`).join('');
+  },
+  news(a){
+    if(!a||!a.length)return empty('ニュースを取得中…');
+    return a.slice(0,3).map(n=>{
+      const q=n.url?QR+encodeURIComponent(n.url):'';
+      return `<div class="nw"><div><p>${esc(n.title)}</p><small>${esc(n.source||'ニュース')}</small></div>${q?`<img alt="" src="${esc(q)}">`:''}</div>`;
+    }).join('');
+  },
+  quake(a){
+    if(!a||!a.length)return empty('直近の地震情報はありません');
+    return a.slice(0,4).map(q=>{
+      const m=+q.mag,c=m>=6?'m-hi':m>=4.5?'m-mid':'',d=new Date(q.time);
+      const t=isNaN(d)?esc(q.time||''):`${d.getMonth()+1}/${d.getDate()} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+      return `<div class="eq"><div class="mag ${c}">M${isNaN(m)?'-':m.toFixed(1)}</div><div><p>${esc(q.place)}</p><small>${t}${q.depth!=null?' ・深さ '+esc(q.depth)+'km':''}</small></div>${q.intensity?`<span class="int">震度${esc(q.intensity)}</span>`:''}</div>`;
+    }).join('');
+  }
+};
+
+function apply(data){
+  if(!data)return;
+  for(const k in R){
+    if(data[k]!=null) $('#b-'+k).innerHTML=R[k](data[k]);
+  }
+  if(data.weather&&data.weather.temp!=null) $('#temp').textContent=num(data.weather.temp)+'°C';
+}
+
+/* ---- Direct API fetch (GitHub Pages完結) ---- */
+const st={ok:true,t:0};let busy=false,wl=null;
+function status(){
+  const el=$('#stat'),d=new Date(st.t),tm=st.t?`${pad(d.getHours())}:${pad(d.getMinutes())}`:'--:--';
+  el.className=st.ok?'':'err';
+  el.textContent=(st.ok?`${tm} 更新`:`${tm} 更新試行中`)+(wl?'':' ・画面維持オフ');
+}
+
+async function load(){
+  if(busy)return;busy=true;
+  try{
+    // 1. 天気 (Open-Meteo API: 登録・キー不要・CORS制限なし)
+    const wxUrl=`https://api.open-meteo.com/v1/forecast?latitude=${cfg.lat}&longitude=${cfg.lon}&current=temperature_2m,weather_code&hourly=temperature_2m,weather_code,precipitation_probability&daily=temperature_2m_max,temperature_2m_min&timezone=Asia%2FTokyo&forecast_days=2`;
+    const wxRes=await fetch(wxUrl).then(r=>r.json());
+    
+    const curCode=wxRes.current.weather_code;
+    const curInfo=wxCode(curCode);
+    const nowHour=new Date().getHours();
+    
+    const hourly=[];
+    for(let i=nowHour;i<nowHour+18;i+=3){
+      if(wxRes.hourly.time[i]){
+        const c=wxRes.hourly.weather_code[i];
+        hourly.push({
+          time:wxRes.hourly.time[i],
+          temp:wxRes.hourly.temperature_2m[i],
+          pop:wxRes.hourly.precipitation_probability[i],
+          icon:wxCode(c).ic
+        });
+      }
+    }
+    const weatherData={
+      temp:wxRes.current.temperature_2m,
+      desc:curInfo.desc,
+      icon:curInfo.ic,
+      hi:wxRes.daily.temperature_2m_max[0],
+      lo:wxRes.daily.temperature_2m_min[0],
+      hourly:hourly
+    };
+
+    // 2. 鉄道遅延情報 (rti-giken: CORSフリー)
+    let trainData=[];
+    try{
+      const delayList=await fetch('https://tetsudo.rti-giken.jp/free/delay.json').then(r=>r.json());
+      const delayMap=new Set(delayList.map(t=>t.name));
+      const watchLines=cfg.trains.split(',').map(s=>s.trim()).filter(Boolean);
+
+      if(watchLines.length>0){
+        trainData=watchLines.map(line=>{
+          const isDelay=[...delayMap].some(d=>d.includes(line)||line.includes(d));
+          const hit=delayList.find(d=>d.name.includes(line)||line.includes(d.name));
+          return {name:line, company:hit?hit.company:'JR / 私鉄', delay:isDelay};
+        });
+      } else {
+        trainData=delayList.slice(0,5).map(t=>({name:t.name, company:t.company, delay:true}));
+      }
+    }catch(_){}
+
+    // 3. 地震情報 (P2P地震情報 API: CORSフリー)
+    let quakeData=[];
+    try{
+      const qRes=await fetch('https://api.p2pquake.net/v2/history?codes=551&limit=4').then(r=>r.json());
+      const intMap={10:'1',20:'2',30:'3',40:'4',45:'5弱',50:'5強',55:'6弱',60:'6強',70:'7'};
+      quakeData=qRes.map(q=>({
+        time:q.earthquake.time,
+        place:q.earthquake.hypocenter.name||'不明',
+        mag:q.earthquake.hypocenter.magnitude>=0?q.earthquake.hypocenter.magnitude:'-',
+        depth:q.earthquake.hypocenter.depth>=0?q.earthquake.hypocenter.depth:'-',
+        intensity:intMap[q.earthquake.maxScale]||''
+      }));
+    }catch(_){}
+
+    // 4. ニュース (NHK主要ニュース)
+    let newsData=[
+      {title:'NHKニュース・主要ヘッドライン', source:'NHK', url:'https://www3.nhk.or.jp/news/'}
+    ];
+
+    const aggregated={
+      weather:weatherData,
+      train:trainData,
+      calendar:[],
+      news:newsData,
+      quake:quakeData
+    };
+
+    apply(aggregated);
+    st.ok=true;st.t=Date.now();
+    ls.set(KD,{t:st.t,data:aggregated});
+  }catch(e){
+    console.warn(e);
+    st.ok=false;
+  }finally{
+    busy=false;status();
+  }
+}
+
+/* ---- wake lock ---- */
+async function lock(){
+  try{
+    if(!('wakeLock' in navigator)||wl)return;
+    wl=await navigator.wakeLock.request('screen');
+    wl.addEventListener('release',()=>{wl=null;status()});
+    status();
+  }catch(e){wl=null}
+}
+
+/* ---- pager / dots / scroll ---- */
+const pager=$('#pager'),dots=$('#dots');let cur=0,touched=0,timer=0;
+const vis=()=>$$('.card').filter(c=>!c.hidden);
+function mark(){[...dots.children].forEach((b,i)=>b.classList.toggle('on',i===cur))}
+function go(i){
+  const n=vis().length;if(!n)return;
+  cur=(i+n)%n;
+  pager.scrollTo({top:cur*pager.clientHeight,behavior:'smooth'});
+  mark();
+}
+function buildDots(){
+  dots.innerHTML='';const v=vis();
+  dots.style.display=v.length>1?'':'none';
+  v.forEach((c,i)=>{
+    const b=document.createElement('button');
+    b.setAttribute('aria-label',c.dataset.t);
+    b.onclick=()=>{touched=Date.now();go(i)};
+    dots.appendChild(b);
+  });
+  mark();
+}
+pager.addEventListener('scroll',()=>{
+  const i=Math.round(pager.scrollTop/pager.clientHeight);
+  if(i!==cur){cur=i;mark()}
+},{passive:true});
+['touchstart','wheel'].forEach(e=>pager.addEventListener(e,()=>{touched=Date.now()},{passive:true}));
+
+function setAuto(){
+  clearInterval(timer);
+  if(cfg.auto>0)timer=setInterval(()=>{
+    if(Date.now()-touched<15000||document.body.classList.contains('open'))return;
+    go(cur+1);
+  },cfg.auto*1000);
+}
+
+function applyCfg(){
+  $$('.card').forEach(c=>{c.hidden=!cfg.show[c.dataset.k]});
+  cur=0;pager.scrollTop=0;buildDots();setAuto();
+}
+
+/* ---- drawer ---- */
+const open=v=>{document.body.classList.toggle('open',v);if(v)fill()};
+function fill(){
+  $('#sAuto').value=cfg.auto;$('#sLat').value=cfg.lat;$('#sLon').value=cfg.lon;
+  $('#sTrains').value=cfg.trains||'';
+  $$('#drawer [data-k]').forEach(c=>{c.checked=!!cfg.show[c.dataset.k]});
+}
+$('#edge').onclick=()=>open(true);
+$('#scrim').onclick=$('#close').onclick=()=>open(false);
+$('#save').onclick=()=>{
+  const a=parseInt($('#sAuto').value,10),la=parseFloat($('#sLat').value),lo=parseFloat($('#sLon').value);
+  cfg.auto=isNaN(a)||a<0?0:a;
+  if(!isNaN(la))cfg.lat=la;
+  if(!isNaN(lo))cfg.lon=lo;
+  cfg.trains=$('#sTrains').value.trim();
+  $$('#drawer [data-k]').forEach(c=>{cfg.show[c.dataset.k]=c.checked});
+  if(!Object.values(cfg.show).some(Boolean))cfg.show.weather=true;
+  ls.set(KC,cfg);applyCfg();open(false);load();
+};
+$('#fs').onclick=()=>{
+  try{const e=document.documentElement,f=e.requestFullscreen||e.webkitRequestFullscreen;if(f)Promise.resolve(f.call(e)).catch(()=>{})}catch(_){}
+  open(false);
+};
+
+/* ---- boot ---- */
+applyCfg();
+const c=ls.get(KD);if(c&&c.data){apply(c.data);st.t=c.t}
+tick();status();lock();load();
+setInterval(load,60000);
+})();
+</script>
+</body>
+</html>
