@@ -792,7 +792,7 @@ function buildLineCheckboxes(){
   wrap.innerHTML = RAILWAY_CATALOG.map(line=>`
     <label class="line-chk-item">
       <input type="checkbox" class="line-chk" value="${line.id}">
-      <img class="mini-sym-img" src="icons/${encodeURI(line.file)}" alt="" onerror="if(!this.dataset.r){this.dataset.r=1;this.src='${encodeURI(line.file)}';}">
+      <img class="mini-sym-img" src="icon/${encodeURI(line.file)}" alt="" onerror="if(!this.dataset.r){this.dataset.r=1;this.src='${encodeURI(line.file)}';}">
       <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(line.name)}</span>
     </label>
   `).join('');
@@ -920,7 +920,7 @@ const R={
       const svgFile = cat.file || item.file || '';
       return `
         <div class="train-item glass-item ${item.delay?'delay':''}">
-          <img class="line-icon-svg" src="icons/${encodeURI(svgFile)}" alt="${esc(item.name)}" onerror="if(!this.dataset.r){this.dataset.r=1;this.src='${encodeURI(svgFile)}';}">
+          <img class="line-icon-svg" src="icon/${encodeURI(svgFile)}" alt="${esc(item.name)}" onerror="if(!this.dataset.r){this.dataset.r=1;this.src='${encodeURI(svgFile)}';}">
           <div>
             <div class="train-name">${esc(item.name)}</div>
             <div class="train-comp">${esc(item.company||'')}</div>
