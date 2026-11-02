@@ -60,19 +60,56 @@ body{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-i
 @keyframes fb{to{transform:none}}
 .meta{display:flex;align-items:baseline;gap:3vmin;font-size:min(4.4vh,2.4vw)}
 #temp{color:var(--acc);font-weight:600}
-#stat{position:absolute;left:1vmin;bottom:0;font-size:max(2.1vmin,11px);color:var(--sub)}
+
+/* 左下フッター（CSS製設定ボタン＋更新ステータス） */
+.clock-foot{
+  position:absolute;
+  left:.5vmin;
+  bottom:0;
+  display:flex;
+  align-items:center;
+  gap:1.6vmin;
+}
+#cfgBtn{
+  width:clamp(32px,4.6vmin,42px);
+  height:clamp(32px,4.6vmin,42px);
+  border-radius:1.2vmin;
+  background:var(--panel2);
+  border:1px solid var(--line);
+  color:var(--sub);
+  display:grid;
+  place-items:center;
+  cursor:pointer;
+  padding:0;
+  transition:color .2s, border-color .2s, background .2s, transform .2s;
+}
+#cfgBtn:hover,#cfgBtn:active{
+  color:var(--acc);
+  border-color:var(--acc);
+  background:#222c38;
+}
+#cfgBtn svg{
+  width:54%;
+  height:54%;
+  stroke:currentColor;
+  fill:none;
+  stroke-width:1.8;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+}
+#stat{font-size:max(2.1vmin,11px);color:var(--sub)}
 #stat.err{color:var(--warm)}
 
 /* cards (縦ページャー) */
 .stage{position:relative;min-width:0;min-height:0}
 #pager{position:relative;height:100%;overflow-y:auto;scroll-snap-type:y mandatory;scrollbar-width:none;overscroll-behavior:contain;border-radius:2vmin;touch-action:pan-y}
 #pager::-webkit-scrollbar{display:none}
-.card{height:100%;scroll-snap-align:start;scroll-snap-stop:always;display:flex;flex-direction:column;gap:1.8vmin;padding:3vmin 5vmin 3vmin 4vmin;overflow:hidden;background:var(--panel);border-radius:2vmin;box-shadow:inset 0 0 0 1px var(--line)}
+.card{height:100%;scroll-snap-align:start;scroll-snap-stop:always;display:flex;flex-direction:column;gap:1.8vmin;padding:2.8vmin 4.8vmin 2.8vmin 3.8vmin;overflow:hidden;background:var(--panel);border-radius:2vmin;box-shadow:inset 0 0 0 1px var(--line)}
 .card[hidden]{display:none}
 .card-hdr{display:flex;justify-content:space-between;align-items:center}
-.card h2{font-size:max(2.6vmin,13px);font-weight:600;color:var(--sub)}
+.card h2{font-size:max(2.5vmin,13px);font-weight:600;color:var(--sub)}
 .body{flex:1;min-height:0;display:flex;flex-direction:column}
-.empty{margin:auto;color:var(--sub);font-size:3.4vmin;text-align:center}
+.empty{margin:auto;color:var(--sub);font-size:3.2vmin;text-align:center}
 #dots{position:absolute;right:1.2vmin;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:2vmin;z-index:10}
 #dots button{position:relative;width:1.2vmin;height:1.2vmin;min-width:8px;min-height:8px;padding:0;border:0;border-radius:50%;background:#ffffff33;cursor:pointer}
 #dots button::before{content:"";position:absolute;inset:-12px}
@@ -80,25 +117,45 @@ body{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-i
 
 /* Weather */
 .wx-main{display:flex;align-items:center;gap:4vmin}
-.wx-ic{font-size:16vmin;line-height:1}
-.wx-t{font-size:16vmin;font-weight:700;line-height:1}
-.wx-d{font-size:4vmin}
-.wx-hl{font-size:3vmin;color:var(--sub);margin-top:.6vmin}
+.wx-ic{font-size:15vmin;line-height:1}
+.wx-t{font-size:15vmin;font-weight:700;line-height:1}
+.wx-d{font-size:3.8vmin}
+.wx-hl{font-size:2.8vmin;color:var(--sub);margin-top:.6vmin}
 .hrs{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:1.2vmin;margin-top:auto}
-.hr{background:var(--panel2);border-radius:1.4vmin;padding:1.6vmin 0;text-align:center;font-size:2.8vmin}
-.hr i{display:block;font-style:normal;font-size:4.8vmin;margin:.6vmin 0}
-.hr small{color:var(--acc);font-size:2.2vmin}
+.hr{background:var(--panel2);border-radius:1.4vmin;padding:1.5vmin 0;text-align:center;font-size:2.7vmin}
+.hr i{display:block;font-style:normal;font-size:4.6vmin;margin:.5vmin 0}
+.hr small{color:var(--acc);font-size:2.1vmin}
 
-/* Train Info */
-.train-list{display:flex;flex-direction:column;gap:1.8vmin;overflow-y:auto;flex:1;padding-right:1vmin}
-.train-item{display:grid;grid-template-columns:1fr auto;align-items:center;padding:2vmin 2.4vmin;background:var(--panel2);border-radius:1.4vmin;border-left:5px solid var(--good)}
-.train-item.delay{border-left-color:var(--bad)}
-.train-name{font-size:3.8vmin;font-weight:600}
-.train-comp{font-size:2.4vmin;color:var(--sub);margin-top:2px}
-.train-badge{font-size:2.8vmin;font-weight:700;padding:.6vmin 1.6vmin;border-radius:1vmin;background:rgba(74,222,128,0.15);color:var(--good)}
-.train-item.delay .train-badge{background:rgba(232,104,95,0.15);color:var(--bad)}
+/* Train Info (CSSナンバリング記号対応) */
+.train-list{display:flex;flex-direction:column;gap:1.4vmin;overflow-y:auto;flex:1;padding-right:.6vmin;scrollbar-width:thin}
+.train-item{display:grid;grid-template-columns:auto 1fr auto;gap:2vmin;align-items:center;padding:1.5vmin 2vmin;background:var(--panel2);border-radius:1.4vmin;border:1px solid var(--line)}
+.train-item.delay{border-color:rgba(232,104,95,0.5);background:linear-gradient(90deg, rgba(232,104,95,0.10), var(--panel2))}
+.line-badge{
+  width:clamp(32px,5.2vmin,44px);
+  height:clamp(32px,5.2vmin,44px);
+  display:grid;
+  place-items:center;
+  font-family:"SF Pro Display","Helvetica Neue",Arial,sans-serif;
+  font-weight:800;
+  font-size:clamp(11px,2vmin,15px);
+  letter-spacing:-.03em;
+  background:#fff;
+  color:#111;
+  border:clamp(3px,.55vmin,4.5px) solid var(--lc,#3b82f6);
+  border-radius:6px;
+  flex-shrink:0;
+  position:relative;
+  overflow:hidden;
+}
+.line-badge.sub{border-radius:50%} /* 地下鉄は丸型 */
+.line-badge.shinkansen{background:var(--lc);color:#fff;border-color:#fff;border-width:2px;border-radius:6px}
+.line-badge img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#fff}
+.train-name{font-size:clamp(13px,3.2vmin,20px);font-weight:600;line-height:1.2}
+.train-comp{font-size:clamp(10px,2.1vmin,13px);color:var(--sub);margin-top:2px}
+.train-status{font-size:clamp(11px,2.4vmin,15px);font-weight:700;padding:.5vmin 1.4vmin;border-radius:.9vmin;background:rgba(74,222,128,0.14);color:var(--good);white-space:nowrap}
+.train-item.delay .train-status{background:rgba(232,104,95,0.2);color:var(--bad)}
 
-/* News (横スクロールカルーセル・Panoramaスタイル) */
+/* News (タイトル縮小・詳細拡大・余白解消版) */
 .nw-wrap{position:relative;flex:1;min-height:0;display:flex;flex-direction:column;justify-content:space-between}
 .nw-track{
   flex:1;
@@ -108,7 +165,7 @@ body{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-i
   scrollbar-width:none;
   overscroll-behavior-x:contain;
   touch-action:pan-x;
-  gap:2.4vmin;
+  gap:2vmin;
 }
 .nw-track::-webkit-scrollbar{display:none}
 .nw-slide{
@@ -117,57 +174,64 @@ body{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-i
   height:100%;
   scroll-snap-align:start;
   scroll-snap-stop:always;
-  display:flex;
-  flex-direction:column;
-  justify-content:space-between;
+  display:grid;
+  grid-template-rows:auto auto 1fr;
+  gap:1.4vmin;
   background:var(--panel2);
   border-radius:1.6vmin;
-  padding:2.8vmin 3.2vmin;
+  padding:2.2vmin 2.8vmin;
   border:1px solid var(--line);
+  overflow:hidden;
 }
 .nw-top{display:flex;justify-content:space-between;align-items:center;gap:2vmin}
-.nw-idx{font-size:2.4vmin;font-weight:700;color:var(--acc);background:rgba(143,208,232,0.12);padding:.4vmin 1.4vmin;border-radius:99px}
-.nw-src{font-size:2.4vmin;color:var(--sub);font-weight:600}
+.nw-idx{font-size:max(2vmin,11px);font-weight:700;color:var(--acc);background:rgba(143,208,232,0.12);padding:.3vmin 1.2vmin;border-radius:99px}
+.nw-src{font-size:max(2vmin,11px);color:var(--sub);font-weight:600}
 .nw-title{
-  font-size:clamp(16px, 4.2vmin, 28px);
+  font-size:clamp(14px, 3.1vmin, 21px);
   font-weight:700;
-  line-height:1.4;
+  line-height:1.35;
   color:var(--text);
-  display:-webkit-box;
-  -webkit-line-clamp:3;
-  -webkit-box-orient:vertical;
-  overflow:hidden;
-  margin:auto 0;
-}
-.nw-btm{
-  display:grid;
-  grid-template-columns:1fr auto;
-  gap:2.4vmin;
-  align-items:flex-end;
-  padding-top:1.6vmin;
-  border-top:1px solid var(--line);
-}
-.nw-desc{
-  font-size:clamp(12px, 2.7vmin, 18px);
-  color:var(--sub);
-  line-height:1.45;
   display:-webkit-box;
   -webkit-line-clamp:2;
   -webkit-box-orient:vertical;
   overflow:hidden;
-  margin-bottom:1vmin;
+  padding-bottom:1.2vmin;
+  border-bottom:1px solid var(--line);
 }
-.nw-meta{display:flex;justify-content:space-between;align-items:center;font-size:max(2.2vmin,11px);color:#6e7b8b}
+.nw-content{
+  min-height:0;
+  display:grid;
+  grid-template-columns:1fr auto;
+  gap:2.2vmin;
+  align-items: stretch;
+}
+.nw-text-col{
+  min-height:0;
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+}
+.nw-desc{
+  font-size:clamp(12.5px, 2.7vmin, 17.5px);
+  color:#cfd6df;
+  line-height:1.55;
+  display:-webkit-box;
+  -webkit-line-clamp:5;
+  -webkit-box-orient:vertical;
+  overflow:hidden;
+}
+.nw-meta{display:flex;justify-content:space-between;align-items:center;font-size:max(2vmin,11px);color:var(--sub);padding-top:.8vmin}
+.nw-qr-col{display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:.5vmin}
 .nw-qr{
-  width:clamp(64px, 15vmin, 110px);
-  height:clamp(64px, 15vmin, 110px);
-  padding:6px;
+  width:clamp(62px, 14vmin, 102px);
+  height:clamp(62px, 14vmin, 102px);
+  padding:5px;
   background:#fff;
   border-radius:1vmin;
   object-fit:contain;
   flex-shrink:0;
 }
-.nw-dots{display:flex;justify-content:center;gap:1.4vmin;padding-top:1.6vmin}
+.nw-dots{display:flex;justify-content:center;gap:1.4vmin;padding-top:1.4vmin}
 .nw-dots button{
   width:1.8vmin;height:.8vmin;min-width:14px;min-height:5px;
   border:0;border-radius:99px;padding:0;
@@ -175,31 +239,101 @@ body{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-i
 }
 .nw-dots button.on{background:var(--acc);width:3.6vmin;min-width:26px}
 
-/* Quake & Calendar */
+/* Quake (下から最新順 ＆ 最新1件のみ大きく強調) */
+.eq-wrap{
+  flex:1;
+  min-height:0;
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+  gap:1.4vmin;
+}
+.eq-older-list{
+  display:flex;
+  flex-direction:column;
+  gap:1vmin;
+}
+.eq-old{
+  display:grid;
+  grid-template-columns:9vmin 1fr auto auto;
+  gap:1.6vmin;
+  align-items:center;
+  padding:1vmin 1.8vmin;
+  background:rgba(29,37,47,0.55);
+  border-radius:1.1vmin;
+  border:1px solid var(--line);
+  font-size:clamp(11px,2.3vmin,15px);
+  color:var(--sub);
+}
+.eq-old-mag{font-weight:700;color:var(--text)}
+.eq-old-place{color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.eq-old-time{font-size:clamp(10px,2vmin,13px);font-variant-numeric:tabular-nums}
+.eq-old-int{font-size:clamp(10px,2.1vmin,13px);padding:.2vmin 1vmin;background:var(--panel2);border-radius:.6vmin;color:var(--text);font-weight:600}
+
+/* 最新1件（一番下に大きく配置） */
+.eq-latest{
+  margin-top:auto;
+  display:grid;
+  grid-template-columns:auto 1fr;
+  gap:2.4vmin;
+  align-items:center;
+  padding:2.2vmin 2.6vmin;
+  background:linear-gradient(135deg, #222b38 0%, var(--panel2) 100%);
+  border:1.5px solid var(--acc);
+  border-radius:1.6vmin;
+  box-shadow:0 6px 20px rgba(0,0,0,0.35);
+}
+.eq-latest-badge{
+  background:var(--panel);
+  border:1px solid var(--line);
+  border-radius:1.2vmin;
+  padding:1.4vmin 2vmin;
+  min-width:14vmin;
+  text-align:center;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+}
+.eq-latest-badge.hi{background:rgba(232,104,95,0.2);border-color:var(--bad)}
+.eq-latest-badge.mid{background:rgba(240,163,94,0.2);border-color:var(--warm)}
+.eq-latest-lbl{font-size:max(1.9vmin,10px);color:var(--sub);font-weight:600}
+.eq-latest-int{font-size:clamp(22px,5.4vmin,38px);font-weight:800;line-height:1.1;color:var(--text)}
+.eq-latest-info{display:flex;flex-direction:column;gap:.6vmin;min-width:0}
+.eq-latest-top{display:flex;align-items:center;gap:1.2vmin}
+.eq-latest-tag{font-size:max(1.8vmin,10px);font-weight:700;background:var(--acc);color:#08202b;padding:.2vmin 1vmin;border-radius:4px}
+.eq-latest-time{font-size:clamp(11px,2.3vmin,15px);color:var(--sub);font-variant-numeric:tabular-nums}
+.eq-latest-place{font-size:clamp(16px,4vmin,26px);font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.eq-latest-meta{font-size:clamp(12px,2.6vmin,17px);color:var(--acc);font-weight:600}
+
+/* Calendar */
 .ev{display:grid;grid-template-columns:minmax(14vmin,max-content) 1fr;gap:2.4vmin;align-items:baseline;padding:2vmin 0;border-top:1px solid var(--line);font-size:3.8vmin}
 .ev time{color:var(--acc);font-variant-numeric:tabular-nums}
-.eq{display:grid;grid-template-columns:19vmin 1fr auto;gap:2.4vmin;align-items:center;padding:2vmin 0;border-top:1px solid var(--line)}
-.mag{font-size:7vmin;font-weight:700;line-height:1}
-.m-hi{color:var(--bad)}.m-mid{color:var(--warm)}
-.eq p{font-size:3.6vmin}.eq small{color:var(--sub);font-size:2.6vmin}
-.int{font-size:3.4vmin;padding:.8vmin 1.6vmin;background:var(--panel2);border-radius:1vmin}
 
 /* drawer */
-#edge{position:fixed;left:0;top:0;bottom:0;width:22px;z-index:20;padding:0;border:0;background:none}
-#edge::after{content:"";position:absolute;left:5px;top:50%;width:4px;height:48px;margin-top:-24px;border-radius:2px;background:#ffffff26}
-#scrim{position:fixed;inset:0;z-index:30;background:#000a;opacity:0;pointer-events:none;transition:opacity .4s}
-#drawer{position:fixed;left:0;top:0;bottom:0;z-index:40;width:min(460px,90vw);padding:24px;display:flex;flex-direction:column;gap:16px;overflow-y:auto;font-size:14px;background:var(--panel);transform:translateX(-100%);transition:transform .42s cubic-bezier(.22,1,.36,1)}
+#edge{position:fixed;left:0;top:0;bottom:0;width:18px;z-index:20;padding:0;border:0;background:none}
+#scrim{position:fixed;inset:0;z-index:30;background:#000a;opacity:0;pointer-events:none;transition:opacity .35s}
+#drawer{position:fixed;left:0;top:0;bottom:0;z-index:40;width:min(500px,92vw);padding:22px;display:flex;flex-direction:column;gap:16px;overflow-y:auto;font-size:14px;background:var(--panel);transform:translateX(-100%);transition:transform .38s cubic-bezier(.22,1,.36,1)}
 body.open #drawer{transform:none;box-shadow:0 0 5vmin #000c}
 body.open #scrim{opacity:1;pointer-events:auto}
-#drawer h3{font-size:19px}
+#drawer h3{font-size:18px;display:flex;justify-content:space-between;align-items:center}
 #drawer label{display:flex;flex-direction:column;gap:6px;color:var(--sub)}
-#drawer .chk{flex-direction:row;align-items:center;gap:10px;color:var(--text)}
-#drawer fieldset{display:flex;flex-direction:column;gap:10px;border:0}
-#drawer legend{margin-bottom:6px;color:var(--sub);font-weight:600}
-#drawer input[type=number],#drawer input[type=text],#drawer select{font:inherit;color:var(--text);background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:9px;user-select:text;-webkit-user-select:text}
-#drawer input[type=checkbox]{width:20px;height:20px;accent-color:var(--acc)}
-#drawer button{font:inherit;padding:11px;border-radius:8px;border:1px solid var(--line);background:var(--panel2);color:var(--text);cursor:pointer}
-#drawer #save{background:var(--acc);color:#08202b;border:0;font-weight:600}
+#drawer .chk{flex-direction:row;align-items:center;gap:8px;color:var(--text);cursor:pointer}
+#drawer fieldset{display:flex;flex-direction:column;gap:10px;border:1px solid var(--line);border-radius:10px;padding:12px}
+#drawer legend{padding:0 6px;color:var(--acc);font-weight:600;font-size:13px}
+#drawer input[type=number],#drawer input[type=text],#drawer select{font:inherit;color:var(--text);background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:8px 10px;user-select:text;-webkit-user-select:text}
+#drawer input[type=checkbox]{width:18px;height:18px;accent-color:var(--acc);cursor:pointer}
+#drawer button{font:inherit;padding:10px 12px;border-radius:8px;border:1px solid var(--line);background:var(--panel2);color:var(--text);cursor:pointer}
+#drawer #save{background:var(--acc);color:#08202b;border:0;font-weight:700}
+
+/* 路線チェックボックスグリッド */
+.line-filter-btns{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:4px}
+.line-filter-btns button{padding:5px 10px !important;font-size:12px !important;border-radius:6px !important}
+.line-cat-title{font-size:12px;color:var(--sub);font-weight:600;margin-top:6px;border-bottom:1px solid var(--line);padding-bottom:3px}
+.line-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(135px,1fr));gap:6px 10px;max-height:210px;overflow-y:auto;padding:4px 2px}
+.line-chk-item{display:flex !important;flex-direction:row !important;align-items:center;gap:6px;font-size:12.5px;color:var(--text) !important;cursor:pointer}
+.mini-sym{display:inline-grid;place-items:center;width:20px;height:20px;font-size:9px;font-weight:800;background:#fff;color:#111;border:2.5px solid var(--lc);border-radius:4px;flex-shrink:0}
+.mini-sym.sub{border-radius:50%}
+.mini-sym.shinkansen{background:var(--lc);color:#fff;border-color:#fff;border-width:1.5px}
 
 .source-info{
   background:var(--panel2);
@@ -209,14 +343,14 @@ body.open #scrim{opacity:1;pointer-events:auto}
   display:flex;
   flex-direction:column;
   gap:8px;
-  font-size:12.5px;
+  font-size:12px;
   line-height:1.45;
 }
 .source-info h4{font-size:13px;color:var(--text);margin-bottom:2px}
 .source-row{display:flex;flex-direction:column;border-top:1px solid var(--line);padding-top:6px}
 .source-row:first-of-type{border-top:0;padding-top:0}
 .source-row strong{color:var(--acc);font-weight:600}
-.source-url{color:var(--sub);font-family:monospace;font-size:11.5px;word-break:break-all}
+.source-url{color:var(--sub);font-family:monospace;font-size:11px;word-break:break-all}
 </style>
 </head>
 <body>
@@ -228,14 +362,24 @@ body.open #scrim{opacity:1;pointer-events:auto}
       <div class="flip s" id="s"><div class="u"><span>00</span></div><div class="l"><span>00</span></div><div class="fa"><span>00</span></div><div class="fb"><span>00</span></div></div>
     </div>
     <div class="meta"><span id="date"></span><span id="temp"></span></div>
-    <div id="stat"></div>
+    <!-- 左下：CSS/SVG製設定ボタン ＋ シンプルな更新時刻表示 -->
+    <div class="clock-foot">
+      <button id="cfgBtn" aria-label="設定を開く" title="設定">
+        <svg viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="3.2"></circle>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+        </svg>
+      </button>
+      <div id="stat"></div>
+    </div>
   </section>
+
   <section class="stage">
     <div id="pager">
       <article class="card" data-k="weather" data-t="天気"><div class="card-hdr"><h2>天気と3時間ごとの予報</h2></div><div class="body" id="b-weather"></div></article>
       <article class="card" data-k="train" data-t="鉄道"><div class="card-hdr"><h2>鉄道運行情報</h2></div><div class="body" id="b-train"></div></article>
       <article class="card" data-k="news" data-t="ニュース"><div class="card-hdr"><h2>トピックニュース（左右スワイプで切替）</h2></div><div class="body" id="b-news"></div></article>
-      <article class="card" data-k="quake" data-t="地震情報"><div class="card-hdr"><h2>地震情報</h2></div><div class="body" id="b-quake"></div></article>
+      <article class="card" data-k="quake" data-t="地震情報"><div class="card-hdr"><h2>地震情報（下段が最新）</h2></div><div class="body" id="b-quake"></div></article>
       <article class="card" data-k="calendar" data-t="予定"><div class="card-hdr"><h2>カレンダーの予定</h2></div><div class="body" id="b-calendar"></div></article>
     </div>
     <div id="dots"></div>
@@ -245,15 +389,53 @@ body.open #scrim{opacity:1;pointer-events:auto}
 <button id="edge" aria-label="設定を開く"></button>
 <div id="scrim"></div>
 <aside id="drawer" aria-label="設定">
-  <h3>設定</h3>
+  <h3><span>設定</span></h3>
   <label>自動スクロールの間隔（秒・0でオフ）<input id="sAuto" type="number" min="0" max="600" inputmode="numeric"></label>
   <fieldset>
     <legend>表示するカード</legend>
-    <label class="chk"><input type="checkbox" data-k="weather">天気</label>
-    <label class="chk"><input type="checkbox" data-k="train">鉄道運行情報</label>
-    <label class="chk"><input type="checkbox" data-k="news">ニュース</label>
-    <label class="chk"><input type="checkbox" data-k="quake">地震情報</label>
-    <label class="chk"><input type="checkbox" data-k="calendar">予定</label>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+      <label class="chk"><input type="checkbox" data-k="weather">天気</label>
+      <label class="chk"><input type="checkbox" data-k="train">鉄道運行情報</label>
+      <label class="chk"><input type="checkbox" data-k="news">ニュース</label>
+      <label class="chk"><input type="checkbox" data-k="quake">地震情報</label>
+      <label class="chk"><input type="checkbox" data-k="calendar">予定</label>
+    </div>
+  </fieldset>
+
+  <fieldset>
+    <legend>🚃 監視する路線（チェックボックス選択）</legend>
+    <div class="line-filter-btns">
+      <button type="button" id="btnAllLines">全選択</button>
+      <button type="button" id="btnClearLines">全解除</button>
+      <button type="button" id="btnKantoLines">首都圏のみ</button>
+      <button type="button" id="btnShinkansen">東海道新幹線</button>
+    </div>
+    <div class="line-grid" id="lineCheckboxes"></div>
+  </fieldset>
+
+  <fieldset>
+    <legend>📰 ニュース設定</legend>
+    <label>表示件数（横スクロール）
+      <select id="sNewsCount">
+        <option value="3">3件（推奨）</option>
+        <option value="5">5件</option>
+        <option value="7">7件</option>
+      </select>
+    </label>
+    <label>配信元プリセット
+      <select id="sNewsPreset">
+        <option value="https://news.web.nhk/n-data/conf/na/rss/cat0.xml">NHK ニュース（主要・最新URL）</option>
+        <option value="https://news.web.nhk/n-data/conf/na/rss/cat1.xml">NHK ニュース（社会）</option>
+        <option value="https://news.web.nhk/n-data/conf/na/rss/cat3.xml">NHK ニュース（科学・文化）</option>
+        <option value="https://news.web.nhk/n-data/conf/na/rss/cat5.xml">NHK ニュース（経済）</option>
+        <option value="https://news.yahoo.co.jp/rss/topics/top-picks.xml">Yahoo!ニュース（主要トピックス）</option>
+        <option value="https://news.yahoo.co.jp/rss/topics/it.xml">Yahoo!ニュース（IT・テクノロジー）</option>
+        <option value="custom">カスタム（下の欄に直接URLを入力）</option>
+      </select>
+    </label>
+    <label>RSS フィード URL
+      <input id="sNewsRss" type="text" placeholder="https://news.web.nhk/n-data/conf/na/rss/cat0.xml">
+    </label>
   </fieldset>
 
   <fieldset>
@@ -265,35 +447,6 @@ body.open #scrim{opacity:1;pointer-events:auto}
       <label>減光終了（時）<input id="sNightEnd" type="number" min="0" max="23" inputmode="numeric"></label>
     </div>
   </fieldset>
-
-  <label>監視する路線（カンマ区切り・空欄で全国の遅延一覧）
-    <input id="sTrains" type="text" placeholder="例: 総武線, 東西線, 京葉線">
-  </label>
-
-  <label>ニュース表示件数（横スクロール）
-    <select id="sNewsCount">
-      <option value="3">3件（推奨）</option>
-      <option value="5">5件</option>
-      <option value="7">7件</option>
-    </select>
-  </label>
-
-  <label>ニュース配信元プリセット
-    <select id="sNewsPreset">
-      <option value="https://www3.nhk.or.jp/rss/news/cat0.xml">NHK ニュース（主要・NHK ONE）</option>
-      <option value="https://www3.nhk.or.jp/rss/news/cat1.xml">NHK ニュース（社会）</option>
-      <option value="https://www3.nhk.or.jp/rss/news/cat3.xml">NHK ニュース（科学・文化・IT）</option>
-      <option value="https://www3.nhk.or.jp/rss/news/cat5.xml">NHK ニュース（経済）</option>
-      <option value="https://news.yahoo.co.jp/rss/topics/top-picks.xml">Yahoo!ニュース（主要トピックス）</option>
-      <option value="https://news.yahoo.co.jp/rss/topics/it.xml">Yahoo!ニュース（IT・テクノロジー）</option>
-      <option value="https://rss.itmedia.co.jp/rss/2.0/news_bursts.xml">ITmedia NEWS</option>
-      <option value="custom">カスタム（下の欄に直接URLを入力）</option>
-    </select>
-  </label>
-
-  <label>ニュース RSS フィード URL
-    <input id="sNewsRss" type="text" placeholder="https://www3.nhk.or.jp/rss/news/cat0.xml">
-  </label>
 
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
     <label>緯度<input id="sLat" type="number" step="any" inputmode="decimal"></label>
@@ -313,17 +466,17 @@ body.open #scrim{opacity:1;pointer-events:auto}
     </div>
     <div class="source-row">
       <strong>🚃 鉄道運行情報・遅延検知</strong>
-      <span>鉄道遅延情報のjson（リアルタイム鉄道遅延集計データ）</span>
+      <span>鉄道遅延情報のjson（rti-giken リアルタイム遅延データ）</span>
       <span class="source-url">https://tetsudo.rti-giken.jp/free/delay.json</span>
     </div>
     <div class="source-row">
       <strong>📰 ニュース記事・QRコード</strong>
-      <span>指定RSSフィード ＋ QR Server API</span>
-      <span class="source-url" id="info-rss-url">https://www3.nhk.or.jp/rss/news/cat0.xml</span>
+      <span>NHK ONE 公式RSSフィード等 ＋ QR Server API</span>
+      <span class="source-url" id="info-rss-url">https://news.web.nhk/n-data/conf/na/rss/cat0.xml</span>
     </div>
     <div class="source-row">
       <strong>🌋 地震情報（震度・震源・規模）</strong>
-      <span>P2P地震情報 JSON API v2</span>
+      <span>P2P地震情報 JSON API v2（気象庁発表データ）</span>
       <span class="source-url">https://api.p2pquake.net/v2/history?codes=551</span>
     </div>
   </div>
@@ -333,16 +486,54 @@ body.open #scrim{opacity:1;pointer-events:auto}
 (()=>{
 'use strict';
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
-const KC='dash.cfg.v2', KD='dash.cache.v2'; // 古い壊れたキャッシュを無効化するためv2へ更新
+const KC='dash.cfg.v3', KD='dash.cache.v3';
 const QR='https://api.qrserver.com/v1/create-qr-code/?margin=0&size=240x240&data=';
+
+/* ---- 路線マスターデータ（首都圏主要路線 ＋ 東海道新幹線） ---- */
+const RAILWAY_CATALOG = [
+  // 新幹線
+  { id:'tokaido_shinkansen', name:'東海道新幹線', match:['東海道新幹線'], code:'N', color:'#003399', company:'JR東海', type:'shinkansen', group:'shinkansen' },
+  // JR首都圏
+  { id:'jb_sobu', name:'中央・総武線各駅停車', match:['中央・総武各駅停車','総武線各駅停車','中央・総武線'], code:'JB', color:'#ffd400', company:'JR東日本', type:'jr', group:'kanto' },
+  { id:'jo_sobu_rapid', name:'総武快速線', match:['総武快速線','総武線快速','横須賀・総武快速線'], code:'JO', color:'#005bac', company:'JR東日本', type:'jr', group:'kanto' },
+  { id:'jc_chuo', name:'中央線快速', match:['中央線快速','中央線'], code:'JC', color:'#f15a22', company:'JR東日本', type:'jr', group:'kanto' },
+  { id:'jy_yamanote', name:'山手線', match:['山手線'], code:'JY', color:'#9acd32', company:'JR東日本', type:'jr', group:'kanto' },
+  { id:'jk_keihintohoku', name:'京浜東北線', match:['京浜東北線','根岸線'], code:'JK', color:'#00b2e5', company:'JR東日本', type:'jr', group:'kanto' },
+  { id:'je_keiyo', name:'京葉線', match:['京葉線'], code:'JE', color:'#c9242b', company:'JR東日本', type:'jr', group:'kanto' },
+  { id:'jm_musashino', name:'武蔵野線', match:['武蔵野線'], code:'JM', color:'#f15a22', company:'JR東日本', type:'jr', group:'kanto' },
+  { id:'ja_saikyo', name:'埼京線', match:['埼京線','川越線'], code:'JA', color:'#00ac9a', company:'JR東日本', type:'jr', group:'kanto' },
+  { id:'jj_joban', name:'常磐線', match:['常磐線','常磐線快速','常磐線各駅停車'], code:'JJ', color:'#00b261', company:'JR東日本', type:'jr', group:'kanto' },
+  { id:'js_shonan', name:'湘南新宿ライン', match:['湘南新宿ライン'], code:'JS', color:'#e21f26', company:'JR東日本', type:'jr', group:'kanto' },
+  { id:'jt_tokaido', name:'上野東京・東海道線', match:['東海道線','上野東京ライン','宇都宮線','高崎線'], code:'JT', color:'#f68b1e', company:'JR東日本', type:'jr', group:'kanto' },
+  // 東京メトロ・都営
+  { id:'t_tozai', name:'東京メトロ東西線', match:['東西線'], code:'T', color:'#009bbf', company:'東京メトロ', type:'sub', group:'kanto' },
+  { id:'g_ginza', name:'東京メトロ銀座線', match:['銀座線'], code:'G', color:'#ff9500', company:'東京メトロ', type:'sub', group:'kanto' },
+  { id:'m_marunouchi', name:'東京メトロ丸ノ内線', match:['丸ノ内線'], code:'M', color:'#f62e36', company:'東京メトロ', type:'sub', group:'kanto' },
+  { id:'h_hibiya', name:'東京メトロ日比谷線', match:['日比谷線'], code:'H', color:'#b5b5ac', company:'東京メトロ', type:'sub', group:'kanto' },
+  { id:'c_chiyoda', name:'東京メトロ千代田線', match:['千代田線'], code:'C', color:'#00bb85', company:'東京メトロ', type:'sub', group:'kanto' },
+  { id:'y_yurakucho', name:'東京メトロ有楽町線', match:['有楽町線'], code:'Y', color:'#c1a470', company:'東京メトロ', type:'sub', group:'kanto' },
+  { id:'z_hanzomon', name:'東京メトロ半蔵門線', match:['半蔵門線'], code:'Z', color:'#8f76d6', company:'東京メトロ', type:'sub', group:'kanto' },
+  { id:'f_fukutoshin', name:'東京メトロ副都心線', match:['副都心線'], code:'F', color:'#9c5e31', company:'東京メトロ', type:'sub', group:'kanto' },
+  { id:'a_asakusa', name:'都営浅草線', match:['都営浅草線','浅草線'], code:'A', color:'#e85298', company:'都営地下鉄', type:'sub', group:'kanto' },
+  { id:'s_shinjuku', name:'都営新宿線', match:['都営新宿線','新宿線'], code:'S', color:'#b0bf1e', company:'都営地下鉄', type:'sub', group:'kanto' },
+  { id:'e_oedo', name:'都営大江戸線', match:['都営大江戸線','大江戸線'], code:'E', color:'#ce045b', company:'都営地下鉄', type:'sub', group:'kanto' },
+  // 首都圏私鉄
+  { id:'ks_keisei', name:'京成本線', match:['京成本線','京成線','押上線'], code:'KS', color:'#005aaa', company:'京成電鉄', type:'jr', group:'kanto' },
+  { id:'ty_toyoko', name:'東急東横線', match:['東横線','東急東横線'], code:'TY', color:'#da0442', company:'東急電鉄', type:'jr', group:'kanto' },
+  { id:'dt_denentoshi', name:'東急田園都市線', match:['田園都市線','東急田園都市線'], code:'DT', color:'#20a288', company:'東急電鉄', type:'jr', group:'kanto' },
+  { id:'ko_keio', name:'京王線', match:['京王線','井の頭線'], code:'KO', color:'#dd0077', company:'京王電鉄', type:'jr', group:'kanto' },
+  { id:'oh_odakyu', name:'小田急線', match:['小田急小田原線','小田急線'], code:'OH', color:'#2288cc', company:'小田急電鉄', type:'jr', group:'kanto' },
+  { id:'tj_tobu', name:'東武東上線・スカイツリー', match:['東武東上線','東武スカイツリーライン','東武野田線','アーバンパークライン'], code:'TD', color:'#0f6cc3', company:'東武鉄道', type:'jr', group:'kanto' },
+  { id:'si_seibu', name:'西武池袋・新宿線', match:['西武池袋線','西武新宿線'], code:'SI', color:'#003e98', company:'西武鉄道', type:'jr', group:'kanto' }
+];
 
 const DEF={
   auto:12,
   show:{weather:true,train:true,news:true,quake:true,calendar:false},
   lat:35.6908,
   lon:139.9984,
-  trains:'総武線, 東西線, 京葉線',
-  newsRss:'https://www3.nhk.or.jp/rss/news/cat0.xml',
+  selectedLines:['jb_sobu','jo_sobu_rapid','je_keiyo','t_tozai','ks_keisei','jy_yamanote','tokaido_shinkansen'],
+  newsRss:'https://news.web.nhk/n-data/conf/na/rss/cat0.xml',
   newsCount:3,
   burnShift:true,
   nightDim:true,
@@ -351,12 +542,43 @@ const DEF={
 };
 
 const ls={get(k){try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
-const cfg=Object.assign({},DEF,ls.get(KC));cfg.show=Object.assign({},DEF.show,cfg.show);
+const cfg=Object.assign({},DEF,ls.get(KC));
+cfg.show=Object.assign({},DEF.show,cfg.show);
+if(!Array.isArray(cfg.selectedLines)||!cfg.selectedLines.length) cfg.selectedLines=DEF.selectedLines;
+
 const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const stripHtml=s=>String(s==null?'':s).replace(/<[^>]*>/g,'').replace(/\s+/g,' ').trim();
 const pad=n=>String(n).padStart(2,'0');
 const num=v=>v==null||isNaN(v)?'--':Math.round(v);
 const empty=s=>`<div class="empty">${esc(s)}</div>`;
+
+/* ---- 設定ドロワーの路線チェックボックス生成 ---- */
+function buildLineCheckboxes(){
+  const wrap=$('#lineCheckboxes');
+  if(!wrap)return;
+  wrap.innerHTML = RAILWAY_CATALOG.map(line=>`
+    <label class="line-chk-item">
+      <input type="checkbox" class="line-chk" value="${line.id}">
+      <span class="mini-sym ${line.type}" style="--lc:${line.color}">${line.code}</span>
+      <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(line.name)}</span>
+    </label>
+  `).join('');
+
+  $('#btnAllLines').onclick=()=>$$('.line-chk').forEach(c=>c.checked=true);
+  $('#btnClearLines').onclick=()=>$$('.line-chk').forEach(c=>c.checked=false);
+  $('#btnKantoLines').onclick=()=>{
+    $$('.line-chk').forEach(c=>{
+      const l=RAILWAY_CATALOG.find(x=>x.id===c.value);
+      c.checked=(l&&l.group==='kanto');
+    });
+  };
+  $('#btnShinkansen').onclick=()=>{
+    $$('.line-chk').forEach(c=>{
+      if(c.value==='tokaido_shinkansen') c.checked=true;
+    });
+  };
+}
+buildLineCheckboxes();
 
 /* ---- 焼き付き防止：ピクセルシフト ＆ 夜間/アイドル減光 ---- */
 let shiftStep=0;
@@ -432,7 +654,7 @@ function tick(){
   setTimeout(tick,1005-d.getMilliseconds());
 }
 
-/* ---- ニュース横カルーセルの初期化とイベント紐付け ---- */
+/* ---- ニュース横カルーセル制御 ---- */
 function initNewsCarousel(){
   const track=$('#nwTrack');
   const dotsWrap=$('#nwDots');
@@ -452,7 +674,6 @@ function initNewsCarousel(){
     btns.forEach((b,i)=>b.classList.toggle('on',i===idx));
   },{passive:true});
 
-  // ホイールでの横送りサポート（Shiftなしでもカード内なら横移動可能に）
   track.addEventListener('wheel',e=>{
     if(Math.abs(e.deltaX)>Math.abs(e.deltaY)) return;
     if(slides.length<=1) return;
@@ -478,26 +699,31 @@ const R={
     return `<div class="wx-main"><span class="wx-ic">${esc(w.icon)}</span><span class="wx-t">${num(w.temp)}°</span><div><div class="wx-d">${esc(w.desc)}</div><div class="wx-hl">最高 ${num(w.hi)}° / 最低 ${num(w.lo)}°</div></div></div><div class="hrs">${hrs}</div>`;
   },
   train(t){
-    if(!t||!t.length) return empty('遅延情報はありません（全線平常運転）');
+    if(!t||!t.length) return empty('監視する路線が選択されていません（設定から選択してください）');
+    // GitHubの icons/<CODE>.png が存在すれば画像を表示し、無ければCSSナンバリング記号を表示
     return `<div class="train-list">${t.map(item=>`
       <div class="train-item ${item.delay?'delay':''}">
+        <div class="line-badge ${esc(item.type||'')}" style="--lc:${esc(item.color||'#3b82f6')}">
+          <span>${esc(item.code||'JR')}</span>
+          <img src="icons/${encodeURIComponent(item.code||'JR')}.png" alt="" onerror="this.remove()">
+        </div>
         <div>
           <div class="train-name">${esc(item.name)}</div>
-          <div class="train-comp">${esc(item.company||'鉄道情報')}</div>
+          <div class="train-comp">${esc(item.company||'')}</div>
         </div>
-        <div class="train-badge">${item.delay?'遅延・運休あり':'平常運転'}</div>
+        <div class="train-status">${item.delay?'⚠️ 遅延・情報あり':'平常運転'}</div>
       </div>
     `).join('')}</div>`;
   },
   news(a){
     const valid = (a||[]).filter(n=>n && n.title);
-    if(!valid.length) return empty('ニュースを取得しています…（設定からURLを確認できます）');
+    if(!valid.length) return empty('ニュースを取得しています…');
     const limit = cfg.newsCount || 3;
     const list = valid.slice(0, limit);
 
     const slidesHtml = list.map((n, idx)=>{
       const q = n.url ? QR+encodeURIComponent(n.url) : '';
-      const desc = n.desc ? stripHtml(n.desc) : 'QRコードをスマートフォンで読み取ると記事全文が開きます。';
+      const desc = n.desc ? stripHtml(n.desc) : '詳細な記事内容は右のQRコードからご確認いただけます。';
       return `
         <div class="nw-slide">
           <div class="nw-top">
@@ -505,15 +731,17 @@ const R={
             <span class="nw-src">${esc(n.source||'NHKニュース')}</span>
           </div>
           <div class="nw-title">${esc(n.title)}</div>
-          <div class="nw-btm">
-            <div>
+          <div class="nw-content">
+            <div class="nw-text-col">
               <div class="nw-desc">${esc(desc)}</div>
               <div class="nw-meta">
-                <span>${esc(n.date||'最新')}</span>
-                <span>詳しい内容はQRコードから ▶</span>
+                <span>🕒 ${esc(n.date||'最新')}</span>
+                <span>QRで記事を開く ▶</span>
               </div>
             </div>
-            ${q?`<img class="nw-qr" alt="QR" src="${esc(q)}">`:''}
+            <div class="nw-qr-col">
+              ${q?`<img class="nw-qr" alt="QR" src="${esc(q)}">`:''}
+            </div>
           </div>
         </div>
       `;
@@ -530,11 +758,53 @@ const R={
   },
   quake(a){
     if(!a||!a.length) return empty('直近の地震情報はありません');
-    return a.slice(0,4).map(q=>{
-      const m=+q.mag,c=m>=6?'m-hi':m>=4.5?'m-mid':'',d=new Date(q.time);
-      const t=isNaN(d)?esc(q.time||''):`${d.getMonth()+1}/${d.getDate()} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
-      return `<div class="eq"><div class="mag ${c}">M${isNaN(m)?'-':m.toFixed(1)}</div><div><p>${esc(q.place)}</p><small>${t}${q.depth!=null?' ・深さ '+esc(q.depth)+'km':''}</small></div>${q.intensity?`<span class="int">震度${esc(q.intensity)}</span>`:''}</div>`;
+    // APIからは新しい順(index 0が最新)で来るため、過去3件を上に、最新1件を一番下に大きく配置
+    const latest = a[0];
+    const older = a.slice(1, 4).reverse(); // 古い順→新しい順で下に向かって並ぶように反転
+
+    const fmtTime = tStr => {
+      const d=new Date(tStr);
+      return isNaN(d)?esc(tStr||''):`${d.getMonth()+1}/${d.getDate()} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    };
+
+    const olderHtml = older.map(q=>{
+      const m=+q.mag;
+      return `
+        <div class="eq-old">
+          <span class="eq-old-mag">M${isNaN(m)?'-':m.toFixed(1)}</span>
+          <span class="eq-old-place">${esc(q.place)}</span>
+          <span class="eq-old-time">${fmtTime(q.time)}</span>
+          <span class="eq-old-int">震度${esc(q.intensity||'-')}</span>
+        </div>
+      `;
     }).join('');
+
+    const lm = +latest.mag;
+    const badgeCls = lm>=6 ? 'hi' : (lm>=4.5 ? 'mid' : '');
+
+    const latestHtml = `
+      <div class="eq-latest">
+        <div class="eq-latest-badge ${badgeCls}">
+          <span class="eq-latest-lbl">最大震度</span>
+          <span class="eq-latest-int">${esc(latest.intensity||'-')}</span>
+        </div>
+        <div class="eq-latest-info">
+          <div class="eq-latest-top">
+            <span class="eq-latest-tag">最新</span>
+            <span class="eq-latest-time">${fmtTime(latest.time)} 発生</span>
+          </div>
+          <div class="eq-latest-place">${esc(latest.place)}</div>
+          <div class="eq-latest-meta">規模 M${isNaN(lm)?'-':lm.toFixed(1)} ／ 深さ ${esc(latest.depth||'-')}km</div>
+        </div>
+      </div>
+    `;
+
+    return `
+      <div class="eq-wrap">
+        <div class="eq-older-list">${olderHtml}</div>
+        ${latestHtml}
+      </div>
+    `;
   },
   calendar(a){
     if(!a||!a.length) return empty('直近の予定はありません');
@@ -553,7 +823,7 @@ function apply(data){
   if(data.weather&&data.weather.temp!=null) $('#temp').textContent=num(data.weather.temp)+'°C';
 }
 
-/* ---- ニュースRSS多重取得（見出し＋本文抜粋対応） ---- */
+/* ---- ニュースRSS多重取得 ---- */
 function formatPubDate(str){
   if(!str) return '';
   const d=new Date(str.replace(/-/g,'/'));
@@ -577,11 +847,33 @@ function parseXmlString(xmlText){
 
 async function fetchNewsWithFallback(rssUrl){
   if(!rssUrl) return [];
-  // 1. rss2json API
+  // 1. corsproxy.io (NHKの新ドメイン news.web.nhk に対して最も高速)
   try{
-    const r1=await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`);
+    const r1=await fetch(`https://corsproxy.io/?${encodeURIComponent(rssUrl)}`);
     if(r1.ok){
-      const j=await r1.json();
+      const txt=await r1.text();
+      const parsed=parseXmlString(txt);
+      if(parsed.length>0) return parsed;
+    }
+  }catch(e){}
+
+  // 2. allorigins.win
+  try{
+    const r2=await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(rssUrl)}`);
+    if(r2.ok){
+      const j=await r2.json();
+      if(j.contents){
+        const parsed=parseXmlString(j.contents);
+        if(parsed.length>0) return parsed;
+      }
+    }
+  }catch(e){}
+
+  // 3. rss2json API
+  try{
+    const r3=await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`);
+    if(r3.ok){
+      const j=await r3.json();
       if(j.status==='ok' && j.items && j.items.length>0){
         const src=stripHtml(j.feed?.title||'NHKニュース');
         const list=j.items.map(it=>({
@@ -596,28 +888,20 @@ async function fetchNewsWithFallback(rssUrl){
     }
   }catch(e){}
 
-  // 2. corsproxy.io
-  try{
-    const r2=await fetch(`https://corsproxy.io/?${encodeURIComponent(rssUrl)}`);
-    if(r2.ok){
-      const txt=await r2.text();
-      const parsed=parseXmlString(txt);
-      if(parsed.length>0) return parsed;
-    }
-  }catch(e){}
+  return [];
+}
 
-  // 3. allorigins.win
+/* ---- 鉄道運行情報の取得（CORS回避フォールバック付き） ---- */
+async function fetchTrainDelayList(){
+  const target='https://tetsudo.rti-giken.jp/free/delay.json';
   try{
-    const r3=await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(rssUrl)}`);
-    if(r3.ok){
-      const j=await r3.json();
-      if(j.contents){
-        const parsed=parseXmlString(j.contents);
-        if(parsed.length>0) return parsed;
-      }
-    }
+    const r=await fetch(target,{cache:'no-store'});
+    if(r.ok) return await r.json();
   }catch(e){}
-
+  try{
+    const r2=await fetch(`https://corsproxy.io/?${encodeURIComponent(target)}`);
+    if(r2.ok) return await r2.json();
+  }catch(e){}
   return [];
 }
 
@@ -626,13 +910,15 @@ const st={ok:true,t:0};let busy=false,wl=null;
 function status(){
   const el=$('#stat'),d=new Date(st.t),tm=st.t?`${pad(d.getHours())}:${pad(d.getMinutes())}`:'--:--';
   el.className=st.ok?'':'err';
-  el.textContent=(st.ok?`${tm} 更新`:`${tm} 更新試行中`)+(wl?'':' ・画面維持オフ')+(cfg.burnShift?' ・焼付防止ON':'');
+  // 焼付防止表示は省き、シンプルに更新時刻のみを表示
+  el.textContent=(st.ok?`${tm} 更新`:`${tm} 更新試行中`);
 }
 
 async function load(){
   if(busy)return;busy=true;
   $('#info-rss-url').textContent=cfg.newsRss||'未設定';
   try{
+    // 1. 天気
     let weatherData=null;
     try{
       const wxUrl=`https://api.open-meteo.com/v1/forecast?latitude=${cfg.lat}&longitude=${cfg.lon}&current=temperature_2m,weather_code&hourly=temperature_2m,weather_code,precipitation_probability&daily=temperature_2m_max,temperature_2m_min&timezone=Asia%2FTokyo&forecast_days=2`;
@@ -662,25 +948,29 @@ async function load(){
       };
     }catch(e){}
 
-    let trainData=[];
-    try{
-      const delayList=await fetch('https://tetsudo.rti-giken.jp/free/delay.json').then(r=>r.json());
-      const delayMap=new Set(delayList.map(t=>t.name));
-      const watchLines=cfg.trains.split(',').map(s=>s.trim()).filter(Boolean);
+    // 2. 鉄道運行情報（選択された路線を常時一覧表示し、遅延リストと照合）
+    const delayList = await fetchTrainDelayList();
+    const delayNames = delayList.map(d=>d.name);
+    const chosen = RAILWAY_CATALOG.filter(line=>cfg.selectedLines.includes(line.id));
+    const trainData = chosen.map(line=>{
+      const isDelay = line.match.some(m => delayNames.some(dn => dn.includes(m) || m.includes(dn)));
+      return {
+        id:line.id,
+        name:line.name,
+        code:line.code,
+        color:line.color,
+        company:line.company,
+        type:line.type,
+        delay:isDelay
+      };
+    });
+    // 遅延している路線があれば最上部にソートして目立たせる
+    trainData.sort((a,b)=>(b.delay?1:0)-(a.delay?1:0));
 
-      if(watchLines.length>0){
-        trainData=watchLines.map(line=>{
-          const isDelay=[...delayMap].some(d=>d.includes(line)||line.includes(d));
-          const hit=delayList.find(d=>d.name.includes(line)||line.includes(d.name));
-          return {name:line, company:hit?hit.company:'JR / 私鉄', delay:isDelay};
-        });
-      } else {
-        trainData=delayList.slice(0,5).map(t=>({name:t.name, company:t.company, delay:true}));
-      }
-    }catch(e){}
-
+    // 3. ニュース
     const newsData=await fetchNewsWithFallback(cfg.newsRss);
 
+    // 4. 地震情報
     let quakeData=[];
     try{
       const qRes=await fetch('https://api.p2pquake.net/v2/history?codes=551&limit=4').then(r=>r.json());
@@ -690,14 +980,14 @@ async function load(){
         place:q.earthquake.hypocenter.name||'不明',
         mag:q.earthquake.hypocenter.magnitude>=0?q.earthquake.hypocenter.magnitude:'-',
         depth:q.earthquake.hypocenter.depth>=0?q.earthquake.hypocenter.depth:'-',
-        intensity:intMap[q.earthquake.maxScale]||''
+        intensity:intMap[q.earthquake.maxScale]||'-'
       }));
     }catch(e){}
 
     const prev=(ls.get(KD)||{}).data||{};
     const aggregated={
       weather:weatherData||prev.weather,
-      train:trainData.length?trainData:(prev.train||[]),
+      train:trainData,
       news:newsData.length?newsData:(prev.news||[]),
       quake:quakeData.length?quakeData:(prev.quake||[]),
       calendar:[]
@@ -750,7 +1040,6 @@ pager.addEventListener('scroll',()=>{
 },{passive:true});
 ['touchstart','wheel'].forEach(e=>pager.addEventListener(e,()=>{touched=Date.now()},{passive:true}));
 
-// 自動スクロール：ニュース表示中は横スライドも順番に巡回してから次のカードへ進む
 function setAuto(){
   clearInterval(timer);
   if(cfg.auto>0)timer=setInterval(()=>{
@@ -783,7 +1072,6 @@ function applyCfg(){
 const open=v=>{document.body.classList.toggle('open',v);if(v)fill()};
 function fill(){
   $('#sAuto').value=cfg.auto;$('#sLat').value=cfg.lat;$('#sLon').value=cfg.lon;
-  $('#sTrains').value=cfg.trains||'';
   $('#sNewsRss').value=cfg.newsRss||'';
   $('#sNewsCount').value=String(cfg.newsCount||3);
   $('#sBurnShift').checked=!!cfg.burnShift;
@@ -791,6 +1079,10 @@ function fill(){
   $('#sNightStart').value=cfg.nightStart;
   $('#sNightEnd').value=cfg.nightEnd;
   $('#info-rss-url').textContent=cfg.newsRss||'未設定';
+
+  $$('.line-chk').forEach(c=>{
+    c.checked = cfg.selectedLines.includes(c.value);
+  });
 
   const presetEl=$('#sNewsPreset');
   const match=Array.from(presetEl.options).some(opt=>opt.value===cfg.newsRss);
@@ -805,6 +1097,7 @@ $('#sNewsPreset').onchange=e=>{
   }
 };
 
+$('#cfgBtn').onclick=()=>open(true);
 $('#edge').onclick=()=>open(true);
 $('#scrim').onclick=$('#close').onclick=()=>open(false);
 $('#save').onclick=()=>{
@@ -813,7 +1106,7 @@ $('#save').onclick=()=>{
   cfg.auto=isNaN(a)||a<0?0:a;
   if(!isNaN(la))cfg.lat=la;
   if(!isNaN(lo))cfg.lon=lo;
-  cfg.trains=$('#sTrains').value.trim();
+  cfg.selectedLines=$$('.line-chk').filter(c=>c.checked).map(c=>c.value);
   cfg.newsRss=$('#sNewsRss').value.trim();
   cfg.newsCount=parseInt($('#sNewsCount').value,10)||3;
   cfg.burnShift=$('#sBurnShift').checked;
