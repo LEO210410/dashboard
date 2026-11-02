@@ -81,7 +81,7 @@ body{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-i
   place-items:center;
   cursor:pointer;
   padding:0;
-  transition:color .2s, border-color .2s, background .2s, transform .2s;
+  transition:color .2s, border-color .2s, background .2s;
 }
 #cfgBtn:hover,#cfgBtn:active{
   color:var(--acc);
@@ -104,10 +104,10 @@ body{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-i
 .stage{position:relative;min-width:0;min-height:0}
 #pager{position:relative;height:100%;overflow-y:auto;scroll-snap-type:y mandatory;scrollbar-width:none;overscroll-behavior:contain;border-radius:2vmin;touch-action:pan-y}
 #pager::-webkit-scrollbar{display:none}
-.card{height:100%;scroll-snap-align:start;scroll-snap-stop:always;display:flex;flex-direction:column;gap:1.8vmin;padding:2.8vmin 4.8vmin 2.8vmin 3.8vmin;overflow:hidden;background:var(--panel);border-radius:2vmin;box-shadow:inset 0 0 0 1px var(--line)}
+.card{height:100%;scroll-snap-align:start;scroll-snap-stop:always;display:flex;flex-direction:column;gap:1.6vmin;padding:2.6vmin 4.6vmin 2.6vmin 3.6vmin;overflow:hidden;background:var(--panel);border-radius:2vmin;box-shadow:inset 0 0 0 1px var(--line);transition:background .8s ease}
 .card[hidden]{display:none}
 .card-hdr{display:flex;justify-content:space-between;align-items:center}
-.card h2{font-size:max(2.5vmin,13px);font-weight:600;color:var(--sub)}
+.card h2{font-size:max(2.4vmin,13px);font-weight:600;color:var(--sub)}
 .body{flex:1;min-height:0;display:flex;flex-direction:column}
 .empty{margin:auto;color:var(--sub);font-size:3.2vmin;text-align:center}
 #dots{position:absolute;right:1.2vmin;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:2vmin;z-index:10}
@@ -115,18 +115,118 @@ body{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-i
 #dots button::before{content:"";position:absolute;inset:-12px}
 #dots button.on{background:var(--acc)}
 
-/* Weather */
-.wx-main{display:flex;align-items:center;gap:4vmin}
-.wx-ic{font-size:15vmin;line-height:1}
-.wx-t{font-size:15vmin;font-weight:700;line-height:1}
-.wx-d{font-size:3.8vmin}
-.wx-hl{font-size:2.8vmin;color:var(--sub);margin-top:.6vmin}
-.hrs{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:1.2vmin;margin-top:auto}
-.hr{background:var(--panel2);border-radius:1.4vmin;padding:1.5vmin 0;text-align:center;font-size:2.7vmin}
-.hr i{display:block;font-style:normal;font-size:4.6vmin;margin:.5vmin 0}
-.hr small{color:var(--acc);font-size:2.1vmin}
+/* ========== Weather（時間帯別グラデーション背景 ＆ フラットSVGアイコン） ========== */
+.card[data-k="weather"].wx-morning{
+  background:linear-gradient(165deg, #2b507c 0%, #1c3554 55%, #152238 100%);
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,0.12);
+}
+.card[data-k="weather"].wx-day{
+  background:linear-gradient(165deg, #2e5f96 0%, #1e416e 55%, #162a4a 100%);
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,0.14);
+}
+.card[data-k="weather"].wx-evening{
+  background:linear-gradient(165deg, #3c3568 0%, #26254c 55%, #171932 100%);
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,0.12);
+}
+.card[data-k="weather"].wx-night{
+  background:linear-gradient(165deg, #10162b 0%, #131933 55%, #171d38 100%);
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,0.08);
+}
+.card[data-k="weather"] .card-hdr h2{color:rgba(255,255,255,0.65)}
 
-/* Train Info (CSSナンバリング記号対応) */
+.wx-wrap{
+  flex:1;
+  min-height:0;
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+}
+.wx-top{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  padding-bottom:2vmin;
+  border-bottom:1px solid rgba(255,255,255,0.12);
+}
+.wx-cond-title{
+  font-size:clamp(24px, 5.6vmin, 42px);
+  font-weight:700;
+  letter-spacing:.02em;
+  line-height:1.15;
+  color:#ffffff;
+}
+.wx-meta-row{
+  display:flex;
+  align-items:center;
+  gap:2vmin;
+  margin-top:1.2vmin;
+  font-size:clamp(13px, 2.8vmin, 19px);
+  font-weight:600;
+  color:rgba(255,255,255,0.9);
+}
+.wx-meta-item{
+  display:inline-flex;
+  align-items:center;
+  gap:.5vmin;
+}
+.wx-meta-item svg{
+  width:clamp(13px, 2.5vmin, 18px);
+  height:clamp(13px, 2.5vmin, 18px);
+}
+.wx-big-temp{
+  font-size:clamp(44px, 11.5vmin, 88px);
+  font-weight:700;
+  line-height:0.95;
+  color:#ffffff;
+  font-variant-numeric:tabular-nums;
+  letter-spacing:-.03em;
+}
+.wx-hrs{
+  display:grid;
+  grid-template-columns:repeat(7, 1fr);
+  align-items:center;
+  text-align:center;
+  padding-top:1.5vmin;
+  flex:1;
+}
+.wx-hr-col{
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+  align-items:center;
+  height:100%;
+  max-height:22vmin;
+  padding:.6vmin 0;
+}
+.wx-hr-time{
+  font-size:clamp(12px, 2.6vmin, 18px);
+  color:rgba(255,255,255,0.72);
+  font-weight:600;
+}
+.wx-hr-ic{
+  width:clamp(26px, 5.2vmin, 40px);
+  height:clamp(26px, 5.2vmin, 40px);
+  display:grid;
+  place-items:center;
+  margin:.4vmin 0;
+}
+.wx-hr-ic svg{
+  width:100%;
+  height:100%;
+  overflow:visible;
+}
+.wx-hr-temp{
+  font-size:clamp(13px, 2.9vmin, 20px);
+  font-weight:700;
+  color:#ffffff;
+}
+.wx-hr-pop{
+  font-size:clamp(11px, 2.2vmin, 15px);
+  font-weight:600;
+  color:#93c5fd;
+}
+
+/* ========== Train Info ========== */
 .train-list{display:flex;flex-direction:column;gap:1.4vmin;overflow-y:auto;flex:1;padding-right:.6vmin;scrollbar-width:thin}
 .train-item{display:grid;grid-template-columns:auto 1fr auto;gap:2vmin;align-items:center;padding:1.5vmin 2vmin;background:var(--panel2);border-radius:1.4vmin;border:1px solid var(--line)}
 .train-item.delay{border-color:rgba(232,104,95,0.5);background:linear-gradient(90deg, rgba(232,104,95,0.10), var(--panel2))}
@@ -147,7 +247,7 @@ body{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-i
   position:relative;
   overflow:hidden;
 }
-.line-badge.sub{border-radius:50%} /* 地下鉄は丸型 */
+.line-badge.sub{border-radius:50%}
 .line-badge.shinkansen{background:var(--lc);color:#fff;border-color:#fff;border-width:2px;border-radius:6px}
 .line-badge img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#fff}
 .train-name{font-size:clamp(13px,3.2vmin,20px);font-weight:600;line-height:1.2}
@@ -155,140 +255,125 @@ body{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-i
 .train-status{font-size:clamp(11px,2.4vmin,15px);font-weight:700;padding:.5vmin 1.4vmin;border-radius:.9vmin;background:rgba(74,222,128,0.14);color:var(--good);white-space:nowrap}
 .train-item.delay .train-status{background:rgba(232,104,95,0.2);color:var(--bad)}
 
-/* News (タイトル縮小・詳細拡大・余白解消版) */
-.nw-wrap{position:relative;flex:1;min-height:0;display:flex;flex-direction:column;justify-content:space-between}
-.nw-track{
+/* ========== News（1枚に3件集約・QRコード削除・CSS時計アイコン） ========== */
+.nw-stack{
   flex:1;
-  display:flex;
-  overflow-x:auto;
-  scroll-snap-type:x mandatory;
-  scrollbar-width:none;
-  overscroll-behavior-x:contain;
-  touch-action:pan-x;
-  gap:2vmin;
-}
-.nw-track::-webkit-scrollbar{display:none}
-.nw-slide{
-  flex:0 0 100%;
-  width:100%;
-  height:100%;
-  scroll-snap-align:start;
-  scroll-snap-stop:always;
+  min-height:0;
   display:grid;
-  grid-template-rows:auto auto 1fr;
+  grid-template-rows:repeat(3, minmax(0, 1fr));
   gap:1.4vmin;
+}
+.nw-item{
   background:var(--panel2);
-  border-radius:1.6vmin;
-  padding:2.2vmin 2.8vmin;
   border:1px solid var(--line);
+  border-radius:1.4vmin;
+  padding:1.4vmin 2.2vmin;
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+  min-height:0;
   overflow:hidden;
 }
-.nw-top{display:flex;justify-content:space-between;align-items:center;gap:2vmin}
-.nw-idx{font-size:max(2vmin,11px);font-weight:700;color:var(--acc);background:rgba(143,208,232,0.12);padding:.3vmin 1.2vmin;border-radius:99px}
-.nw-src{font-size:max(2vmin,11px);color:var(--sub);font-weight:600}
-.nw-title{
-  font-size:clamp(14px, 3.1vmin, 21px);
+.nw-item-top{
+  display:flex;
+  justify-content:space-between;
+  align-items: baseline;
+  gap:1.5vmin;
+}
+.nw-item-title{
+  font-size:clamp(13px, 2.6vmin, 18px);
   font-weight:700;
-  line-height:1.35;
   color:var(--text);
+  line-height:1.3;
+  display:-webkit-box;
+  -webkit-line-clamp:1;
+  -webkit-box-orient:vertical;
+  overflow:hidden;
+  flex:1;
+}
+.nw-item-time{
+  display:inline-flex;
+  align-items:center;
+  gap:.5vmin;
+  font-size:clamp(10px, 1.9vmin, 13px);
+  color:var(--acc);
+  font-variant-numeric:tabular-nums;
+  white-space:nowrap;
+  flex-shrink:0;
+}
+.nw-item-time svg{
+  width:clamp(11px, 2vmin, 14px);
+  height:clamp(11px, 2vmin, 14px);
+  stroke:currentColor;
+  fill:none;
+  stroke-width:2;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+}
+.nw-item-desc{
+  font-size:clamp(11.5px, 2.25vmin, 15px);
+  color:#c2cbd6;
+  line-height:1.45;
   display:-webkit-box;
   -webkit-line-clamp:2;
   -webkit-box-orient:vertical;
   overflow:hidden;
-  padding-bottom:1.2vmin;
-  border-bottom:1px solid var(--line);
+  margin-top:.4vmin;
 }
-.nw-content{
-  min-height:0;
-  display:grid;
-  grid-template-columns:1fr auto;
-  gap:2.2vmin;
-  align-items: stretch;
-}
-.nw-text-col{
-  min-height:0;
-  display:flex;
-  flex-direction:column;
-  justify-content:space-between;
-}
-.nw-desc{
-  font-size:clamp(12.5px, 2.7vmin, 17.5px);
-  color:#cfd6df;
-  line-height:1.55;
-  display:-webkit-box;
-  -webkit-line-clamp:5;
-  -webkit-box-orient:vertical;
-  overflow:hidden;
-}
-.nw-meta{display:flex;justify-content:space-between;align-items:center;font-size:max(2vmin,11px);color:var(--sub);padding-top:.8vmin}
-.nw-qr-col{display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:.5vmin}
-.nw-qr{
-  width:clamp(62px, 14vmin, 102px);
-  height:clamp(62px, 14vmin, 102px);
-  padding:5px;
-  background:#fff;
-  border-radius:1vmin;
-  object-fit:contain;
-  flex-shrink:0;
-}
-.nw-dots{display:flex;justify-content:center;gap:1.4vmin;padding-top:1.4vmin}
-.nw-dots button{
-  width:1.8vmin;height:.8vmin;min-width:14px;min-height:5px;
-  border:0;border-radius:99px;padding:0;
-  background:#ffffff26;cursor:pointer;transition:all .25s;
-}
-.nw-dots button.on{background:var(--acc);width:3.6vmin;min-width:26px}
 
-/* Quake (下から最新順 ＆ 最新1件のみ大きく強調) */
+/* ========== Quake（上部2/3に過去4件均等配置・下部1/3に最新1件） ========== */
 .eq-wrap{
   flex:1;
   min-height:0;
-  display:flex;
-  flex-direction:column;
-  justify-content:space-between;
+  display:grid;
+  grid-template-rows:2fr 1fr;
   gap:1.4vmin;
 }
 .eq-older-list{
-  display:flex;
-  flex-direction:column;
+  min-height:0;
+  display:grid;
+  grid-template-rows:repeat(4, minmax(0, 1fr));
   gap:1vmin;
 }
 .eq-old{
   display:grid;
-  grid-template-columns:9vmin 1fr auto auto;
+  grid-template-columns:8.5vmin 1fr auto auto;
   gap:1.6vmin;
   align-items:center;
-  padding:1vmin 1.8vmin;
-  background:rgba(29,37,47,0.55);
+  padding:0 2vmin;
+  background:rgba(29,37,47,0.65);
   border-radius:1.1vmin;
   border:1px solid var(--line);
-  font-size:clamp(11px,2.3vmin,15px);
+  font-size:clamp(11.5px, 2.35vmin, 15.5px);
   color:var(--sub);
+  min-height:0;
 }
 .eq-old-mag{font-weight:700;color:var(--text)}
-.eq-old-place{color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.eq-old-time{font-size:clamp(10px,2vmin,13px);font-variant-numeric:tabular-nums}
-.eq-old-int{font-size:clamp(10px,2.1vmin,13px);padding:.2vmin 1vmin;background:var(--panel2);border-radius:.6vmin;color:var(--text);font-weight:600}
+.eq-old-place{color:var(--text);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.eq-old-time{font-size:clamp(10.5px, 2vmin, 13.5px);font-variant-numeric:tabular-nums}
+.eq-old-int{font-size:clamp(10.5px, 2.1vmin, 13.5px);padding:.3vmin 1.1vmin;background:var(--panel);border:1px solid var(--line);border-radius:.7vmin;color:var(--text);font-weight:700}
 
-/* 最新1件（一番下に大きく配置） */
+/* 最新1件（下部1/3をフル活用） */
 .eq-latest{
-  margin-top:auto;
+  min-height:0;
+  height:100%;
   display:grid;
   grid-template-columns:auto 1fr;
-  gap:2.4vmin;
+  gap:2.2vmin;
   align-items:center;
-  padding:2.2vmin 2.6vmin;
+  padding:1.4vmin 2.4vmin;
   background:linear-gradient(135deg, #222b38 0%, var(--panel2) 100%);
   border:1.5px solid var(--acc);
-  border-radius:1.6vmin;
-  box-shadow:0 6px 20px rgba(0,0,0,0.35);
+  border-radius:1.5vmin;
+  box-shadow:0 4px 16px rgba(0,0,0,0.3);
 }
 .eq-latest-badge{
+  height:100%;
   background:var(--panel);
   border:1px solid var(--line);
-  border-radius:1.2vmin;
-  padding:1.4vmin 2vmin;
-  min-width:14vmin;
+  border-radius:1.1vmin;
+  padding:.8vmin 2vmin;
+  min-width:13.5vmin;
   text-align:center;
   display:flex;
   flex-direction:column;
@@ -296,14 +381,14 @@ body{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-i
 }
 .eq-latest-badge.hi{background:rgba(232,104,95,0.2);border-color:var(--bad)}
 .eq-latest-badge.mid{background:rgba(240,163,94,0.2);border-color:var(--warm)}
-.eq-latest-lbl{font-size:max(1.9vmin,10px);color:var(--sub);font-weight:600}
-.eq-latest-int{font-size:clamp(22px,5.4vmin,38px);font-weight:800;line-height:1.1;color:var(--text)}
-.eq-latest-info{display:flex;flex-direction:column;gap:.6vmin;min-width:0}
+.eq-latest-lbl{font-size:max(1.8vmin,10px);color:var(--sub);font-weight:600}
+.eq-latest-int{font-size:clamp(20px, 4.8vmin, 34px);font-weight:800;line-height:1.05;color:var(--text)}
+.eq-latest-info{display:flex;flex-direction:column;justify-content:center;gap:.4vmin;min-width:0}
 .eq-latest-top{display:flex;align-items:center;gap:1.2vmin}
-.eq-latest-tag{font-size:max(1.8vmin,10px);font-weight:700;background:var(--acc);color:#08202b;padding:.2vmin 1vmin;border-radius:4px}
-.eq-latest-time{font-size:clamp(11px,2.3vmin,15px);color:var(--sub);font-variant-numeric:tabular-nums}
-.eq-latest-place{font-size:clamp(16px,4vmin,26px);font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.eq-latest-meta{font-size:clamp(12px,2.6vmin,17px);color:var(--acc);font-weight:600}
+.eq-latest-tag{font-size:max(1.7vmin,10px);font-weight:700;background:var(--acc);color:#08202b;padding:.15vmin .9vmin;border-radius:4px}
+.eq-latest-time{font-size:clamp(11px,2.2vmin,14.5px);color:var(--sub);font-variant-numeric:tabular-nums}
+.eq-latest-place{font-size:clamp(15px,3.6vmin,24px);font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.2}
+.eq-latest-meta{font-size:clamp(11.5px,2.4vmin,16px);color:var(--acc);font-weight:600}
 
 /* Calendar */
 .ev{display:grid;grid-template-columns:minmax(14vmin,max-content) 1fr;gap:2.4vmin;align-items:baseline;padding:2vmin 0;border-top:1px solid var(--line);font-size:3.8vmin}
@@ -325,10 +410,8 @@ body.open #scrim{opacity:1;pointer-events:auto}
 #drawer button{font:inherit;padding:10px 12px;border-radius:8px;border:1px solid var(--line);background:var(--panel2);color:var(--text);cursor:pointer}
 #drawer #save{background:var(--acc);color:#08202b;border:0;font-weight:700}
 
-/* 路線チェックボックスグリッド */
 .line-filter-btns{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:4px}
 .line-filter-btns button{padding:5px 10px !important;font-size:12px !important;border-radius:6px !important}
-.line-cat-title{font-size:12px;color:var(--sub);font-weight:600;margin-top:6px;border-bottom:1px solid var(--line);padding-bottom:3px}
 .line-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(135px,1fr));gap:6px 10px;max-height:210px;overflow-y:auto;padding:4px 2px}
 .line-chk-item{display:flex !important;flex-direction:row !important;align-items:center;gap:6px;font-size:12.5px;color:var(--text) !important;cursor:pointer}
 .mini-sym{display:inline-grid;place-items:center;width:20px;height:20px;font-size:9px;font-weight:800;background:#fff;color:#111;border:2.5px solid var(--lc);border-radius:4px;flex-shrink:0}
@@ -362,7 +445,6 @@ body.open #scrim{opacity:1;pointer-events:auto}
       <div class="flip s" id="s"><div class="u"><span>00</span></div><div class="l"><span>00</span></div><div class="fa"><span>00</span></div><div class="fb"><span>00</span></div></div>
     </div>
     <div class="meta"><span id="date"></span><span id="temp"></span></div>
-    <!-- 左下：CSS/SVG製設定ボタン ＋ シンプルな更新時刻表示 -->
     <div class="clock-foot">
       <button id="cfgBtn" aria-label="設定を開く" title="設定">
         <svg viewBox="0 0 24 24">
@@ -376,7 +458,7 @@ body.open #scrim{opacity:1;pointer-events:auto}
 
   <section class="stage">
     <div id="pager">
-      <article class="card" data-k="weather" data-t="天気"><div class="card-hdr"><h2>天気と3時間ごとの予報</h2></div><div class="body" id="b-weather"></div></article>
+      <article class="card wx-night" id="cardWeather" data-k="weather" data-t="天気"><div class="card-hdr"><h2>天気と3時間ごとの予報</h2></div><div class="body" id="b-weather"></div></article>
       <article class="card" data-k="train" data-t="鉄道"><div class="card-hdr"><h2>鉄道運行情報</h2></div><div class="body" id="b-train"></div></article>
       <article class="card" data-k="news" data-t="ニュース"><div class="card-hdr"><h2>トピックニュース</h2></div><div class="body" id="b-news"></div></article>
       <article class="card" data-k="quake" data-t="地震情報"><div class="card-hdr"><h2>地震情報</h2></div><div class="body" id="b-quake"></div></article>
@@ -403,7 +485,7 @@ body.open #scrim{opacity:1;pointer-events:auto}
   </fieldset>
 
   <fieldset>
-    <legend>🚃 監視する路線（チェックボックス選択）</legend>
+    <legend>監視する路線（チェックボックス選択）</legend>
     <div class="line-filter-btns">
       <button type="button" id="btnAllLines">全選択</button>
       <button type="button" id="btnClearLines">全解除</button>
@@ -414,14 +496,7 @@ body.open #scrim{opacity:1;pointer-events:auto}
   </fieldset>
 
   <fieldset>
-    <legend>📰 ニュース設定</legend>
-    <label>表示件数（横スクロール）
-      <select id="sNewsCount">
-        <option value="3">3件（推奨）</option>
-        <option value="5">5件</option>
-        <option value="7">7件</option>
-      </select>
-    </label>
+    <legend>ニュース設定</legend>
     <label>配信元プリセット
       <select id="sNewsPreset">
         <option value="https://news.web.nhk/n-data/conf/na/rss/cat0.xml">NHK ニュース（主要・最新URL）</option>
@@ -449,6 +524,8 @@ body.open #scrim{opacity:1;pointer-events:auto}
   </fieldset>
 
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+    <label>表示地域名（天気カード用）<input id="sCityName" type="text" placeholder="例: 千葉県船橋市"></label>
+    <div></div>
     <label>緯度<input id="sLat" type="number" step="any" inputmode="decimal"></label>
     <label>経度<input id="sLon" type="number" step="any" inputmode="decimal"></label>
   </div>
@@ -458,24 +535,24 @@ body.open #scrim{opacity:1;pointer-events:auto}
   <button id="close">閉じる</button>
 
   <div class="source-info">
-    <h4>📡 データ取得元（API・情報源一覧）</h4>
+    <h4>データ取得元（API・情報源一覧）</h4>
     <div class="source-row">
-      <strong>🌤️ 天気・気温・降水確率</strong>
+      <strong>天気・気温・降水確率</strong>
       <span>Open-Meteo Weather Forecast API</span>
       <span class="source-url">https://api.open-meteo.com/v1/forecast</span>
     </div>
     <div class="source-row">
-      <strong>🚃 鉄道運行情報・遅延検知</strong>
+      <strong>鉄道運行情報・遅延検知</strong>
       <span>鉄道遅延情報のjson（rti-giken リアルタイム遅延データ）</span>
       <span class="source-url">https://tetsudo.rti-giken.jp/free/delay.json</span>
     </div>
     <div class="source-row">
-      <strong>📰 ニュース記事・QRコード</strong>
-      <span>NHK ONE 公式RSSフィード等 ＋ QR Server API</span>
+      <strong>ニュース記事</strong>
+      <span>NHK ONE 公式RSSフィード等</span>
       <span class="source-url" id="info-rss-url">https://news.web.nhk/n-data/conf/na/rss/cat0.xml</span>
     </div>
     <div class="source-row">
-      <strong>🌋 地震情報（震度・震源・規模）</strong>
+      <strong>地震情報（震度・震源・規模）</strong>
       <span>P2P地震情報 JSON API v2（気象庁発表データ）</span>
       <span class="source-url">https://api.p2pquake.net/v2/history?codes=551</span>
     </div>
@@ -486,14 +563,11 @@ body.open #scrim{opacity:1;pointer-events:auto}
 (()=>{
 'use strict';
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
-const KC='dash.cfg.v3', KD='dash.cache.v3';
-const QR='https://api.qrserver.com/v1/create-qr-code/?margin=0&size=240x240&data=';
+const KC='dash.cfg.v4', KD='dash.cache.v4';
 
-/* ---- 路線マスターデータ（首都圏主要路線 ＋ 東海道新幹線） ---- */
+/* ---- 路線マスターデータ ---- */
 const RAILWAY_CATALOG = [
-  // 新幹線
   { id:'tokaido_shinkansen', name:'東海道新幹線', match:['東海道新幹線'], code:'N', color:'#003399', company:'JR東海', type:'shinkansen', group:'shinkansen' },
-  // JR首都圏
   { id:'jb_sobu', name:'中央・総武線各駅停車', match:['中央・総武各駅停車','総武線各駅停車','中央・総武線'], code:'JB', color:'#ffd400', company:'JR東日本', type:'jr', group:'kanto' },
   { id:'jo_sobu_rapid', name:'総武快速線', match:['総武快速線','総武線快速','横須賀・総武快速線'], code:'JO', color:'#005bac', company:'JR東日本', type:'jr', group:'kanto' },
   { id:'jc_chuo', name:'中央線快速', match:['中央線快速','中央線'], code:'JC', color:'#f15a22', company:'JR東日本', type:'jr', group:'kanto' },
@@ -505,7 +579,6 @@ const RAILWAY_CATALOG = [
   { id:'jj_joban', name:'常磐線', match:['常磐線','常磐線快速','常磐線各駅停車'], code:'JJ', color:'#00b261', company:'JR東日本', type:'jr', group:'kanto' },
   { id:'js_shonan', name:'湘南新宿ライン', match:['湘南新宿ライン'], code:'JS', color:'#e21f26', company:'JR東日本', type:'jr', group:'kanto' },
   { id:'jt_tokaido', name:'上野東京・東海道線', match:['東海道線','上野東京ライン','宇都宮線','高崎線'], code:'JT', color:'#f68b1e', company:'JR東日本', type:'jr', group:'kanto' },
-  // 東京メトロ・都営
   { id:'t_tozai', name:'東京メトロ東西線', match:['東西線'], code:'T', color:'#009bbf', company:'東京メトロ', type:'sub', group:'kanto' },
   { id:'g_ginza', name:'東京メトロ銀座線', match:['銀座線'], code:'G', color:'#ff9500', company:'東京メトロ', type:'sub', group:'kanto' },
   { id:'m_marunouchi', name:'東京メトロ丸ノ内線', match:['丸ノ内線'], code:'M', color:'#f62e36', company:'東京メトロ', type:'sub', group:'kanto' },
@@ -517,7 +590,6 @@ const RAILWAY_CATALOG = [
   { id:'a_asakusa', name:'都営浅草線', match:['都営浅草線','浅草線'], code:'A', color:'#e85298', company:'都営地下鉄', type:'sub', group:'kanto' },
   { id:'s_shinjuku', name:'都営新宿線', match:['都営新宿線','新宿線'], code:'S', color:'#b0bf1e', company:'都営地下鉄', type:'sub', group:'kanto' },
   { id:'e_oedo', name:'都営大江戸線', match:['都営大江戸線','大江戸線'], code:'E', color:'#ce045b', company:'都営地下鉄', type:'sub', group:'kanto' },
-  // 首都圏私鉄
   { id:'ks_keisei', name:'京成本線', match:['京成本線','京成線','押上線'], code:'KS', color:'#005aaa', company:'京成電鉄', type:'jr', group:'kanto' },
   { id:'ty_toyoko', name:'東急東横線', match:['東横線','東急東横線'], code:'TY', color:'#da0442', company:'東急電鉄', type:'jr', group:'kanto' },
   { id:'dt_denentoshi', name:'東急田園都市線', match:['田園都市線','東急田園都市線'], code:'DT', color:'#20a288', company:'東急電鉄', type:'jr', group:'kanto' },
@@ -530,11 +602,11 @@ const RAILWAY_CATALOG = [
 const DEF={
   auto:12,
   show:{weather:true,train:true,news:true,quake:true,calendar:false},
+  cityName:'千葉県船橋市',
   lat:35.6908,
   lon:139.9984,
   selectedLines:['jb_sobu','jo_sobu_rapid','je_keiyo','t_tozai','ks_keisei','jy_yamanote','tokaido_shinkansen'],
   newsRss:'https://news.web.nhk/n-data/conf/na/rss/cat0.xml',
-  newsCount:3,
   burnShift:true,
   nightDim:true,
   nightStart:23,
@@ -551,6 +623,98 @@ const stripHtml=s=>String(s==null?'':s).replace(/<[^>]*>/g,'').replace(/\s+/g,' 
 const pad=n=>String(n).padStart(2,'0');
 const num=v=>v==null||isNaN(v)?'--':Math.round(v);
 const empty=s=>`<div class="empty">${esc(s)}</div>`;
+
+/* ---- 時間帯に応じた天気カード背景の切り替え ---- */
+function updateWeatherBgTheme(){
+  const card=$('#cardWeather');
+  if(!card)return;
+  const h=new Date().getHours();
+  card.classList.remove('wx-morning','wx-day','wx-evening','wx-night');
+  if(h>=5 && h<9) card.classList.add('wx-morning');
+  else if(h>=9 && h<16) card.classList.add('wx-day');
+  else if(h>=16 && h<19) card.classList.add('wx-evening');
+  else card.classList.add('wx-night');
+}
+
+/* ---- カスタムフラットSVG天気アイコン生成（OS絵文字不使用） ---- */
+function getWeatherSvg(code, hour){
+  const c = +code;
+  const isNight = (hour < 6 || hour >= 18);
+  const cloudPath = `<path d="M11 26h15a5.5 5.5 0 0 0 .6-10.97A7.5 7.5 0 0 0 12.3 12a6 6 0 0 0-1.3 14z" fill="#ffffff"/>`;
+  const subCloud = `<path d="M8 21h12a4.5 4.5 0 0 0 .4-8.97A6 6 0 0 0 9 9.5a4.8 4.8 0 0 0-1 11.5z" fill="rgba(255,255,255,0.65)"/>`;
+
+  // 快晴 (0)
+  if(c === 0){
+    if(isNight){
+      return `<svg viewBox="0 0 36 36"><path d="M23.5 7.5A9.5 9.5 0 1 0 28.5 23a8 8 0 0 1-5-15.5z" fill="#ffffff"/></svg>`;
+    }
+    return `<svg viewBox="0 0 36 36">
+      <circle cx="18" cy="18" r="7" fill="#fbbf24"/>
+      <g stroke="#fbbf24" stroke-width="2.4" stroke-linecap="round">
+        <line x1="18" y1="5" x2="18" y2="7.5"/><line x1="18" y1="28.5" x2="18" y2="31"/>
+        <line x1="5" y1="18" x2="7.5" y2="18"/><line x1="28.5" y1="18" x2="31" y2="18"/>
+        <line x1="8.8" y1="8.8" x2="10.6" y2="10.6"/><line x1="25.4" y1="25.4" x2="27.2" y2="27.2"/>
+        <line x1="27.2" y1="8.8" x2="25.4" y2="10.6"/><line x1="10.6" y1="25.4" x2="8.8" y2="27.2"/>
+      </g>
+    </svg>`;
+  }
+  // 晴れ時々曇り (1, 2)
+  if(c <= 2){
+    if(isNight){
+      return `<svg viewBox="0 0 36 36">
+        <path d="M16 7a6.5 6.5 0 1 0 4 11.2A5.5 5.5 0 0 1 16 7z" fill="#f8fafc"/>
+        ${cloudPath}
+      </svg>`;
+    }
+    return `<svg viewBox="0 0 36 36">
+      <circle cx="13" cy="13" r="5.5" fill="#fbbf24"/>
+      ${cloudPath}
+    </svg>`;
+  }
+  // 曇り・霧 (3 ~ 48)
+  if(c <= 48){
+    return `<svg viewBox="0 0 36 36">${subCloud}${cloudPath}</svg>`;
+  }
+  // 雨 (51 ~ 67, 80 ~ 82)
+  if((c >= 51 && c <= 67) || (c >= 80 && c <= 82)){
+    return `<svg viewBox="0 0 36 36">
+      ${cloudPath}
+      <g stroke="#60a5fa" stroke-width="2.2" stroke-linecap="round">
+        <line x1="13" y1="29" x2="11.5" y2="33"/>
+        <line x1="18.5" y1="29" x2="17" y2="33"/>
+        <line x1="24" y1="29" x2="22.5" y2="33"/>
+      </g>
+    </svg>`;
+  }
+  // 雪 (71 ~ 77, 85 ~ 86)
+  if((c >= 71 && c <= 77) || (c >= 85 && c <= 86)){
+    return `<svg viewBox="0 0 36 36">
+      ${cloudPath}
+      <g fill="#bae6fd">
+        <circle cx="13" cy="31" r="1.8"/><circle cx="18.5" cy="32" r="1.8"/><circle cx="24" cy="31" r="1.8"/>
+      </g>
+    </svg>`;
+  }
+  // 雷雨 (95+)
+  return `<svg viewBox="0 0 36 36">
+    ${cloudPath}
+    <polygon points="19,25 14,31 18,31 16.5,35 23,28.5 19,28.5" fill="#fbbf24"/>
+  </svg>`;
+}
+
+function wxLabel(c){
+  c=+c;
+  if(c===0) return '晴天';
+  if(c<=2) return '晴れ時々曇';
+  if(c===3) return '曇り';
+  if(c<=48) return '霧';
+  if(c<=57) return '小雨';
+  if(c<=67) return '雨';
+  if(c<=77) return '雪';
+  if(c<=82) return '強い雨';
+  if(c>=95) return '雷雨';
+  return '曇り';
+}
 
 /* ---- 設定ドロワーの路線チェックボックス生成 ---- */
 function buildLineCheckboxes(){
@@ -609,6 +773,7 @@ function updateBurnInProtection(){
   const isIdle = (Date.now() - lastActive) > 300000;
   const targetDim = isNight ? 0.35 : (isIdle ? 0.90 : 1.0);
   root.setProperty('--dim', targetDim);
+  updateWeatherBgTheme();
 }
 
 ['touchstart','pointerdown','wheel','keydown'].forEach(ev=>{
@@ -618,20 +783,6 @@ function updateBurnInProtection(){
   },{passive:true});
 });
 setInterval(updateBurnInProtection, 60000);
-
-function wxCode(c){
-  c=+c;
-  if(c===0) return {desc:'快晴', ic:'☀️'};
-  if(c<=2) return {desc:'晴れ時々曇', ic:'🌤️'};
-  if(c===3) return {desc:'曇り', ic:'☁️'};
-  if(c<=48) return {desc:'霧', ic:'🌫️'};
-  if(c<=57) return {desc:'小雨', ic:'🌦️'};
-  if(c<=67) return {desc:'雨', ic:'🌧️'};
-  if(c<=77) return {desc:'雪', ic:'❄️'};
-  if(c<=82) return {desc:'強い雨', ic:'🌧️'};
-  if(c>=95) return {desc:'雷雨', ic:'⛈️'};
-  return {desc:'曇り', ic:'☁️'};
-}
 
 /* ---- clock ---- */
 const cl=['h','m','s'].map(k=>{const p=$('#'+k);return{p,s:[...p.querySelectorAll('span')],t:0,x:undefined}});
@@ -654,53 +805,48 @@ function tick(){
   setTimeout(tick,1005-d.getMilliseconds());
 }
 
-/* ---- ニュース横カルーセル制御 ---- */
-function initNewsCarousel(){
-  const track=$('#nwTrack');
-  const dotsWrap=$('#nwDots');
-  if(!track||!dotsWrap)return;
-  const slides=[...track.querySelectorAll('.nw-slide')];
-  const btns=[...dotsWrap.querySelectorAll('button')];
-
-  btns.forEach((btn,idx)=>{
-    btn.onclick=()=>{
-      touched=Date.now();
-      track.scrollTo({left:idx*track.clientWidth, behavior:'smooth'});
-    };
-  });
-
-  track.addEventListener('scroll',()=>{
-    const idx=Math.round(track.scrollLeft / Math.max(1,track.clientWidth));
-    btns.forEach((b,i)=>b.classList.toggle('on',i===idx));
-  },{passive:true});
-
-  track.addEventListener('wheel',e=>{
-    if(Math.abs(e.deltaX)>Math.abs(e.deltaY)) return;
-    if(slides.length<=1) return;
-    const atStart = track.scrollLeft <= 4;
-    const atEnd = track.scrollLeft >= (track.scrollWidth - track.clientWidth - 4);
-    if((e.deltaY>0 && !atEnd) || (e.deltaY<0 && !atStart)){
-      e.preventDefault();
-      e.stopPropagation();
-      touched=Date.now();
-      const curIdx=Math.round(track.scrollLeft / Math.max(1,track.clientWidth));
-      const nextIdx=Math.max(0, Math.min(slides.length-1, curIdx + (e.deltaY>0?1:-1)));
-      track.scrollTo({left:nextIdx*track.clientWidth, behavior:'smooth'});
-    }
-  },{passive:false});
-}
-
 /* ---- renderers ---- */
 const R={
   weather(w){
     if(!w) return empty('天気データを取得中…');
-    const hh=h=>{const d=new Date(h.time);return isNaN(d)?h.time:d.getHours()+'時'};
-    const hrs=(w.hourly||[]).slice(0,6).map(h=>`<div class="hr">${hh(h)}<i>${esc(h.icon)}</i>${num(h.temp)}°<br><small>${esc(h.pop)}%</small></div>`).join('');
-    return `<div class="wx-main"><span class="wx-ic">${esc(w.icon)}</span><span class="wx-t">${num(w.temp)}°</span><div><div class="wx-d">${esc(w.desc)}</div><div class="wx-hl">最高 ${num(w.hi)}° / 最低 ${num(w.lo)}°</div></div></div><div class="hrs">${hrs}</div>`;
+    updateWeatherBgTheme();
+    const hrs=(w.hourly||[]).slice(0,7).map(h=>{
+      const d=new Date(h.time);
+      const hrNum=isNaN(d)?0:d.getHours();
+      return `
+        <div class="wx-hr-col">
+          <div class="wx-hr-time">${hrNum}</div>
+          <div class="wx-hr-ic">${getWeatherSvg(h.code, hrNum)}</div>
+          <div class="wx-hr-temp">${num(h.temp)}°</div>
+          <div class="wx-hr-pop">${num(h.pop)}%</div>
+        </div>
+      `;
+    }).join('');
+
+    const dropSvg = `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>`;
+    const upSvg = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>`;
+    const downSvg = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg>`;
+
+    return `
+      <div class="wx-wrap">
+        <div class="wx-top">
+          <div>
+            <div class="wx-cond-title">${esc(w.desc)}</div>
+            <div class="wx-meta-row">
+              <span>${esc(cfg.cityName||'現在地')}</span>
+              <span class="wx-meta-item">${upSvg}${num(w.hi)}°</span>
+              <span class="wx-meta-item">${downSvg}${num(w.lo)}°</span>
+              <span class="wx-meta-item" style="color:#93c5fd">${dropSvg}${num(w.pop)}%</span>
+            </div>
+          </div>
+          <div class="wx-big-temp">${num(w.temp)}°</div>
+        </div>
+        <div class="wx-hrs">${hrs}</div>
+      </div>
+    `;
   },
   train(t){
     if(!t||!t.length) return empty('監視する路線が選択されていません（設定から選択してください）');
-    // GitHubの icons/<CODE>.png が存在すれば画像を表示し、無ければCSSナンバリング記号を表示
     return `<div class="train-list">${t.map(item=>`
       <div class="train-item ${item.delay?'delay':''}">
         <div class="line-badge ${esc(item.type||'')}" style="--lc:${esc(item.color||'#3b82f6')}">
@@ -711,56 +857,34 @@ const R={
           <div class="train-name">${esc(item.name)}</div>
           <div class="train-comp">${esc(item.company||'')}</div>
         </div>
-        <div class="train-status">${item.delay?'⚠️ 遅延・情報あり':'平常運転'}</div>
+        <div class="train-status">${item.delay?'遅延・情報あり':'平常運転'}</div>
       </div>
     `).join('')}</div>`;
   },
   news(a){
     const valid = (a||[]).filter(n=>n && n.title);
     if(!valid.length) return empty('ニュースを取得しています…');
-    const limit = cfg.newsCount || 3;
-    const list = valid.slice(0, limit);
+    const list = valid.slice(0, 3);
+    const clockSvg = `<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15.5 14"/></svg>`;
 
-    const slidesHtml = list.map((n, idx)=>{
-      const q = n.url ? QR+encodeURIComponent(n.url) : '';
-      const desc = n.desc ? stripHtml(n.desc) : '詳細な記事内容は右のQRコードからご確認いただけます。';
+    return `<div class="nw-stack">${list.map(n=>{
+      const desc = n.desc ? stripHtml(n.desc) : '';
       return `
-        <div class="nw-slide">
-          <div class="nw-top">
-            <span class="nw-idx">TOPIC ${idx+1} / ${list.length}</span>
-            <span class="nw-src">${esc(n.source||'NHKニュース')}</span>
+        <div class="nw-item">
+          <div class="nw-item-top">
+            <div class="nw-item-title">${esc(n.title)}</div>
+            <span class="nw-item-time">${clockSvg}${esc(n.date||'最新')}</span>
           </div>
-          <div class="nw-title">${esc(n.title)}</div>
-          <div class="nw-content">
-            <div class="nw-text-col">
-              <div class="nw-desc">${esc(desc)}</div>
-              <div class="nw-meta">
-                <span>🕒 ${esc(n.date||'最新')}</span>
-                <span>QRで記事を開く ▶</span>
-              </div>
-            </div>
-            <div class="nw-qr-col">
-              ${q?`<img class="nw-qr" alt="QR" src="${esc(q)}">`:''}
-            </div>
-          </div>
+          <div class="nw-item-desc">${esc(desc)}</div>
         </div>
       `;
-    }).join('');
-
-    const dotsHtml = list.map((_, idx)=>`<button class="${idx===0?'on':''}" aria-label="ニュース ${idx+1}"></button>`).join('');
-
-    return `
-      <div class="nw-wrap">
-        <div class="nw-track" id="nwTrack">${slidesHtml}</div>
-        <div class="nw-dots" id="nwDots">${dotsHtml}</div>
-      </div>
-    `;
+    }).join('')}</div>`;
   },
   quake(a){
     if(!a||!a.length) return empty('直近の地震情報はありません');
-    // APIからは新しい順(index 0が最新)で来るため、過去3件を上に、最新1件を一番下に大きく配置
     const latest = a[0];
-    const older = a.slice(1, 4).reverse(); // 古い順→新しい順で下に向かって並ぶように反転
+    // 過去4件を取得し、上から下へ新しくなるよう反転
+    const older = a.slice(1, 5).reverse();
 
     const fmtTime = tStr => {
       const d=new Date(tStr);
@@ -817,7 +941,6 @@ function apply(data){
   for(const k in R){
     if(data[k]!=null){
       $('#b-'+k).innerHTML=R[k](data[k]);
-      if(k==='news') initNewsCarousel();
     }
   }
   if(data.weather&&data.weather.temp!=null) $('#temp').textContent=num(data.weather.temp)+'°C';
@@ -835,7 +958,7 @@ function parseXmlString(xmlText){
   const parser=new DOMParser();
   const xml=parser.parseFromString(xmlText,"text/xml");
   const feedTitle=stripHtml(xml.querySelector("channel > title, feed > title")?.textContent||"NHKニュース");
-  const items=Array.from(xml.querySelectorAll("item, entry")).slice(0,10);
+  const items=Array.from(xml.querySelectorAll("item, entry")).slice(0,6);
   return items.map(item=>{
     const title=stripHtml(item.querySelector("title")?.textContent||"");
     const desc=stripHtml(item.querySelector("description, summary, content")?.textContent||"");
@@ -847,7 +970,6 @@ function parseXmlString(xmlText){
 
 async function fetchNewsWithFallback(rssUrl){
   if(!rssUrl) return [];
-  // 1. corsproxy.io (NHKの新ドメイン news.web.nhk に対して最も高速)
   try{
     const r1=await fetch(`https://corsproxy.io/?${encodeURIComponent(rssUrl)}`);
     if(r1.ok){
@@ -857,7 +979,6 @@ async function fetchNewsWithFallback(rssUrl){
     }
   }catch(e){}
 
-  // 2. allorigins.win
   try{
     const r2=await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(rssUrl)}`);
     if(r2.ok){
@@ -869,7 +990,6 @@ async function fetchNewsWithFallback(rssUrl){
     }
   }catch(e){}
 
-  // 3. rss2json API
   try{
     const r3=await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`);
     if(r3.ok){
@@ -891,7 +1011,7 @@ async function fetchNewsWithFallback(rssUrl){
   return [];
 }
 
-/* ---- 鉄道運行情報の取得（CORS回避フォールバック付き） ---- */
+/* ---- 鉄道運行情報の取得 ---- */
 async function fetchTrainDelayList(){
   const target='https://tetsudo.rti-giken.jp/free/delay.json';
   try{
@@ -910,7 +1030,6 @@ const st={ok:true,t:0};let busy=false,wl=null;
 function status(){
   const el=$('#stat'),d=new Date(st.t),tm=st.t?`${pad(d.getHours())}:${pad(d.getMinutes())}`:'--:--';
   el.className=st.ok?'':'err';
-  // 焼付防止表示は省き、シンプルに更新時刻のみを表示
   el.textContent=(st.ok?`${tm} 更新`:`${tm} 更新試行中`);
 }
 
@@ -918,37 +1037,37 @@ async function load(){
   if(busy)return;busy=true;
   $('#info-rss-url').textContent=cfg.newsRss||'未設定';
   try{
-    // 1. 天気
+    // 1. 天気（7列分の3時間予報を取得）
     let weatherData=null;
     try{
       const wxUrl=`https://api.open-meteo.com/v1/forecast?latitude=${cfg.lat}&longitude=${cfg.lon}&current=temperature_2m,weather_code&hourly=temperature_2m,weather_code,precipitation_probability&daily=temperature_2m_max,temperature_2m_min&timezone=Asia%2FTokyo&forecast_days=2`;
       const wxRes=await fetch(wxUrl).then(r=>r.json());
       const curCode=wxRes.current.weather_code;
-      const curInfo=wxCode(curCode);
       const nowHour=new Date().getHours();
       
       const hourly=[];
-      for(let i=nowHour;i<nowHour+18;i+=3){
+      for(let i=nowHour;i<nowHour+21;i+=3){
         if(wxRes.hourly.time[i]){
           hourly.push({
             time:wxRes.hourly.time[i],
             temp:wxRes.hourly.temperature_2m[i],
             pop:wxRes.hourly.precipitation_probability[i],
-            icon:wxCode(wxRes.hourly.weather_code[i]).ic
+            code:wxRes.hourly.weather_code[i]
           });
         }
       }
       weatherData={
         temp:wxRes.current.temperature_2m,
-        desc:curInfo.desc,
-        icon:curInfo.ic,
+        code:curCode,
+        desc:wxLabel(curCode),
+        pop:wxRes.hourly.precipitation_probability[nowHour]||0,
         hi:wxRes.daily.temperature_2m_max[0],
         lo:wxRes.daily.temperature_2m_min[0],
         hourly:hourly
       };
     }catch(e){}
 
-    // 2. 鉄道運行情報（選択された路線を常時一覧表示し、遅延リストと照合）
+    // 2. 鉄道運行情報
     const delayList = await fetchTrainDelayList();
     const delayNames = delayList.map(d=>d.name);
     const chosen = RAILWAY_CATALOG.filter(line=>cfg.selectedLines.includes(line.id));
@@ -964,16 +1083,15 @@ async function load(){
         delay:isDelay
       };
     });
-    // 遅延している路線があれば最上部にソートして目立たせる
     trainData.sort((a,b)=>(b.delay?1:0)-(a.delay?1:0));
 
     // 3. ニュース
     const newsData=await fetchNewsWithFallback(cfg.newsRss);
 
-    // 4. 地震情報
+    // 4. 地震情報（最新1件＋過去4件＝計5件取得）
     let quakeData=[];
     try{
-      const qRes=await fetch('https://api.p2pquake.net/v2/history?codes=551&limit=4').then(r=>r.json());
+      const qRes=await fetch('https://api.p2pquake.net/v2/history?codes=551&limit=5').then(r=>r.json());
       const intMap={10:'1',20:'2',30:'3',40:'4',45:'5弱',50:'5強',55:'6弱',60:'6強',70:'7'};
       quakeData=qRes.map(q=>({
         time:q.earthquake.time,
@@ -1044,21 +1162,6 @@ function setAuto(){
   clearInterval(timer);
   if(cfg.auto>0)timer=setInterval(()=>{
     if(Date.now()-touched<15000||document.body.classList.contains('open'))return;
-    const activeCards=vis();
-    const curCard=activeCards[cur];
-    if(curCard && curCard.dataset.k==='news'){
-      const track=$('#nwTrack');
-      if(track){
-        const slides=track.querySelectorAll('.nw-slide');
-        const nwIdx=Math.round(track.scrollLeft / Math.max(1,track.clientWidth));
-        if(nwIdx < slides.length - 1){
-          track.scrollTo({left:(nwIdx+1)*track.clientWidth, behavior:'smooth'});
-          return;
-        }else{
-          track.scrollTo({left:0, behavior:'smooth'});
-        }
-      }
-    }
     go(cur+1);
   },cfg.auto*1000);
 }
@@ -1071,9 +1174,11 @@ function applyCfg(){
 /* ---- drawer ---- */
 const open=v=>{document.body.classList.toggle('open',v);if(v)fill()};
 function fill(){
-  $('#sAuto').value=cfg.auto;$('#sLat').value=cfg.lat;$('#sLon').value=cfg.lon;
+  $('#sAuto').value=cfg.auto;
+  $('#sCityName').value=cfg.cityName||'千葉県船橋市';
+  $('#sLat').value=cfg.lat;
+  $('#sLon').value=cfg.lon;
   $('#sNewsRss').value=cfg.newsRss||'';
-  $('#sNewsCount').value=String(cfg.newsCount||3);
   $('#sBurnShift').checked=!!cfg.burnShift;
   $('#sNightDim').checked=!!cfg.nightDim;
   $('#sNightStart').value=cfg.nightStart;
@@ -1104,11 +1209,11 @@ $('#save').onclick=()=>{
   const a=parseInt($('#sAuto').value,10),la=parseFloat($('#sLat').value),lo=parseFloat($('#sLon').value);
   const ns=parseInt($('#sNightStart').value,10),ne=parseInt($('#sNightEnd').value,10);
   cfg.auto=isNaN(a)||a<0?0:a;
+  cfg.cityName=$('#sCityName').value.trim()||'現在地';
   if(!isNaN(la))cfg.lat=la;
   if(!isNaN(lo))cfg.lon=lo;
   cfg.selectedLines=$$('.line-chk').filter(c=>c.checked).map(c=>c.value);
   cfg.newsRss=$('#sNewsRss').value.trim();
-  cfg.newsCount=parseInt($('#sNewsCount').value,10)||3;
   cfg.burnShift=$('#sBurnShift').checked;
   cfg.nightDim=$('#sNightDim').checked;
   if(!isNaN(ns)&&ns>=0&&ns<=23)cfg.nightStart=ns;
