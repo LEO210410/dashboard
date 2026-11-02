@@ -146,7 +146,7 @@ body{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-i
   box-shadow:0 4px 12px rgba(0, 0, 0, 0.35);
 }
 
-/* Weather */
+/* ========== Weather（以前のボックス型レイアウト復元＋上半分に現在天気） ========== */
 .card[data-k="weather"].wx-morning{
   background:linear-gradient(165deg, #2b507c 0%, #1c3554 55%, #152238 100%);
   box-shadow:inset 0 0 0 1px rgba(255,255,255,0.12);
@@ -165,132 +165,130 @@ body{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-i
 }
 .card[data-k="weather"] .card-hdr h2{color:rgba(255,255,255,0.65)}
 
-.wx-wrap{
+/* 上半分を使って現在の天気を表示 */
+.wx-main{
   flex:1;
   min-height:0;
+  display:flex;
+  align-items:center;
+  gap:3.6vmin;
+  padding:1vmin 0;
+}
+.wx-ic{
+  width:clamp(68px, 15.5vmin, 130px);
+  height:clamp(68px, 15.5vmin, 130px);
+  flex-shrink:0;
   display:grid;
-  grid-template-rows:1fr 1fr;
-  gap:1vmin;
+  place-items:center;
 }
-.wx-top{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  padding-bottom:1.5vmin;
-  border-bottom:1px solid rgba(255,255,255,0.12);
-}
-.wx-cond-title{
-  font-size:clamp(28px, 6.2vmin, 46px);
+.wx-ic svg{width:100%;height:100%;overflow:visible}
+.wx-t{
+  font-size:clamp(54px, 15vmin, 118px);
   font-weight:700;
-  letter-spacing:.02em;
-  line-height:1.15;
-  color:#ffffff;
-}
-.wx-meta-row{
-  display:flex;
-  align-items:center;
-  gap:2vmin;
-  margin-top:1vmin;
-  font-size:clamp(14px, 2.9vmin, 20px);
-  font-weight:600;
-  color:rgba(255,255,255,0.92);
-}
-.wx-meta-item{display:inline-flex;align-items:center;gap:.5vmin}
-.wx-meta-item svg{width:clamp(14px, 2.6vmin, 19px);height:clamp(14px, 2.6vmin, 19px)}
-.wx-big-temp{
-  font-size:clamp(52px, 12.8vmin, 96px);
-  font-weight:700;
-  line-height:0.95;
-  color:#ffffff;
+  line-height:1;
+  color:var(--text);
   font-variant-numeric:tabular-nums;
   letter-spacing:-.03em;
 }
-.wx-hrs{
-  display:grid;
-  grid-template-columns:repeat(7, 1fr);
-  align-items:center;
-  text-align:center;
-  padding-top:1vmin;
-  height:100%;
-}
-.wx-hr-col{
+.wx-details{
   display:flex;
   flex-direction:column;
-  justify-content:space-between;
-  align-items:center;
-  height:100%;
-  padding:.4vmin 0;
+  justify-content:center;
+  gap:.7vmin;
+  min-width:0;
 }
-.wx-hr-time{
-  font-size:clamp(12.5px, 2.7vmin, 18px);
-  color:rgba(255,255,255,0.75);
+.wx-d{
+  font-size:clamp(18px, 4vmin, 30px);
+  font-weight:700;
+  color:#ffffff;
+  line-height:1.2;
+}
+.wx-hl{
+  font-size:clamp(12px, 2.7vmin, 18px);
+  color:rgba(255,255,255,0.78);
   font-weight:600;
 }
-.wx-hr-ic{
-  width:clamp(28px, 5.8vmin, 44px);
-  height:clamp(28px, 5.8vmin, 44px);
+.wx-loc-pop{
+  display:flex;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:1.6vmin;
+  font-size:clamp(12px, 2.5vmin, 17px);
+  color:rgba(255,255,255,0.88);
+  font-weight:600;
+  margin-top:.2vmin;
+}
+.wx-pop-badge{
+  display:inline-flex;
+  align-items:center;
+  gap:.4vmin;
+  color:var(--acc);
+}
+.wx-pop-badge svg{
+  width:clamp(12px, 2.3vmin, 16px);
+  height:clamp(12px, 2.3vmin, 16px);
+}
+
+/* 下部：以前のコンパクトな3時間ごとの予報カード */
+.hrs{
+  display:grid;
+  grid-auto-flow:column;
+  grid-auto-columns:1fr;
+  gap:1.2vmin;
+  margin-top:auto;
+}
+.hr{
+  background:rgba(29, 37, 47, 0.72);
+  border:1px solid rgba(255, 255, 255, 0.08);
+  border-radius:1.4vmin;
+  padding:1.5vmin .4vmin;
+  text-align:center;
+  font-size:clamp(12px, 2.6vmin, 17px);
+  font-weight:600;
+  color:var(--text);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:.7vmin;
+}
+.hr-ic{
+  width:clamp(26px, 5vmin, 38px);
+  height:clamp(26px, 5vmin, 38px);
   display:grid;
   place-items:center;
   margin:.2vmin 0;
 }
-.wx-hr-ic svg{width:100%;height:100%;overflow:visible}
-.wx-hr-temp{
-  font-size:clamp(13.5px, 3.1vmin, 21px);
+.hr-ic svg{width:100%;height:100%;overflow:visible}
+.hr-temp{
+  font-size:clamp(13px, 2.8vmin, 19px);
   font-weight:700;
   color:#ffffff;
 }
-.wx-hr-pop{
-  font-size:clamp(11.5px, 2.3vmin, 15.5px);
+.hr small{
+  color:var(--acc);
+  font-size:clamp(10.5px, 2.1vmin, 14px);
   font-weight:600;
-  color:#93c5fd;
 }
 
-/* ========== Train Info ========== */
+/* ========== Train Info（CSS記号を完全撤廃しSVGのみ表示） ========== */
 .train-list{display:flex;flex-direction:column;gap:1.4vmin;overflow-y:auto;flex:1;padding-right:.6vmin;scrollbar-width:thin}
 .train-item{display:grid;grid-template-columns:auto 1fr auto;gap:2vmin;align-items:center;padding:1.6vmin 2.2vmin;border-radius:1.4vmin}
 .train-item.delay{border-color:rgba(232,104,95,0.7) !important;background:linear-gradient(90deg, rgba(232,104,95,0.22), rgba(18,24,33,0.75)) !important}
 
-.line-badge{
+.line-icon-svg{
   width:clamp(34px, 5.4vmin, 46px);
   height:clamp(34px, 5.4vmin, 46px);
-  display:grid;
-  place-items:center;
-  flex-shrink:0;
-  position:relative;
-  background:transparent;
-}
-.line-badge img{
-  width:100%;
-  height:100%;
   object-fit:contain;
   display:block;
-  background:transparent;
+  flex-shrink:0;
 }
-.line-badge .fb-sym{
-  display:none;
-  width:100%;
-  height:100%;
-  place-items:center;
-  font-family:"SF Pro Display","Helvetica Neue",Arial,sans-serif;
-  font-weight:800;
-  font-size:clamp(11px,2vmin,15px);
-  letter-spacing:-.03em;
-  background:#fff;
-  color:#111;
-  border:clamp(3px,.55vmin,4.5px) solid var(--lc,#3b82f6);
-  border-radius:6px;
-}
-.line-badge.sub .fb-sym{border-radius:50%}
-.line-badge.shinkansen .fb-sym{background:var(--lc);color:#fff;border-color:#fff;border-width:2px}
-.line-badge.has-err .fb-sym{display:grid}
-.line-badge.has-err img{display:none}
-
 .train-name{font-size:clamp(13.5px,3.3vmin,21px);font-weight:600;line-height:1.2}
 .train-comp{font-size:clamp(10.5px,2.1vmin,13.5px);color:var(--sub);margin-top:2px}
 .train-status{font-size:clamp(11.5px,2.5vmin,15.5px);font-weight:700;padding:.6vmin 1.5vmin;border-radius:.9vmin;background:rgba(74,222,128,0.18);color:var(--good);white-space:nowrap}
 .train-item.delay .train-status{background:rgba(232,104,95,0.25);color:var(--bad)}
 
-/* News */
+/* ========== News（見出しを少し下に配置＆フォント拡大） ========== */
 .nw-stack{
   flex:1;
   min-height:0;
@@ -300,21 +298,23 @@ body{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-i
 }
 .nw-item{
   border-radius:1.4vmin;
-  padding:1.6vmin 2.4vmin;
+  padding:1.8vmin 2.4vmin 1.5vmin;
   display:flex;
   flex-direction:column;
-  justify-content:space-between;
+  justify-content:center;
+  gap:.8vmin;
   min-height:0;
   overflow:hidden;
 }
 .nw-item-top{
   display:flex;
   justify-content:space-between;
-  align-items:center;
+  align-items:flex-start;
   gap:1.6vmin;
+  margin-top:.5vmin; /* 見出し位置を少し下へ調整 */
 }
 .nw-item-title{
-  font-size:clamp(14px, 2.85vmin, 19.5px);
+  font-size:clamp(15.5px, 3.2vmin, 22px); /* フォントサイズを拡大 */
   font-weight:700;
   color:#ffffff;
   line-height:1.35;
@@ -334,6 +334,7 @@ body{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-i
   white-space:nowrap;
   flex-shrink:0;
   font-weight:600;
+  margin-top:.2vmin;
 }
 .nw-item-time svg{
   width:clamp(11px, 2vmin, 14px);
@@ -345,17 +346,16 @@ body{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-i
   stroke-linejoin:round;
 }
 .nw-item-desc{
-  font-size:clamp(12px, 2.4vmin, 16px);
+  font-size:clamp(12px, 2.35vmin, 16px);
   color:#d5dee8;
-  line-height:1.5;
+  line-height:1.48;
   display:-webkit-box;
   -webkit-line-clamp:2;
   -webkit-box-orient:vertical;
   overflow:hidden;
-  margin-top:.4vmin;
 }
 
-/* ========== Quake（参考サイトと同様の深さ抽出を反映） ========== */
+/* ========== Quake ========== */
 .eq-wrap{
   flex:1;
   min-height:0;
@@ -591,80 +591,80 @@ body.open #scrim{opacity:1;pointer-events:auto}
 (()=>{
 'use strict';
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
-const KC='dash.cfg.v7', KD='dash.cache.v7';
+const KC='dash.cfg.v8', KD='dash.cache.v8';
 
-/* ---- 登録SVGファイル名に対応した全路線カタログ ---- */
+/* ---- 登録SVGファイル名に対応した全70路線カタログ ---- */
 const RAILWAY_CATALOG = [
-  { id:'tokaido_shinkansen', name:'東海道新幹線', match:['東海道新幹線'], file:'Shinkansen_jrc.svg', code:'N', color:'#003399', company:'JR東海', type:'shinkansen', group:'shinkansen' },
-  { id:'nex', name:'成田エクスプレス', match:['成田エクスプレス'], file:'Sign_of_NEX_in_station.svg', code:'NEX', color:'#c9242b', company:'JR東日本', type:'jr', group:'kanto' },
-  { id:'jb_sobu', name:'中央・総武各駅停車', match:['中央・総武各駅停車','総武線各駅停車','中央・総武線'], file:'JR_JB_line_symbol.svg', code:'JB', color:'#ffd400', company:'JR東日本', type:'jr', group:'kanto' },
-  { id:'jo_sobu_rapid', name:'総武快速線', match:['総武快速線','総武線快速','横須賀・総武快速線'], file:'JR_JO_line_symbol.svg', code:'JO', color:'#005bac', company:'JR東日本', type:'jr', group:'kanto' },
-  { id:'jc_chuo', name:'中央線快速', match:['中央線快速','中央線'], file:'JR_JC_line_symbol.svg', code:'JC', color:'#f15a22', company:'JR東日本', type:'jr', group:'kanto' },
-  { id:'jy_yamanote', name:'山手線', match:['山手線'], file:'JR_JY_line_symbol.svg', code:'JY', color:'#9acd32', company:'JR東日本', type:'jr', group:'kanto' },
-  { id:'jk_keihintohoku', name:'京浜東北線', match:['京浜東北線','根岸線'], file:'JR_JK_line_symbol.svg', code:'JK', color:'#00b2e5', company:'JR東日本', type:'jr', group:'kanto' },
-  { id:'je_keiyo', name:'京葉線', match:['京葉線'], file:'JR_JE_line_symbol.svg', code:'JE', color:'#c9242b', company:'JR東日本', type:'jr', group:'kanto' },
-  { id:'jm_musashino', name:'武蔵野線', match:['武蔵野線'], file:'JR_JM_line_symbol.svg', code:'JM', color:'#f15a22', company:'JR東日本', type:'jr', group:'kanto' },
-  { id:'ja_saikyo', name:'埼京線', match:['埼京線','川越線'], file:'JR_JA_line_symbol.svg', code:'JA', color:'#00ac9a', company:'JR東日本', type:'jr', group:'kanto' },
-  { id:'jj_joban', name:'常磐線快速', match:['常磐線','常磐線快速'], file:'JR_JJ_line_symbol.svg', code:'JJ', color:'#00b261', company:'JR東日本', type:'jr', group:'kanto' },
-  { id:'jl_joban_local', name:'常磐線各駅停車', match:['常磐線各駅停車'], file:'JR_JL_line_symbol.svg', code:'JL', color:'#808080', company:'JR東日本', type:'jr', group:'kanto' },
-  { id:'js_shonan', name:'湘南新宿ライン', match:['湘南新宿ライン'], file:'JR_JS_line_symbol.svg', code:'JS', color:'#e21f26', company:'JR東日本', type:'jr', group:'kanto' },
-  { id:'jt_tokaido', name:'東海道線・上野東京', match:['東海道線','上野東京ライン'], file:'JR_JT_line_symbol.svg', code:'JT', color:'#f68b1e', company:'JR東日本', type:'jr', group:'kanto' },
-  { id:'ju_utsunomiya', name:'宇都宮線・高崎線', match:['宇都宮線','高崎線'], file:'JR_JU_line_symbol.svg', code:'JU', color:'#f68b1e', company:'JR東日本', type:'jr', group:'kanto' },
-  { id:'jh_yokohama', name:'横浜線', match:['横浜線'], file:'JR_JH_line_symbol.svg', code:'JH', color:'#9acd32', company:'JR東日本', type:'jr', group:'kanto' },
-  { id:'jn_nambu', name:'南武線', match:['南武線'], file:'JR_JN_line_symbol.svg', code:'JN', color:'#ffd400', company:'JR東日本', type:'jr', group:'kanto' },
-  { id:'ji_tsurumi', name:'鶴見線', match:['鶴見線'], file:'JR_JI_line_symbol.svg', code:'JI', color:'#ffd400', company:'JR東日本', type:'jr', group:'kanto' },
-  { id:'g_ginza', name:'銀座線', match:['銀座線'], file:'Logo_of_Tokyo_Metro_Ginza_Line.svg', code:'G', color:'#ff9500', company:'東京メトロ', type:'sub', group:'kanto' },
-  { id:'m_marunouchi', name:'丸ノ内線', match:['丸ノ内線'], file:'Logo_of_Tokyo_Metro_Marunouchi_Line.svg', code:'M', color:'#f62e36', company:'東京メトロ', type:'sub', group:'kanto' },
-  { id:'mb_marunouchi_br', name:'丸ノ内線方南町支線', match:['丸ノ内線支線'], file:'Logo_of_Tokyo_Metro_Marunouchi_branch_Line.svg', code:'Mb', color:'#f62e36', company:'東京メトロ', type:'sub', group:'kanto' },
-  { id:'h_hibiya', name:'日比谷線', match:['日比谷線'], file:'Logo_of_Tokyo_Metro_Hibiya_Line.svg', code:'H', color:'#b5b5ac', company:'東京メトロ', type:'sub', group:'kanto' },
-  { id:'t_tozai', name:'東西線', match:['東西線'], file:'Logo_of_Tokyo_Metro_Tōzai_Line.svg', code:'T', color:'#009bbf', company:'東京メトロ', type:'sub', group:'kanto' },
-  { id:'c_chiyoda', name:'千代田線', match:['千代田線'], file:'Logo_of_Tokyo_Metro_Chiyoda_Line.svg', code:'C', color:'#00bb85', company:'東京メトロ', type:'sub', group:'kanto' },
-  { id:'y_yurakucho', name:'有楽町線', match:['有楽町線'], file:'Logo_of_Tokyo_Metro_Yūrakuchō_Line.svg', code:'Y', color:'#c1a470', company:'東京メトロ', type:'sub', group:'kanto' },
-  { id:'z_hanzomon', name:'半蔵門線', match:['半蔵門線'], file:'Logo_of_Tokyo_Metro_Hanzōmon_Line.svg', code:'Z', color:'#8f76d6', company:'東京メトロ', type:'sub', group:'kanto' },
-  { id:'n_namboku', name:'南北線', match:['南北線'], file:'Logo_of_Tokyo_Metro_Namboku_Line.svg', code:'N', color:'#00ac9b', company:'東京メトロ', type:'sub', group:'kanto' },
-  { id:'f_fukutoshin', name:'副都心線', match:['副都心線'], file:'Logo_of_Tokyo_Metro_Fukutoshin_Line.svg', code:'F', color:'#9c5e31', company:'東京メトロ', type:'sub', group:'kanto' },
-  { id:'a_asakusa', name:'都営浅草線', match:['浅草線','都営浅草線'], file:'Toei_Asakusa_line_symbol.svg', code:'A', color:'#e85298', company:'都営地下鉄', type:'sub', group:'kanto' },
-  { id:'i_mita', name:'都営三田線', match:['三田線','都営三田線'], file:'Toei_Mita_line_symbol.svg', code:'I', color:'#0079c2', company:'都営地下鉄', type:'sub', group:'kanto' },
-  { id:'s_shinjuku', name:'都営新宿線', match:['新宿線','都営新宿線'], file:'Toei_Shinjuku_line_symbol.svg', code:'S', color:'#b0bf1e', company:'都営地下鉄', type:'sub', group:'kanto' },
-  { id:'e_oedo', name:'都営大江戸線', match:['大江戸線','都営大江戸線'], file:'Toei_Oedo_line_symbol.svg', code:'E', color:'#ce045b', company:'都営地下鉄', type:'sub', group:'kanto' },
-  { id:'nt_liner', name:'日暮里・舎人ライナー', match:['日暮里・舎人ライナー'], file:'Nippori-Toneri_Liner_symbol.svg', code:'NT', color:'#ea5414', company:'東京都交通局', type:'sub', group:'kanto' },
-  { id:'sa_tram', name:'東京さくらトラム（都電荒川線）', match:['都電荒川線','東京さくらトラム'], file:'Tokyo_Sakura_Tram_symbol.svg', code:'SA', color:'#e5004f', company:'東京都交通局', type:'sub', group:'kanto' },
-  { id:'tr_toyo', name:'東葉高速線', match:['東葉高速線'], file:'Number_prefix_Toyo-Rapid.svg', code:'TR', color:'#008575', company:'東葉高速鉄道', type:'jr', group:'kanto' },
-  { id:'ks_keisei', name:'京成本線', match:['京成線','京成本線'], file:'Number_prefix_Keisei.svg', code:'KS', color:'#005aaa', company:'京成電鉄', type:'jr', group:'kanto' },
-  { id:'ks_skyaccess', name:'成田スカイアクセス', match:['成田スカイアクセス'], file:'Number_prefix_SkyAccess.svg', code:'KS', color:'#f39800', company:'京成電鉄', type:'jr', group:'kanto' },
-  { id:'hs_hokusou', name:'北総線', match:['北総線'], file:'Number_prefix_Hokusō.svg', code:'HS', color:'#0080ff', company:'北総鉄道', type:'jr', group:'kanto' },
-  { id:'sr_shibayama', name:'芝山鉄道線', match:['芝山鉄道線'], file:'Number_prefix_Shibayama.svg', code:'SR', color:'#00aa55', company:'芝山鉄道', type:'jr', group:'kanto' },
-  { id:'r_rinkai', name:'りんかい線', match:['りんかい線'], file:'Rinkai_Line_symbol.svg', code:'R', color:'#004499', company:'東京臨海高速鉄道', type:'jr', group:'kanto' },
-  { id:'u_yurikamome', name:'ゆりかもめ', match:['ゆりかもめ'], file:'Yurikamome_line_symbol.svg', code:'U', color:'#0088cc', company:'ゆりかもめ', type:'sub', group:'kanto' },
-  { id:'tx_tsukuba', name:'つくばエクスプレス', match:['つくばエクスプレス'], file:'Tsukuba_Express_symbol.svg', code:'TX', color:'#d62828', company:'首都圏新都市鉄道', type:'jr', group:'kanto' },
-  { id:'mo_monorail', name:'東京モノレール', match:['東京モノレール'], file:'Tokyo_Monorail_Line_symbol.svg', code:'MO', color:'#0055aa', company:'東京モノレール', type:'jr', group:'kanto' },
-  { id:'en_enoden', name:'江ノ電', match:['江ノ電','江ノ島電鉄'], file:'Number_prefix_Enoden.svg', code:'EN', color:'#007536', company:'江ノ島電鉄', type:'jr', group:'kanto' },
-  { id:'ty_toyoko', name:'東急東横線', match:['東横線','東急東横線'], file:'Tokyu_TY_line_symbol.svg', code:'TY', color:'#da0442', company:'東急電鉄', type:'jr', group:'kanto' },
-  { id:'dt_denentoshi', name:'東急田園都市線', match:['田園都市線','東急田園都市線'], file:'Tokyu_DT_line_symbol.svg', code:'DT', color:'#20a288', company:'東急電鉄', type:'jr', group:'kanto' },
-  { id:'mg_meguro', name:'東急目黒線', match:['東急目黒線','目黒線'], file:'Tokyu_MG_line_symbol.svg', code:'MG', color:'#009cd3', company:'東急電鉄', type:'jr', group:'kanto' },
-  { id:'om_oimachi', name:'東急大井町線', match:['東急大井町線','大井町線'], file:'Tokyu_OM_line_symbol.svg', code:'OM', color:'#f18d00', company:'東急電鉄', type:'jr', group:'kanto' },
-  { id:'ik_ikegami', name:'東急池上線', match:['東急池上線','池上線'], file:'Tokyu_IK_line_symbol.svg', code:'IK', color:'#ee7800', company:'東急電鉄', type:'jr', group:'kanto' },
-  { id:'tm_tamagawa', name:'東急多摩川線', match:['東急多摩川線'], file:'Tokyu_TM_line_symbol.svg', code:'TM', color:'#993399', company:'東急電鉄', type:'jr', group:'kanto' },
-  { id:'sg_setagaya', name:'東急世田谷線', match:['東急世田谷線','世田谷線'], file:'Tokyu_SG_line_symbol.svg', code:'SG', color:'#ffdd00', company:'東急電鉄', type:'jr', group:'kanto' },
-  { id:'sh_shinyokohama', name:'東急新横浜線', match:['東急新横浜線'], file:'Tokyu_SH_line_symbol.svg', code:'SH', color:'#660099', company:'東急電鉄', type:'jr', group:'kanto' },
-  { id:'kd_kodomo', name:'東急こどもの国線', match:['こどもの国線'], file:'Tokyu_KD_line_symbol.svg', code:'KD', color:'#0055aa', company:'東急電鉄', type:'jr', group:'kanto' },
-  { id:'oh_odawara', name:'小田急小田原線', match:['小田原線','小田急線','小田急小田原線'], file:'Odakyu_odawara.svg', code:'OH', color:'#2288cc', company:'小田急電鉄', type:'jr', group:'kanto' },
-  { id:'oe_enoshima', name:'小田急江ノ島線', match:['小田急江ノ島線','江ノ島線'], file:'Odakyu_enoshima.svg', code:'OE', color:'#00a0e9', company:'小田急電鉄', type:'jr', group:'kanto' },
-  { id:'ot_tama', name:'小田急多摩線', match:['小田急多摩線','多摩線'], file:'Odakyu_tama.svg', code:'OT', color:'#0080cc', company:'小田急電鉄', type:'jr', group:'kanto' },
-  { id:'oh_hakone', name:'箱根登山鉄道', match:['箱根登山鉄道'], file:'Odakyu_Hakone_StaNo.svg', code:'OH', color:'#e60012', company:'箱根登山鉄道', type:'jr', group:'kanto' },
-  { id:'ko_keio', name:'京王線', match:['京王線','相模原線','高尾線'], file:'Number_prefix_Keio-line.svg', code:'KO', color:'#dd0077', company:'京王電鉄', type:'jr', group:'kanto' },
-  { id:'in_inokashira', name:'京王井の頭線', match:['井の頭線','京王井の頭線'], file:'Number_prefix_Keio-Inokashira-line.svg', code:'IN', color:'#002080', company:'京王電鉄', type:'jr', group:'kanto' },
-  { id:'si_ikebukuro', name:'西武池袋線', match:['西武池袋線','池袋線'], file:'SeibuIkebukuro.svg', code:'SI', color:'#003e98', company:'西武鉄道', type:'jr', group:'kanto' },
-  { id:'ss_shinjuku', name:'西武新宿線', match:['西武新宿線','新宿線（西武）'], file:'SeibuShinjuku.svg', code:'SS', color:'#0088cc', company:'西武鉄道', type:'jr', group:'kanto' },
-  { id:'sk_kokubunji', name:'西武国分寺線', match:['国分寺線'], file:'SeibuKokubunji.svg', code:'SK', color:'#00aa55', company:'西武鉄道', type:'jr', group:'kanto' },
-  { id:'st_tamagawa', name:'西武多摩川線', match:['西武多摩川線'], file:'SeibuTamagawa.svg', code:'ST', color:'#f39800', company:'西武鉄道', type:'jr', group:'kanto' },
-  { id:'tm_tamako', name:'西武多摩湖線', match:['多摩湖線'], file:'SeibuTamako.svg', code:'TM', color:'#e60012', company:'西武鉄道', type:'jr', group:'kanto' },
-  { id:'sy_yamaguchi', name:'西武山口線（レオライナー）', match:['山口線','レオライナー'], file:'SeibuYamaguchi.svg', code:'SY', color:'#002288', company:'西武鉄道', type:'jr', group:'kanto' },
-  { id:'ts_skytree', name:'東武スカイツリーライン', match:['東武スカイツリーライン','スカイツリーライン'], file:'Tobu_Skytree_Line_(TS)_symbol.svg', code:'TS', color:'#003399', company:'東武鉄道', type:'jr', group:'kanto' },
-  { id:'ti_isesaki', name:'東武伊勢崎線', match:['伊勢崎線','東武伊勢崎線'], file:'Tobu_Isesaki_Line_(TI)_symbol.svg', code:'TI', color:'#e60012', company:'東武鉄道', type:'jr', group:'kanto' },
-  { id:'tn_nikko', name:'東武日光線', match:['東武日光線','日光線'], file:'Tobu_Nikko_Line_(TN)_symbol.svg', code:'TN', color:'#f39800', company:'東武鉄道', type:'jr', group:'kanto' },
-  { id:'td_noda', name:'東武野田線（アーバンパーク）', match:['東武野田線','アーバンパークライン'], file:'Tobu_Noda_Line_(TD)_symbol.svg', code:'TD', color:'#0f6cc3', company:'東武鉄道', type:'jr', group:'kanto' },
-  { id:'tj_tojo', name:'東武東上線', match:['東武東上線','東上線'], file:'Tobu_Tojo_Line_(TJ)_symbol.svg', code:'TJ', color:'#004499', company:'東武鉄道', type:'jr', group:'kanto' }
+  { id:'tokaido_shinkansen', name:'東海道新幹線', match:['東海道新幹線'], file:'Shinkansen_jrc.svg', company:'JR東海', group:'shinkansen' },
+  { id:'nex', name:'成田エクスプレス', match:['成田エクスプレス'], file:'Sign_of_NEX_in_station.svg', company:'JR東日本', group:'kanto' },
+  { id:'jb_sobu', name:'中央・総武各駅停車', match:['中央・総武各駅停車','総武線各駅停車','中央・総武線'], file:'JR_JB_line_symbol.svg', company:'JR東日本', group:'kanto' },
+  { id:'jo_sobu_rapid', name:'総武快速線', match:['総武快速線','総武線快速','横須賀・総武快速線'], file:'JR_JO_line_symbol.svg', company:'JR東日本', group:'kanto' },
+  { id:'jc_chuo', name:'中央線快速', match:['中央線快速','中央線'], file:'JR_JC_line_symbol.svg', company:'JR東日本', group:'kanto' },
+  { id:'jy_yamanote', name:'山手線', match:['山手線'], file:'JR_JY_line_symbol.svg', company:'JR東日本', group:'kanto' },
+  { id:'jk_keihintohoku', name:'京浜東北線', match:['京浜東北線','根岸線'], file:'JR_JK_line_symbol.svg', company:'JR東日本', group:'kanto' },
+  { id:'je_keiyo', name:'京葉線', match:['京葉線'], file:'JR_JE_line_symbol.svg', company:'JR東日本', group:'kanto' },
+  { id:'jm_musashino', name:'武蔵野線', match:['武蔵野線'], file:'JR_JM_line_symbol.svg', company:'JR東日本', group:'kanto' },
+  { id:'ja_saikyo', name:'埼京線', match:['埼京線','川越線'], file:'JR_JA_line_symbol.svg', company:'JR東日本', group:'kanto' },
+  { id:'jj_joban', name:'常磐線快速', match:['常磐線','常磐線快速'], file:'JR_JJ_line_symbol.svg', company:'JR東日本', group:'kanto' },
+  { id:'jl_joban_local', name:'常磐線各駅停車', match:['常磐線各駅停車'], file:'JR_JL_line_symbol.svg', company:'JR東日本', group:'kanto' },
+  { id:'js_shonan', name:'湘南新宿ライン', match:['湘南新宿ライン'], file:'JR_JS_line_symbol.svg', company:'JR東日本', group:'kanto' },
+  { id:'jt_tokaido', name:'東海道線・上野東京', match:['東海道線','上野東京ライン'], file:'JR_JT_line_symbol.svg', company:'JR東日本', group:'kanto' },
+  { id:'ju_utsunomiya', name:'宇都宮線・高崎線', match:['宇都宮線','高崎線'], file:'JR_JU_line_symbol.svg', company:'JR東日本', group:'kanto' },
+  { id:'jh_yokohama', name:'横浜線', match:['横浜線'], file:'JR_JH_line_symbol.svg', company:'JR東日本', group:'kanto' },
+  { id:'jn_nambu', name:'南武線', match:['南武線'], file:'JR_JN_line_symbol.svg', company:'JR東日本', group:'kanto' },
+  { id:'ji_tsurumi', name:'鶴見線', match:['鶴見線'], file:'JR_JI_line_symbol.svg', company:'JR東日本', group:'kanto' },
+  { id:'g_ginza', name:'銀座線', match:['銀座線'], file:'Logo_of_Tokyo_Metro_Ginza_Line.svg', company:'東京メトロ', group:'kanto' },
+  { id:'m_marunouchi', name:'丸ノ内線', match:['丸ノ内線'], file:'Logo_of_Tokyo_Metro_Marunouchi_Line.svg', company:'東京メトロ', group:'kanto' },
+  { id:'mb_marunouchi_br', name:'丸ノ内線方南町支線', match:['丸ノ内線支線'], file:'Logo_of_Tokyo_Metro_Marunouchi_branch_Line.svg', company:'東京メトロ', group:'kanto' },
+  { id:'h_hibiya', name:'日比谷線', match:['日比谷線'], file:'Logo_of_Tokyo_Metro_Hibiya_Line.svg', company:'東京メトロ', group:'kanto' },
+  { id:'t_tozai', name:'東西線', match:['東西線'], file:'Logo_of_Tokyo_Metro_Tōzai_Line.svg', company:'東京メトロ', group:'kanto' },
+  { id:'c_chiyoda', name:'千代田線', match:['千代田線'], file:'Logo_of_Tokyo_Metro_Chiyoda_Line.svg', company:'東京メトロ', group:'kanto' },
+  { id:'y_yurakucho', name:'有楽町線', match:['有楽町線'], file:'Logo_of_Tokyo_Metro_Yūrakuchō_Line.svg', company:'東京メトロ', group:'kanto' },
+  { id:'z_hanzomon', name:'半蔵門線', match:['半蔵門線'], file:'Logo_of_Tokyo_Metro_Hanzōmon_Line.svg', company:'東京メトロ', group:'kanto' },
+  { id:'n_namboku', name:'南北線', match:['南北線'], file:'Logo_of_Tokyo_Metro_Namboku_Line.svg', company:'東京メトロ', group:'kanto' },
+  { id:'f_fukutoshin', name:'副都心線', match:['副都心線'], file:'Logo_of_Tokyo_Metro_Fukutoshin_Line.svg', company:'東京メトロ', group:'kanto' },
+  { id:'a_asakusa', name:'都営浅草線', match:['浅草線','都営浅草線'], file:'Toei_Asakusa_line_symbol.svg', company:'都営地下鉄', group:'kanto' },
+  { id:'i_mita', name:'都営三田線', match:['三田線','都営三田線'], file:'Toei_Mita_line_symbol.svg', company:'都営地下鉄', group:'kanto' },
+  { id:'s_shinjuku', name:'都営新宿線', match:['新宿線','都営新宿線'], file:'Toei_Shinjuku_line_symbol.svg', company:'都営地下鉄', group:'kanto' },
+  { id:'e_oedo', name:'都営大江戸線', match:['大江戸線','都営大江戸線'], file:'Toei_Oedo_line_symbol.svg', company:'都営地下鉄', group:'kanto' },
+  { id:'nt_liner', name:'日暮里・舎人ライナー', match:['日暮里・舎人ライナー'], file:'Nippori-Toneri_Liner_symbol.svg', company:'東京都交通局', group:'kanto' },
+  { id:'sa_tram', name:'東京さくらトラム（都電荒川線）', match:['都電荒川線','東京さくらトラム'], file:'Tokyo_Sakura_Tram_symbol.svg', company:'東京都交通局', group:'kanto' },
+  { id:'tr_toyo', name:'東葉高速線', match:['東葉高速線'], file:'Number_prefix_Toyo-Rapid.svg', company:'東葉高速鉄道', group:'kanto' },
+  { id:'ks_keisei', name:'京成本線', match:['京成線','京成本線'], file:'Number_prefix_Keisei.svg', company:'京成電鉄', group:'kanto' },
+  { id:'ks_skyaccess', name:'成田スカイアクセス', match:['成田スカイアクセス'], file:'Number_prefix_SkyAccess.svg', company:'京成電鉄', group:'kanto' },
+  { id:'hs_hokusou', name:'北総線', match:['北総線'], file:'Number_prefix_Hokusō.svg', company:'北総鉄道', group:'kanto' },
+  { id:'sr_shibayama', name:'芝山鉄道線', match:['芝山鉄道線'], file:'Number_prefix_Shibayama.svg', company:'芝山鉄道', group:'kanto' },
+  { id:'r_rinkai', name:'りんかい線', match:['りんかい線'], file:'Rinkai_Line_symbol.svg', company:'東京臨海高速鉄道', group:'kanto' },
+  { id:'u_yurikamome', name:'ゆりかもめ', match:['ゆりかもめ'], file:'Yurikamome_line_symbol.svg', company:'ゆりかもめ', group:'kanto' },
+  { id:'tx_tsukuba', name:'つくばエクスプレス', match:['つくばエクスプレス'], file:'Tsukuba_Express_symbol.svg', company:'首都圏新都市鉄道', group:'kanto' },
+  { id:'mo_monorail', name:'東京モノレール', match:['東京モノレール'], file:'Tokyo_Monorail_Line_symbol.svg', company:'東京モノレール', group:'kanto' },
+  { id:'en_enoden', name:'江ノ電', match:['江ノ電','江ノ島電鉄'], file:'Number_prefix_Enoden.svg', company:'江ノ島電鉄', group:'kanto' },
+  { id:'ty_toyoko', name:'東急東横線', match:['東横線','東急東横線'], file:'Tokyu_TY_line_symbol.svg', company:'東急電鉄', group:'kanto' },
+  { id:'dt_denentoshi', name:'東急田園都市線', match:['田園都市線','東急田園都市線'], file:'Tokyu_DT_line_symbol.svg', company:'東急電鉄', group:'kanto' },
+  { id:'mg_meguro', name:'東急目黒線', match:['東急目黒線','目黒線'], file:'Tokyu_MG_line_symbol.svg', company:'東急電鉄', group:'kanto' },
+  { id:'om_oimachi', name:'東急大井町線', match:['東急大井町線','大井町線'], file:'Tokyu_OM_line_symbol.svg', company:'東急電鉄', group:'kanto' },
+  { id:'ik_ikegami', name:'東急池上線', match:['東急池上線','池上線'], file:'Tokyu_IK_line_symbol.svg', company:'東急電鉄', group:'kanto' },
+  { id:'tm_tamagawa', name:'東急多摩川線', match:['東急多摩川線'], file:'Tokyu_TM_line_symbol.svg', company:'東急電鉄', group:'kanto' },
+  { id:'sg_setagaya', name:'東急世田谷線', match:['東急世田谷線','世田谷線'], file:'Tokyu_SG_line_symbol.svg', company:'東急電鉄', group:'kanto' },
+  { id:'sh_shinyokohama', name:'東急新横浜線', match:['東急新横浜線'], file:'Tokyu_SH_line_symbol.svg', company:'東急電鉄', group:'kanto' },
+  { id:'kd_kodomo', name:'東急こどもの国線', match:['こどもの国線'], file:'Tokyu_KD_line_symbol.svg', company:'東急電鉄', group:'kanto' },
+  { id:'oh_odawara', name:'小田急小田原線', match:['小田原線','小田急線','小田急小田原線'], file:'Odakyu_odawara.svg', company:'小田急電鉄', group:'kanto' },
+  { id:'oe_enoshima', name:'小田急江ノ島線', match:['小田急江ノ島線','江ノ島線'], file:'Odakyu_enoshima.svg', company:'小田急電鉄', group:'kanto' },
+  { id:'ot_tama', name:'小田急多摩線', match:['小田急多摩線','多摩線'], file:'Odakyu_tama.svg', company:'小田急電鉄', group:'kanto' },
+  { id:'oh_hakone', name:'箱根登山鉄道', match:['箱根登山鉄道'], file:'Odakyu_Hakone_StaNo.svg', company:'箱根登山鉄道', group:'kanto' },
+  { id:'ko_keio', name:'京王線', match:['京王線','相模原線','高尾線'], file:'Number_prefix_Keio-line.svg', company:'京王電鉄', group:'kanto' },
+  { id:'in_inokashira', name:'京王井の頭線', match:['井の頭線','京王井の頭線'], file:'Number_prefix_Keio-Inokashira-line.svg', company:'京王電鉄', group:'kanto' },
+  { id:'si_ikebukuro', name:'西武池袋線', match:['西武池袋線','池袋線'], file:'SeibuIkebukuro.svg', company:'西武鉄道', group:'kanto' },
+  { id:'ss_shinjuku', name:'西武新宿線', match:['西武新宿線','新宿線（西武）'], file:'SeibuShinjuku.svg', company:'西武鉄道', group:'kanto' },
+  { id:'sk_kokubunji', name:'西武国分寺線', match:['国分寺線'], file:'SeibuKokubunji.svg', company:'西武鉄道', group:'kanto' },
+  { id:'st_tamagawa', name:'西武多摩川線', match:['西武多摩川線'], file:'SeibuTamagawa.svg', company:'西武鉄道', group:'kanto' },
+  { id:'tm_tamako', name:'西武多摩湖線', match:['多摩湖線'], file:'SeibuTamako.svg', company:'西武鉄道', group:'kanto' },
+  { id:'sy_yamaguchi', name:'西武山口線（レオライナー）', match:['山口線','レオライナー'], file:'SeibuYamaguchi.svg', company:'西武鉄道', group:'kanto' },
+  { id:'ts_skytree', name:'東武スカイツリーライン', match:['東武スカイツリーライン','スカイツリーライン'], file:'Tobu_Skytree_Line_(TS)_symbol.svg', company:'東武鉄道', group:'kanto' },
+  { id:'ti_isesaki', name:'東武伊勢崎線', match:['伊勢崎線','東武伊勢崎線'], file:'Tobu_Isesaki_Line_(TI)_symbol.svg', company:'東武鉄道', group:'kanto' },
+  { id:'tn_nikko', name:'東武日光線', match:['東武日光線','日光線'], file:'Tobu_Nikko_Line_(TN)_symbol.svg', company:'東武鉄道', group:'kanto' },
+  { id:'td_noda', name:'東武野田線（アーバンパーク）', match:['東武野田線','アーバンパークライン'], file:'Tobu_Noda_Line_(TD)_symbol.svg', company:'東武鉄道', group:'kanto' },
+  { id:'tj_tojo', name:'東武東上線', match:['東武東上線','東上線'], file:'Tobu_Tojo_Line_(TJ)_symbol.svg', company:'東武鉄道', group:'kanto' }
 ];
 
 const DEF={
@@ -773,7 +773,7 @@ function getWeatherSvg(code, hour){
 
 function wxLabel(c){
   c=+c;
-  if(c===0) return '晴天';
+  if(c===0) return '快晴';
   if(c<=2) return '晴れ時々曇';
   if(c===3) return '曇り';
   if(c<=48) return '霧';
@@ -792,7 +792,7 @@ function buildLineCheckboxes(){
   wrap.innerHTML = RAILWAY_CATALOG.map(line=>`
     <label class="line-chk-item">
       <input type="checkbox" class="line-chk" value="${line.id}">
-      <img class="mini-sym-img" src="icons/${encodeURI(line.file)}" alt="" onerror="this.style.visibility='hidden'">
+      <img class="mini-sym-img" src="icons/${encodeURI(line.file)}" alt="" onerror="if(!this.dataset.r){this.dataset.r=1;this.src='${encodeURI(line.file)}';}">
       <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(line.name)}</span>
     </label>
   `).join('');
@@ -879,56 +879,56 @@ const R={
   weather(w){
     if(!w) return empty('天気データを取得中…');
     updateWeatherBgTheme();
-    const hrs=(w.hourly||[]).slice(0,7).map(h=>{
+    const curHr = new Date().getHours();
+    const hrs=(w.hourly||[]).slice(0,6).map(h=>{
       const d=new Date(h.time);
       const hrNum=isNaN(d)?0:d.getHours();
+      const timeLabel=isNaN(d)?esc(h.time||''):hrNum+'時';
       return `
-        <div class="wx-hr-col">
-          <div class="wx-hr-time">${hrNum}</div>
-          <div class="wx-hr-ic">${getWeatherSvg(h.code, hrNum)}</div>
-          <div class="wx-hr-temp">${num(h.temp)}°</div>
-          <div class="wx-hr-pop">${num(h.pop)}%</div>
+        <div class="hr">
+          <div>${timeLabel}</div>
+          <div class="hr-ic">${getWeatherSvg(h.code, hrNum)}</div>
+          <div class="hr-temp">${num(h.temp)}°</div>
+          <small>${num(h.pop)}%</small>
         </div>
       `;
     }).join('');
 
     const dropSvg = `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>`;
-    const upSvg = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>`;
-    const downSvg = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg>`;
 
     return `
-      <div class="wx-wrap">
-        <div class="wx-top">
-          <div>
-            <div class="wx-cond-title">${esc(w.desc)}</div>
-            <div class="wx-meta-row">
-              <span>${esc(cfg.cityName||'現在地')}</span>
-              <span class="wx-meta-item">${upSvg}${num(w.hi)}°</span>
-              <span class="wx-meta-item">${downSvg}${num(w.lo)}°</span>
-              <span class="wx-meta-item" style="color:#93c5fd">${dropSvg}${num(w.pop)}%</span>
-            </div>
+      <div class="wx-main">
+        <span class="wx-ic">${getWeatherSvg(w.code, curHr)}</span>
+        <span class="wx-t">${num(w.temp)}°</span>
+        <div class="wx-details">
+          <div class="wx-d">${esc(w.desc)}</div>
+          <div class="wx-hl">最高 ${num(w.hi)}° / 最低 ${num(w.lo)}°</div>
+          <div class="wx-loc-pop">
+            <span>${esc(cfg.cityName||'現在地')}</span>
+            <span class="wx-pop-badge">${dropSvg}降水 ${num(w.pop)}%</span>
           </div>
-          <div class="wx-big-temp">${num(w.temp)}°</div>
         </div>
-        <div class="wx-hrs">${hrs}</div>
       </div>
+      <div class="hrs">${hrs}</div>
     `;
   },
   train(t){
     if(!t||!t.length) return empty('監視する路線が選択されていません（設定から選択してください）');
-    return `<div class="train-list">${t.map(item=>`
-      <div class="train-item glass-item ${item.delay?'delay':''}">
-        <div class="line-badge ${esc(item.type||'')}" style="--lc:${esc(item.color||'#3b82f6')}">
-          <img src="icons/${encodeURI(item.file)}" alt="" onerror="this.parentElement.classList.add('has-err')">
-          <div class="fb-sym">${esc(item.code||'JR')}</div>
+    // CSS記号を排除し、必ず登録されたSVGアイコンファイルから取得
+    return `<div class="train-list">${t.map(item=>{
+      const cat = RAILWAY_CATALOG.find(x=>x.id===item.id) || item;
+      const svgFile = cat.file || item.file || '';
+      return `
+        <div class="train-item glass-item ${item.delay?'delay':''}">
+          <img class="line-icon-svg" src="icons/${encodeURI(svgFile)}" alt="${esc(item.name)}" onerror="if(!this.dataset.r){this.dataset.r=1;this.src='${encodeURI(svgFile)}';}">
+          <div>
+            <div class="train-name">${esc(item.name)}</div>
+            <div class="train-comp">${esc(item.company||'')}</div>
+          </div>
+          <div class="train-status">${item.delay?'遅延・情報あり':'平常運転'}</div>
         </div>
-        <div>
-          <div class="train-name">${esc(item.name)}</div>
-          <div class="train-comp">${esc(item.company||'')}</div>
-        </div>
-        <div class="train-status">${item.delay?'遅延・情報あり':'平常運転'}</div>
-      </div>
-    `).join('')}</div>`;
+      `;
+    }).join('')}</div>`;
   },
   news(a){
     const valid = (a||[]).filter(n=>n && n.title);
@@ -1105,7 +1105,7 @@ async function load(){
   if(busy)return;busy=true;
   $('#info-rss-url').textContent=cfg.newsRss||'未設定';
   try{
-    // 1. 天気
+    // 1. 天気（6列分の3時間予報を取得）
     let weatherData=null;
     try{
       const wxUrl=`https://api.open-meteo.com/v1/forecast?latitude=${cfg.lat}&longitude=${cfg.lon}&current=temperature_2m,weather_code&hourly=temperature_2m,weather_code,precipitation_probability&daily=temperature_2m_max,temperature_2m_min&timezone=Asia%2FTokyo&forecast_days=2`;
@@ -1114,7 +1114,7 @@ async function load(){
       const nowHour=new Date().getHours();
       
       const hourly=[];
-      for(let i=nowHour;i<nowHour+21;i+=3){
+      for(let i=nowHour;i<nowHour+18;i+=3){
         if(wxRes.hourly.time[i]){
           hourly.push({
             time:wxRes.hourly.time[i],
@@ -1145,10 +1145,7 @@ async function load(){
         id:line.id,
         name:line.name,
         file:line.file,
-        code:line.code,
-        color:line.color,
         company:line.company,
-        type:line.type,
         delay:isDelay
       };
     });
@@ -1157,7 +1154,7 @@ async function load(){
     // 3. ニュース
     const newsData=await fetchNewsWithFallback(cfg.newsRss);
 
-    // 4. 地震情報（参考サイトと同様に深さ・震源・規模をオプショナルチェーンで安全取得）
+    // 4. 地震情報
     let quakeData=[];
     try{
       const qRes=await fetch('https://api.p2pquake.net/v2/history?codes=551&limit=5').then(r=>r.json());
@@ -1181,9 +1178,7 @@ async function load(){
           intensity: intMap[eq?.maxScale] || '-'
         };
       });
-    }catch(e){
-      console.warn('Quake fetch error', e);
-    }
+    }catch(e){}
 
     const prev=(ls.get(KD)||{}).data||{};
     const aggregated={
