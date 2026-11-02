@@ -146,7 +146,7 @@ body{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-i
   box-shadow:0 4px 12px rgba(0, 0, 0, 0.35);
 }
 
-/* ========== Weather（以前のボックス型レイアウト復元＋上半分に現在天気） ========== */
+/* ========== Weather（行間・フォントサイズ拡大で視認性向上） ========== */
 .card[data-k="weather"].wx-morning{
   background:linear-gradient(165deg, #2b507c 0%, #1c3554 55%, #152238 100%);
   box-shadow:inset 0 0 0 1px rgba(255,255,255,0.12);
@@ -165,25 +165,25 @@ body{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-i
 }
 .card[data-k="weather"] .card-hdr h2{color:rgba(255,255,255,0.65)}
 
-/* 上半分を使って現在の天気を表示 */
+/* 上半分を使って現在の天気をゆったり表示 */
 .wx-main{
   flex:1;
   min-height:0;
   display:flex;
   align-items:center;
-  gap:3.6vmin;
-  padding:1vmin 0;
+  gap:4.2vmin;
+  padding:1.2vmin 1vmin;
 }
 .wx-ic{
-  width:clamp(68px, 15.5vmin, 130px);
-  height:clamp(68px, 15.5vmin, 130px);
+  width:clamp(74px, 16.5vmin, 140px);
+  height:clamp(74px, 16.5vmin, 140px);
   flex-shrink:0;
   display:grid;
   place-items:center;
 }
 .wx-ic svg{width:100%;height:100%;overflow:visible}
 .wx-t{
-  font-size:clamp(54px, 15vmin, 118px);
+  font-size:clamp(60px, 16vmin, 128px);
   font-weight:700;
   line-height:1;
   color:var(--text);
@@ -194,42 +194,43 @@ body{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-i
   display:flex;
   flex-direction:column;
   justify-content:center;
-  gap:.7vmin;
+  gap:1.6vmin; /* 行間を広げて窮屈さを解消 */
   min-width:0;
 }
 .wx-d{
-  font-size:clamp(18px, 4vmin, 30px);
+  font-size:clamp(22px, 4.8vmin, 38px); /* 天気名を大きく強調 */
   font-weight:700;
   color:#ffffff;
-  line-height:1.2;
+  line-height:1.15;
 }
 .wx-hl{
-  font-size:clamp(12px, 2.7vmin, 18px);
-  color:rgba(255,255,255,0.78);
+  font-size:clamp(14px, 3.2vmin, 22px); /* 最高・最低気温を拡大 */
+  color:rgba(255,255,255,0.85);
   font-weight:600;
+  line-height:1.2;
 }
 .wx-loc-pop{
   display:flex;
   align-items:center;
   flex-wrap:wrap;
-  gap:1.6vmin;
-  font-size:clamp(12px, 2.5vmin, 17px);
-  color:rgba(255,255,255,0.88);
+  gap:2vmin;
+  font-size:clamp(14px, 3.0vmin, 21px); /* 地域名・降水確率を拡大 */
+  color:rgba(255,255,255,0.92);
   font-weight:600;
-  margin-top:.2vmin;
+  line-height:1.2;
 }
 .wx-pop-badge{
   display:inline-flex;
   align-items:center;
-  gap:.4vmin;
+  gap:.6vmin;
   color:var(--acc);
 }
 .wx-pop-badge svg{
-  width:clamp(12px, 2.3vmin, 16px);
-  height:clamp(12px, 2.3vmin, 16px);
+  width:clamp(14px, 2.8vmin, 20px);
+  height:clamp(14px, 2.8vmin, 20px);
 }
 
-/* 下部：以前のコンパクトな3時間ごとの予報カード */
+/* 下部：コンパクトな3時間ごとの予報カード */
 .hrs{
   display:grid;
   grid-auto-flow:column;
@@ -271,7 +272,7 @@ body{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-i
   font-weight:600;
 }
 
-/* ========== Train Info（CSS記号を完全撤廃しSVGのみ表示） ========== */
+/* ========== Train Info ========== */
 .train-list{display:flex;flex-direction:column;gap:1.4vmin;overflow-y:auto;flex:1;padding-right:.6vmin;scrollbar-width:thin}
 .train-item{display:grid;grid-template-columns:auto 1fr auto;gap:2vmin;align-items:center;padding:1.6vmin 2.2vmin;border-radius:1.4vmin}
 .train-item.delay{border-color:rgba(232,104,95,0.7) !important;background:linear-gradient(90deg, rgba(232,104,95,0.22), rgba(18,24,33,0.75)) !important}
@@ -288,7 +289,7 @@ body{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-i
 .train-status{font-size:clamp(11.5px,2.5vmin,15.5px);font-weight:700;padding:.6vmin 1.5vmin;border-radius:.9vmin;background:rgba(74,222,128,0.18);color:var(--good);white-space:nowrap}
 .train-item.delay .train-status{background:rgba(232,104,95,0.25);color:var(--bad)}
 
-/* ========== News（見出しを少し下に配置＆フォント拡大） ========== */
+/* ========== News ========== */
 .nw-stack{
   flex:1;
   min-height:0;
@@ -311,10 +312,10 @@ body{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-i
   justify-content:space-between;
   align-items:flex-start;
   gap:1.6vmin;
-  margin-top:.5vmin; /* 見出し位置を少し下へ調整 */
+  margin-top:.5vmin;
 }
 .nw-item-title{
-  font-size:clamp(15.5px, 3.2vmin, 22px); /* フォントサイズを拡大 */
+  font-size:clamp(15.5px, 3.2vmin, 22px);
   font-weight:700;
   color:#ffffff;
   line-height:1.35;
@@ -355,12 +356,12 @@ body{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-i
   overflow:hidden;
 }
 
-/* ========== Quake ========== */
+/* ========== Quake（最新地震情報の行間・フォントサイズを大幅拡大） ========== */
 .eq-wrap{
   flex:1;
   min-height:0;
   display:grid;
-  grid-template-rows:1.45fr 1fr;
+  grid-template-rows:1.35fr 1fr;
   gap:1.4vmin;
 }
 .eq-older-list{
@@ -376,23 +377,24 @@ body{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-i
   align-items:center;
   padding:0 2.2vmin;
   border-radius:1.1vmin;
-  font-size:clamp(12px, 2.5vmin, 16.5px);
+  font-size:clamp(12.5px, 2.6vmin, 17px);
   color:var(--sub);
   min-height:0;
 }
 .eq-old-mag{font-weight:800;color:#ffffff}
 .eq-old-place{color:#ffffff;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.eq-old-time{font-size:clamp(11px, 2.15vmin, 14.5px);font-variant-numeric:tabular-nums;color:#c0ccd8}
-.eq-old-int{font-size:clamp(11px, 2.25vmin, 14.5px);padding:.35vmin 1.2vmin;background:rgba(21,27,35,0.85);border:1px solid rgba(255,255,255,0.12);border-radius:.7vmin;color:#ffffff;font-weight:700}
+.eq-old-time{font-size:clamp(11.5px, 2.2vmin, 15px);font-variant-numeric:tabular-nums;color:#c0ccd8}
+.eq-old-int{font-size:clamp(11.5px, 2.3vmin, 15px);padding:.35vmin 1.2vmin;background:rgba(21,27,35,0.85);border:1px solid rgba(255,255,255,0.12);border-radius:.7vmin;color:#ffffff;font-weight:700}
 
+/* 最新1件（文字と行間を大きく広げて視認性強化） */
 .eq-latest{
   min-height:0;
   height:100%;
   display:grid;
   grid-template-columns:auto 1fr;
-  gap:2.4vmin;
+  gap:3vmin;
   align-items:center;
-  padding:1.6vmin 2.6vmin;
+  padding:2vmin 3vmin;
   border:1.5px solid var(--acc) !important;
   border-radius:1.5vmin;
   box-shadow:0 6px 20px rgba(0,0,0,0.45);
@@ -402,23 +404,31 @@ body{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-i
   background:rgba(21,27,35,0.85);
   border:1px solid rgba(255,255,255,0.12);
   border-radius:1.2vmin;
-  padding:.8vmin 2.2vmin;
-  min-width:14vmin;
+  padding:1vmin 2.6vmin;
+  min-width:15.5vmin;
   text-align:center;
   display:flex;
   flex-direction:column;
   justify-content:center;
+  gap:.8vmin;
 }
 .eq-latest-badge.hi{background:rgba(232,104,95,0.3);border-color:var(--bad)}
 .eq-latest-badge.mid{background:rgba(240,163,94,0.3);border-color:var(--warm)}
-.eq-latest-lbl{font-size:max(1.85vmin,11px);color:var(--sub);font-weight:600}
-.eq-latest-int{font-size:clamp(22px, 5.2vmin, 38px);font-weight:800;line-height:1.05;color:#ffffff}
-.eq-latest-info{display:flex;flex-direction:column;justify-content:center;gap:.7vmin;min-width:0}
-.eq-latest-top{display:flex;align-items:center;gap:1.4vmin}
-.eq-latest-tag{font-size:max(1.75vmin,10.5px);font-weight:700;background:var(--acc);color:#08202b;padding:.2vmin 1vmin;border-radius:4px}
-.eq-latest-time{font-size:clamp(11.5px, 2.3vmin, 15.5px);color:#c0ccd8;font-variant-numeric:tabular-nums}
-.eq-latest-place{font-size:clamp(16px, 4vmin, 26px);font-weight:700;color:#ffffff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.25}
-.eq-latest-meta{font-size:clamp(12px, 2.55vmin, 17px);color:var(--acc);font-weight:600}
+.eq-latest-lbl{font-size:clamp(12px, 2.3vmin, 16px);color:var(--sub);font-weight:700}
+.eq-latest-int{font-size:clamp(32px, 7.2vmin, 56px);font-weight:800;line-height:1;color:#ffffff}
+
+.eq-latest-info{
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  gap:1.5vmin; /* 行間を大きく広げて窮屈さを解消 */
+  min-width:0;
+}
+.eq-latest-top{display:flex;align-items:center;gap:1.5vmin}
+.eq-latest-tag{font-size:clamp(11.5px, 2.2vmin, 15px);font-weight:800;background:var(--acc);color:#08202b;padding:.3vmin 1.2vmin;border-radius:5px}
+.eq-latest-time{font-size:clamp(13px, 2.8vmin, 19px);color:#d5dee8;font-weight:600;font-variant-numeric:tabular-nums}
+.eq-latest-place{font-size:clamp(20px, 4.8vmin, 34px);font-weight:800;color:#ffffff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.2}
+.eq-latest-meta{font-size:clamp(14px, 3.1vmin, 21px);color:var(--acc);font-weight:700;line-height:1.2}
 
 /* Calendar */
 .ev{display:grid;grid-template-columns:minmax(14vmin,max-content) 1fr;gap:2.4vmin;align-items:baseline;padding:2vmin 0;border-top:1px solid var(--line);font-size:3.8vmin}
@@ -591,7 +601,7 @@ body.open #scrim{opacity:1;pointer-events:auto}
 (()=>{
 'use strict';
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
-const KC='dash.cfg.v8', KD='dash.cache.v8';
+const KC='dash.cfg.v9', KD='dash.cache.v9';
 
 /* ---- 登録SVGファイル名に対応した全70路線カタログ ---- */
 const RAILWAY_CATALOG = [
@@ -785,14 +795,14 @@ function wxLabel(c){
   return '曇り';
 }
 
-/* ---- 設定ドロワーの路線チェックボックス生成 ---- */
+/* ---- 設定ドロワーの路線チェックボックス生成（icon/ フォルダ参照） ---- */
 function buildLineCheckboxes(){
   const wrap=$('#lineCheckboxes');
   if(!wrap)return;
   wrap.innerHTML = RAILWAY_CATALOG.map(line=>`
     <label class="line-chk-item">
       <input type="checkbox" class="line-chk" value="${line.id}">
-      <img class="mini-sym-img" src="icon/${encodeURI(line.file)}" alt="" onerror="if(!this.dataset.r){this.dataset.r=1;this.src='${encodeURI(line.file)}';}">
+      <img class="mini-sym-img" src="icon/${encodeURI(line.file)}" alt="" onerror="if(!this.dataset.r){this.dataset.r=1;this.src='icons/${encodeURI(line.file)}';}">
       <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(line.name)}</span>
     </label>
   `).join('');
@@ -914,13 +924,12 @@ const R={
   },
   train(t){
     if(!t||!t.length) return empty('監視する路線が選択されていません（設定から選択してください）');
-    // CSS記号を排除し、必ず登録されたSVGアイコンファイルから取得
     return `<div class="train-list">${t.map(item=>{
       const cat = RAILWAY_CATALOG.find(x=>x.id===item.id) || item;
       const svgFile = cat.file || item.file || '';
       return `
         <div class="train-item glass-item ${item.delay?'delay':''}">
-          <img class="line-icon-svg" src="icon/${encodeURI(svgFile)}" alt="${esc(item.name)}" onerror="if(!this.dataset.r){this.dataset.r=1;this.src='${encodeURI(svgFile)}';}">
+          <img class="line-icon-svg" src="icon/${encodeURI(svgFile)}" alt="${esc(item.name)}" onerror="if(!this.dataset.r){this.dataset.r=1;this.src='icons/${encodeURI(svgFile)}';}">
           <div>
             <div class="train-name">${esc(item.name)}</div>
             <div class="train-comp">${esc(item.company||'')}</div>
@@ -1019,7 +1028,7 @@ function formatPubDate(str){
   if(!str) return '';
   const d=new Date(str.replace(/-/g,'/'));
   const d2=isNaN(d)?new Date(str):d;
-  return isNaN(d2)?'':`${d2.getMonth()+1}/${d2.getDate()} ${pad(d2.getHours())}:${pad(d2.getMinutes())}`;
+  return isNaN(d2)?'':`${d2.getMonth()+1}/${d2.getDate()} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
 
 function parseXmlString(xmlText){
@@ -1105,7 +1114,7 @@ async function load(){
   if(busy)return;busy=true;
   $('#info-rss-url').textContent=cfg.newsRss||'未設定';
   try{
-    // 1. 天気（6列分の3時間予報を取得）
+    // 1. 天気
     let weatherData=null;
     try{
       const wxUrl=`https://api.open-meteo.com/v1/forecast?latitude=${cfg.lat}&longitude=${cfg.lon}&current=temperature_2m,weather_code&hourly=temperature_2m,weather_code,precipitation_probability&daily=temperature_2m_max,temperature_2m_min&timezone=Asia%2FTokyo&forecast_days=2`;
