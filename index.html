@@ -61,7 +61,7 @@ body{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-i
 .meta{display:flex;align-items:baseline;gap:3vmin;font-size:min(4.4vh,2.4vw)}
 #temp{color:var(--acc);font-weight:600}
 
-/* 左下フッター（CSS製設定ボタン＋更新ステータス） */
+/* 左下フッター（設定ボタン＋ステータス） */
 .clock-foot{
   position:absolute;
   left:.5vmin;
@@ -104,18 +104,51 @@ body{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-i
 .stage{position:relative;min-width:0;min-height:0}
 #pager{position:relative;height:100%;overflow-y:auto;scroll-snap-type:y mandatory;scrollbar-width:none;overscroll-behavior:contain;border-radius:2vmin;touch-action:pan-y}
 #pager::-webkit-scrollbar{display:none}
-.card{height:100%;scroll-snap-align:start;scroll-snap-stop:always;display:flex;flex-direction:column;gap:1.6vmin;padding:2.6vmin 4.6vmin 2.6vmin 3.6vmin;overflow:hidden;background:var(--panel);border-radius:2vmin;box-shadow:inset 0 0 0 1px var(--line);transition:background .8s ease}
+.card{
+  height:100%;
+  scroll-snap-align:start;
+  scroll-snap-stop:always;
+  display:flex;
+  flex-direction:column;
+  gap:1.6vmin;
+  padding:2.6vmin 4.6vmin 2.6vmin 3.6vmin;
+  overflow:hidden;
+  background-color:var(--panel);
+  border-radius:2vmin;
+  box-shadow:inset 0 0 0 1px var(--line);
+  position:relative;
+}
 .card[hidden]{display:none}
-.card-hdr{display:flex;justify-content:space-between;align-items:center}
+.card-hdr{display:flex;justify-content:space-between;align-items:center;z-index:2}
 .card h2{font-size:max(2.4vmin,13px);font-weight:600;color:var(--sub)}
-.body{flex:1;min-height:0;display:flex;flex-direction:column}
+.body{flex:1;min-height:0;display:flex;flex-direction:column;z-index:2}
 .empty{margin:auto;color:var(--sub);font-size:3.2vmin;text-align:center}
 #dots{position:absolute;right:1.2vmin;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:2vmin;z-index:10}
 #dots button{position:relative;width:1.2vmin;height:1.2vmin;min-width:8px;min-height:8px;padding:0;border:0;border-radius:50%;background:#ffffff33;cursor:pointer}
 #dots button::before{content:"";position:absolute;inset:-12px}
 #dots button.on{background:var(--acc)}
 
-/* ========== Weather（時間帯別グラデーション背景 ＆ フラットSVGアイコン） ========== */
+/* ========== 背景画像設定 ＆ 半透明ブラック・すりガラス共通スタイル ========== */
+.card[data-k="train"]{
+  background:linear-gradient(rgba(11, 15, 20, 0.70), rgba(11, 15, 20, 0.88)), url('train-bg.jpg') center/cover no-repeat, var(--panel);
+}
+.card[data-k="news"]{
+  background:linear-gradient(rgba(11, 15, 20, 0.70), rgba(11, 15, 20, 0.88)), url('news-bg.jpg') center/cover no-repeat, var(--panel);
+}
+.card[data-k="quake"]{
+  background:linear-gradient(rgba(11, 15, 20, 0.70), rgba(11, 15, 20, 0.88)), url('earthquake-bg.jpg') center/cover no-repeat, var(--panel);
+}
+
+/* カード内部の各ブロック（半透明ブラック＋すりガラス効果） */
+.glass-item{
+  background:rgba(18, 24, 33, 0.68) !important;
+  backdrop-filter:blur(8px);
+  -webkit-backdrop-filter:blur(8px);
+  border:1px solid rgba(255, 255, 255, 0.08) !important;
+  box-shadow:0 4px 12px rgba(0, 0, 0, 0.35);
+}
+
+/* ========== Weather（上半分: 現在 / 下半分: 3時間予報 / アイコン前面配置） ========== */
 .card[data-k="weather"].wx-morning{
   background:linear-gradient(165deg, #2b507c 0%, #1c3554 55%, #152238 100%);
   box-shadow:inset 0 0 0 1px rgba(255,255,255,0.12);
@@ -137,19 +170,19 @@ body{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-i
 .wx-wrap{
   flex:1;
   min-height:0;
-  display:flex;
-  flex-direction:column;
-  justify-content:space-between;
+  display:grid;
+  grid-template-rows:1fr 1fr; /* 上下50%ずつに完全分離 */
+  gap:1vmin;
 }
 .wx-top{
   display:flex;
   justify-content:space-between;
-  align-items:flex-start;
-  padding-bottom:2vmin;
+  align-items:center;
+  padding-bottom:1.5vmin;
   border-bottom:1px solid rgba(255,255,255,0.12);
 }
 .wx-cond-title{
-  font-size:clamp(24px, 5.6vmin, 42px);
+  font-size:clamp(28px, 6.2vmin, 46px);
   font-weight:700;
   letter-spacing:.02em;
   line-height:1.15;
@@ -159,10 +192,10 @@ body{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-i
   display:flex;
   align-items:center;
   gap:2vmin;
-  margin-top:1.2vmin;
-  font-size:clamp(13px, 2.8vmin, 19px);
+  margin-top:1vmin;
+  font-size:clamp(14px, 2.9vmin, 20px);
   font-weight:600;
-  color:rgba(255,255,255,0.9);
+  color:rgba(255,255,255,0.92);
 }
 .wx-meta-item{
   display:inline-flex;
@@ -170,11 +203,11 @@ body{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-i
   gap:.5vmin;
 }
 .wx-meta-item svg{
-  width:clamp(13px, 2.5vmin, 18px);
-  height:clamp(13px, 2.5vmin, 18px);
+  width:clamp(14px, 2.6vmin, 19px);
+  height:clamp(14px, 2.6vmin, 19px);
 }
 .wx-big-temp{
-  font-size:clamp(44px, 11.5vmin, 88px);
+  font-size:clamp(52px, 12.8vmin, 96px);
   font-weight:700;
   line-height:0.95;
   color:#ffffff;
@@ -186,8 +219,8 @@ body{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-i
   grid-template-columns:repeat(7, 1fr);
   align-items:center;
   text-align:center;
-  padding-top:1.5vmin;
-  flex:1;
+  padding-top:1vmin;
+  height:100%;
 }
 .wx-hr-col{
   display:flex;
@@ -195,20 +228,19 @@ body{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-i
   justify-content:space-between;
   align-items:center;
   height:100%;
-  max-height:22vmin;
-  padding:.6vmin 0;
+  padding:.4vmin 0;
 }
 .wx-hr-time{
-  font-size:clamp(12px, 2.6vmin, 18px);
-  color:rgba(255,255,255,0.72);
+  font-size:clamp(12.5px, 2.7vmin, 18px);
+  color:rgba(255,255,255,0.75);
   font-weight:600;
 }
 .wx-hr-ic{
-  width:clamp(26px, 5.2vmin, 40px);
-  height:clamp(26px, 5.2vmin, 40px);
+  width:clamp(28px, 5.8vmin, 44px);
+  height:clamp(28px, 5.8vmin, 44px);
   display:grid;
   place-items:center;
-  margin:.4vmin 0;
+  margin:.2vmin 0;
 }
 .wx-hr-ic svg{
   width:100%;
@@ -216,20 +248,20 @@ body{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-i
   overflow:visible;
 }
 .wx-hr-temp{
-  font-size:clamp(13px, 2.9vmin, 20px);
+  font-size:clamp(13.5px, 3.1vmin, 21px);
   font-weight:700;
   color:#ffffff;
 }
 .wx-hr-pop{
-  font-size:clamp(11px, 2.2vmin, 15px);
+  font-size:clamp(11.5px, 2.3vmin, 15.5px);
   font-weight:600;
   color:#93c5fd;
 }
 
 /* ========== Train Info ========== */
 .train-list{display:flex;flex-direction:column;gap:1.4vmin;overflow-y:auto;flex:1;padding-right:.6vmin;scrollbar-width:thin}
-.train-item{display:grid;grid-template-columns:auto 1fr auto;gap:2vmin;align-items:center;padding:1.5vmin 2vmin;background:var(--panel2);border-radius:1.4vmin;border:1px solid var(--line)}
-.train-item.delay{border-color:rgba(232,104,95,0.5);background:linear-gradient(90deg, rgba(232,104,95,0.10), var(--panel2))}
+.train-item{display:grid;grid-template-columns:auto 1fr auto;gap:2vmin;align-items:center;padding:1.6vmin 2.2vmin;border-radius:1.4vmin}
+.train-item.delay{border-color:rgba(232,104,95,0.7) !important;background:linear-gradient(90deg, rgba(232,104,95,0.22), rgba(18,24,33,0.75)) !important}
 .line-badge{
   width:clamp(32px,5.2vmin,44px);
   height:clamp(32px,5.2vmin,44px);
@@ -249,13 +281,13 @@ body{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-i
 }
 .line-badge.sub{border-radius:50%}
 .line-badge.shinkansen{background:var(--lc);color:#fff;border-color:#fff;border-width:2px;border-radius:6px}
-.line-badge img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#fff}
-.train-name{font-size:clamp(13px,3.2vmin,20px);font-weight:600;line-height:1.2}
-.train-comp{font-size:clamp(10px,2.1vmin,13px);color:var(--sub);margin-top:2px}
-.train-status{font-size:clamp(11px,2.4vmin,15px);font-weight:700;padding:.5vmin 1.4vmin;border-radius:.9vmin;background:rgba(74,222,128,0.14);color:var(--good);white-space:nowrap}
-.train-item.delay .train-status{background:rgba(232,104,95,0.2);color:var(--bad)}
+.line-badge img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:transparent}
+.train-name{font-size:clamp(13.5px,3.3vmin,21px);font-weight:600;line-height:1.2}
+.train-comp{font-size:clamp(10.5px,2.1vmin,13.5px);color:var(--sub);margin-top:2px}
+.train-status{font-size:clamp(11.5px,2.5vmin,15.5px);font-weight:700;padding:.6vmin 1.5vmin;border-radius:.9vmin;background:rgba(74,222,128,0.18);color:var(--good);white-space:nowrap}
+.train-item.delay .train-status{background:rgba(232,104,95,0.25);color:var(--bad)}
 
-/* ========== News（1枚に3件集約・QRコード削除・CSS時計アイコン） ========== */
+/* ========== News（空白・途切れ解消 ＆ 視認性向上） ========== */
 .nw-stack{
   flex:1;
   min-height:0;
@@ -264,10 +296,8 @@ body{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-i
   gap:1.4vmin;
 }
 .nw-item{
-  background:var(--panel2);
-  border:1px solid var(--line);
   border-radius:1.4vmin;
-  padding:1.4vmin 2.2vmin;
+  padding:1.6vmin 2.4vmin;
   display:flex;
   flex-direction:column;
   justify-content:space-between;
@@ -277,14 +307,14 @@ body{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-i
 .nw-item-top{
   display:flex;
   justify-content:space-between;
-  align-items: baseline;
-  gap:1.5vmin;
+  align-items:center;
+  gap:1.6vmin;
 }
 .nw-item-title{
-  font-size:clamp(13px, 2.6vmin, 18px);
+  font-size:clamp(14px, 2.85vmin, 19.5px);
   font-weight:700;
-  color:var(--text);
-  line-height:1.3;
+  color:#ffffff;
+  line-height:1.35;
   display:-webkit-box;
   -webkit-line-clamp:1;
   -webkit-box-orient:vertical;
@@ -295,11 +325,12 @@ body{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-i
   display:inline-flex;
   align-items:center;
   gap:.5vmin;
-  font-size:clamp(10px, 1.9vmin, 13px);
+  font-size:clamp(10.5px, 2vmin, 13.5px);
   color:var(--acc);
   font-variant-numeric:tabular-nums;
   white-space:nowrap;
   flex-shrink:0;
+  font-weight:600;
 }
 .nw-item-time svg{
   width:clamp(11px, 2vmin, 14px);
@@ -311,9 +342,9 @@ body{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-i
   stroke-linejoin:round;
 }
 .nw-item-desc{
-  font-size:clamp(11.5px, 2.25vmin, 15px);
-  color:#c2cbd6;
-  line-height:1.45;
+  font-size:clamp(12px, 2.4vmin, 16px);
+  color:#d5dee8;
+  line-height:1.5;
   display:-webkit-box;
   -webkit-line-clamp:2;
   -webkit-box-orient:vertical;
@@ -321,12 +352,12 @@ body{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-i
   margin-top:.4vmin;
 }
 
-/* ========== Quake（上部2/3に過去4件均等配置・下部1/3に最新1件） ========== */
+/* ========== Quake（上部 60% 過去4件 / 下部 40% 最新1件） ========== */
 .eq-wrap{
   flex:1;
   min-height:0;
   display:grid;
-  grid-template-rows:2fr 1fr;
+  grid-template-rows:1.45fr 1fr; /* 最新1件を約40%まで拡大 */
   gap:1.4vmin;
 }
 .eq-older-list{
@@ -337,58 +368,55 @@ body{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-i
 }
 .eq-old{
   display:grid;
-  grid-template-columns:8.5vmin 1fr auto auto;
-  gap:1.6vmin;
+  grid-template-columns:9vmin 1fr auto auto;
+  gap:1.8vmin;
   align-items:center;
-  padding:0 2vmin;
-  background:rgba(29,37,47,0.65);
+  padding:0 2.2vmin;
   border-radius:1.1vmin;
-  border:1px solid var(--line);
-  font-size:clamp(11.5px, 2.35vmin, 15.5px);
+  font-size:clamp(12px, 2.5vmin, 16.5px);
   color:var(--sub);
   min-height:0;
 }
-.eq-old-mag{font-weight:700;color:var(--text)}
-.eq-old-place{color:var(--text);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.eq-old-time{font-size:clamp(10.5px, 2vmin, 13.5px);font-variant-numeric:tabular-nums}
-.eq-old-int{font-size:clamp(10.5px, 2.1vmin, 13.5px);padding:.3vmin 1.1vmin;background:var(--panel);border:1px solid var(--line);border-radius:.7vmin;color:var(--text);font-weight:700}
+.eq-old-mag{font-weight:800;color:#ffffff}
+.eq-old-place{color:#ffffff;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.eq-old-time{font-size:clamp(11px, 2.15vmin, 14.5px);font-variant-numeric:tabular-nums;color:#c0ccd8}
+.eq-old-int{font-size:clamp(11px, 2.25vmin, 14.5px);padding:.35vmin 1.2vmin;background:rgba(21,27,35,0.85);border:1px solid rgba(255,255,255,0.12);border-radius:.7vmin;color:#ffffff;font-weight:700}
 
-/* 最新1件（下部1/3をフル活用） */
+/* 最新1件 */
 .eq-latest{
   min-height:0;
   height:100%;
   display:grid;
   grid-template-columns:auto 1fr;
-  gap:2.2vmin;
+  gap:2.4vmin;
   align-items:center;
-  padding:1.4vmin 2.4vmin;
-  background:linear-gradient(135deg, #222b38 0%, var(--panel2) 100%);
-  border:1.5px solid var(--acc);
+  padding:1.6vmin 2.6vmin;
+  border:1.5px solid var(--acc) !important;
   border-radius:1.5vmin;
-  box-shadow:0 4px 16px rgba(0,0,0,0.3);
+  box-shadow:0 6px 20px rgba(0,0,0,0.45);
 }
 .eq-latest-badge{
   height:100%;
-  background:var(--panel);
-  border:1px solid var(--line);
-  border-radius:1.1vmin;
-  padding:.8vmin 2vmin;
-  min-width:13.5vmin;
+  background:rgba(21,27,35,0.85);
+  border:1px solid rgba(255,255,255,0.12);
+  border-radius:1.2vmin;
+  padding:.8vmin 2.2vmin;
+  min-width:14vmin;
   text-align:center;
   display:flex;
   flex-direction:column;
   justify-content:center;
 }
-.eq-latest-badge.hi{background:rgba(232,104,95,0.2);border-color:var(--bad)}
-.eq-latest-badge.mid{background:rgba(240,163,94,0.2);border-color:var(--warm)}
-.eq-latest-lbl{font-size:max(1.8vmin,10px);color:var(--sub);font-weight:600}
-.eq-latest-int{font-size:clamp(20px, 4.8vmin, 34px);font-weight:800;line-height:1.05;color:var(--text)}
-.eq-latest-info{display:flex;flex-direction:column;justify-content:center;gap:.4vmin;min-width:0}
-.eq-latest-top{display:flex;align-items:center;gap:1.2vmin}
-.eq-latest-tag{font-size:max(1.7vmin,10px);font-weight:700;background:var(--acc);color:#08202b;padding:.15vmin .9vmin;border-radius:4px}
-.eq-latest-time{font-size:clamp(11px,2.2vmin,14.5px);color:var(--sub);font-variant-numeric:tabular-nums}
-.eq-latest-place{font-size:clamp(15px,3.6vmin,24px);font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.2}
-.eq-latest-meta{font-size:clamp(11.5px,2.4vmin,16px);color:var(--acc);font-weight:600}
+.eq-latest-badge.hi{background:rgba(232,104,95,0.3);border-color:var(--bad)}
+.eq-latest-badge.mid{background:rgba(240,163,94,0.3);border-color:var(--warm)}
+.eq-latest-lbl{font-size:max(1.85vmin,11px);color:var(--sub);font-weight:600}
+.eq-latest-int{font-size:clamp(22px, 5.2vmin, 38px);font-weight:800;line-height:1.05;color:#ffffff}
+.eq-latest-info{display:flex;flex-direction:column;justify-content:center;gap:.7vmin;min-width:0}
+.eq-latest-top{display:flex;align-items:center;gap:1.4vmin}
+.eq-latest-tag{font-size:max(1.75vmin,10.5px);font-weight:700;background:var(--acc);color:#08202b;padding:.2vmin 1vmin;border-radius:4px}
+.eq-latest-time{font-size:clamp(11.5px, 2.3vmin, 15.5px);color:#c0ccd8;font-variant-numeric:tabular-nums}
+.eq-latest-place{font-size:clamp(16px, 4vmin, 26px);font-weight:700;color:#ffffff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.25}
+.eq-latest-meta{font-size:clamp(12px, 2.55vmin, 17px);color:var(--acc);font-weight:600}
 
 /* Calendar */
 .ev{display:grid;grid-template-columns:minmax(14vmin,max-content) 1fr;gap:2.4vmin;align-items:baseline;padding:2vmin 0;border-top:1px solid var(--line);font-size:3.8vmin}
@@ -563,7 +591,7 @@ body.open #scrim{opacity:1;pointer-events:auto}
 (()=>{
 'use strict';
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
-const KC='dash.cfg.v4', KD='dash.cache.v4';
+const KC='dash.cfg.v5', KD='dash.cache.v5';
 
 /* ---- 路線マスターデータ ---- */
 const RAILWAY_CATALOG = [
@@ -636,17 +664,17 @@ function updateWeatherBgTheme(){
   else card.classList.add('wx-night');
 }
 
-/* ---- カスタムフラットSVG天気アイコン生成（OS絵文字不使用） ---- */
+/* ---- 太陽/月を前面配置したSVG天気アイコン生成 ---- */
 function getWeatherSvg(code, hour){
   const c = +code;
   const isNight = (hour < 6 || hour >= 18);
-  const cloudPath = `<path d="M11 26h15a5.5 5.5 0 0 0 .6-10.97A7.5 7.5 0 0 0 12.3 12a6 6 0 0 0-1.3 14z" fill="#ffffff"/>`;
-  const subCloud = `<path d="M8 21h12a4.5 4.5 0 0 0 .4-8.97A6 6 0 0 0 9 9.5a4.8 4.8 0 0 0-1 11.5z" fill="rgba(255,255,255,0.65)"/>`;
+  const cloudBack = `<path d="M12 25h14a5 5 0 0 0 .5-9.97A7 7 0 0 0 13.5 11.5a5.5 5.5 0 0 0-1.5 13.5z" fill="rgba(255,255,255,0.78)"/>`;
 
   // 快晴 (0)
   if(c === 0){
     if(isNight){
-      return `<svg viewBox="0 0 36 36"><path d="M23.5 7.5A9.5 9.5 0 1 0 28.5 23a8 8 0 0 1-5-15.5z" fill="#ffffff"/></svg>`;
+      // 月は淡いイエロー (#facc15) でくっきり描画
+      return `<svg viewBox="0 0 36 36"><path d="M22.5 7.5A9.5 9.5 0 1 0 27.5 23a8 8 0 0 1-5-15.5z" fill="#facc15"/></svg>`;
     }
     return `<svg viewBox="0 0 36 36">
       <circle cx="18" cy="18" r="7" fill="#fbbf24"/>
@@ -658,47 +686,55 @@ function getWeatherSvg(code, hour){
       </g>
     </svg>`;
   }
-  // 晴れ時々曇り (1, 2)
+
+  // 晴れ時々曇り (1, 2)：雲を背面に置き、太陽または月を【前面・左上】に大きく描画
   if(c <= 2){
     if(isNight){
       return `<svg viewBox="0 0 36 36">
-        <path d="M16 7a6.5 6.5 0 1 0 4 11.2A5.5 5.5 0 0 1 16 7z" fill="#f8fafc"/>
-        ${cloudPath}
+        ${cloudBack}
+        <path d="M14 6.5A7.5 7.5 0 1 0 18.5 19a6.2 6.2 0 0 1-4.5-12.5z" fill="#facc15" filter="drop-shadow(0 2px 4px rgba(0,0,0,0.5))"/>
       </svg>`;
     }
     return `<svg viewBox="0 0 36 36">
-      <circle cx="13" cy="13" r="5.5" fill="#fbbf24"/>
-      ${cloudPath}
+      ${cloudBack}
+      <circle cx="12" cy="12" r="6" fill="#fbbf24" filter="drop-shadow(0 2px 4px rgba(0,0,0,0.4))"/>
     </svg>`;
   }
+
   // 曇り・霧 (3 ~ 48)
   if(c <= 48){
-    return `<svg viewBox="0 0 36 36">${subCloud}${cloudPath}</svg>`;
+    return `<svg viewBox="0 0 36 36">
+      <path d="M9 22h13a4.5 4.5 0 0 0 .4-8.97A6 6 0 0 0 10 10.5a4.8 4.8 0 0 0-1 11.5z" fill="rgba(255,255,255,0.5)"/>
+      <path d="M12 26h15a5.5 5.5 0 0 0 .6-10.97A7.5 7.5 0 0 0 13.3 12a6 6 0 0 0-1.3 14z" fill="#ffffff"/>
+    </svg>`;
   }
+
   // 雨 (51 ~ 67, 80 ~ 82)
   if((c >= 51 && c <= 67) || (c >= 80 && c <= 82)){
     return `<svg viewBox="0 0 36 36">
-      ${cloudPath}
+      <path d="M12 24h14a5.5 5.5 0 0 0 .6-10.97A7.5 7.5 0 0 0 13.3 10a6 6 0 0 0-1.3 14z" fill="#ffffff"/>
       <g stroke="#60a5fa" stroke-width="2.2" stroke-linecap="round">
-        <line x1="13" y1="29" x2="11.5" y2="33"/>
-        <line x1="18.5" y1="29" x2="17" y2="33"/>
-        <line x1="24" y1="29" x2="22.5" y2="33"/>
+        <line x1="14" y1="27" x2="12.5" y2="31"/>
+        <line x1="19.5" y1="27" x2="18" y2="31"/>
+        <line x1="25" y1="27" x2="23.5" y2="31"/>
       </g>
     </svg>`;
   }
+
   // 雪 (71 ~ 77, 85 ~ 86)
   if((c >= 71 && c <= 77) || (c >= 85 && c <= 86)){
     return `<svg viewBox="0 0 36 36">
-      ${cloudPath}
+      <path d="M12 24h14a5.5 5.5 0 0 0 .6-10.97A7.5 7.5 0 0 0 13.3 10a6 6 0 0 0-1.3 14z" fill="#ffffff"/>
       <g fill="#bae6fd">
-        <circle cx="13" cy="31" r="1.8"/><circle cx="18.5" cy="32" r="1.8"/><circle cx="24" cy="31" r="1.8"/>
+        <circle cx="14" cy="29" r="1.8"/><circle cx="19.5" cy="30" r="1.8"/><circle cx="25" cy="29" r="1.8"/>
       </g>
     </svg>`;
   }
+
   // 雷雨 (95+)
   return `<svg viewBox="0 0 36 36">
-    ${cloudPath}
-    <polygon points="19,25 14,31 18,31 16.5,35 23,28.5 19,28.5" fill="#fbbf24"/>
+    <path d="M12 23h14a5.5 5.5 0 0 0 .6-10.97A7.5 7.5 0 0 0 13.3 9a6 6 0 0 0-1.3 14z" fill="#ffffff"/>
+    <polygon points="19,23 14,29 18,29 16.5,33 23,26.5 19,26.5" fill="#facc15"/>
   </svg>`;
 }
 
@@ -847,11 +883,12 @@ const R={
   },
   train(t){
     if(!t||!t.length) return empty('監視する路線が選択されていません（設定から選択してください）');
+    // SVG優先、無ければPNG、どちらも無ければCSS記号を描画
     return `<div class="train-list">${t.map(item=>`
-      <div class="train-item ${item.delay?'delay':''}">
+      <div class="train-item glass-item ${item.delay?'delay':''}">
         <div class="line-badge ${esc(item.type||'')}" style="--lc:${esc(item.color||'#3b82f6')}">
           <span>${esc(item.code||'JR')}</span>
-          <img src="icons/${encodeURIComponent(item.code||'JR')}.png" alt="" onerror="this.remove()">
+          <img src="icons/${encodeURIComponent(item.code||'JR')}.svg" alt="" onerror="this.onerror=null;this.src='icons/${encodeURIComponent(item.code||'JR')}.png';this.onerror=()=>this.remove();">
         </div>
         <div>
           <div class="train-name">${esc(item.name)}</div>
@@ -870,7 +907,7 @@ const R={
     return `<div class="nw-stack">${list.map(n=>{
       const desc = n.desc ? stripHtml(n.desc) : '';
       return `
-        <div class="nw-item">
+        <div class="nw-item glass-item">
           <div class="nw-item-top">
             <div class="nw-item-title">${esc(n.title)}</div>
             <span class="nw-item-time">${clockSvg}${esc(n.date||'最新')}</span>
@@ -883,7 +920,6 @@ const R={
   quake(a){
     if(!a||!a.length) return empty('直近の地震情報はありません');
     const latest = a[0];
-    // 過去4件を取得し、上から下へ新しくなるよう反転
     const older = a.slice(1, 5).reverse();
 
     const fmtTime = tStr => {
@@ -894,7 +930,7 @@ const R={
     const olderHtml = older.map(q=>{
       const m=+q.mag;
       return `
-        <div class="eq-old">
+        <div class="eq-old glass-item">
           <span class="eq-old-mag">M${isNaN(m)?'-':m.toFixed(1)}</span>
           <span class="eq-old-place">${esc(q.place)}</span>
           <span class="eq-old-time">${fmtTime(q.time)}</span>
@@ -907,7 +943,7 @@ const R={
     const badgeCls = lm>=6 ? 'hi' : (lm>=4.5 ? 'mid' : '');
 
     const latestHtml = `
-      <div class="eq-latest">
+      <div class="eq-latest glass-item">
         <div class="eq-latest-badge ${badgeCls}">
           <span class="eq-latest-lbl">最大震度</span>
           <span class="eq-latest-int">${esc(latest.intensity||'-')}</span>
@@ -1037,7 +1073,7 @@ async function load(){
   if(busy)return;busy=true;
   $('#info-rss-url').textContent=cfg.newsRss||'未設定';
   try{
-    // 1. 天気（7列分の3時間予報を取得）
+    // 1. 天気
     let weatherData=null;
     try{
       const wxUrl=`https://api.open-meteo.com/v1/forecast?latitude=${cfg.lat}&longitude=${cfg.lon}&current=temperature_2m,weather_code&hourly=temperature_2m,weather_code,precipitation_probability&daily=temperature_2m_max,temperature_2m_min&timezone=Asia%2FTokyo&forecast_days=2`;
@@ -1088,7 +1124,7 @@ async function load(){
     // 3. ニュース
     const newsData=await fetchNewsWithFallback(cfg.newsRss);
 
-    // 4. 地震情報（最新1件＋過去4件＝計5件取得）
+    // 4. 地震情報
     let quakeData=[];
     try{
       const qRes=await fetch('https://api.p2pquake.net/v2/history?codes=551&limit=5').then(r=>r.json());
