@@ -273,7 +273,7 @@ body{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-i
   font-weight:600;
 }
 
-/* ========== Train Info（初期全幅表示 ＆ 往復ティッカースライド） ========== */
+/* ========== Train Info ========== */
 .train-list{display:flex;flex-direction:column;gap:1.4vmin;overflow-y:auto;flex:1;padding-right:.6vmin;scrollbar-width:thin}
 .train-item{
   display:flex;
@@ -330,7 +330,6 @@ body{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-i
 .train-status.warm{background:rgba(240,163,94,0.28);color:#ffc085}
 .train-status.info{background:rgba(143,208,232,0.25);color:var(--acc)}
 
-/* 遅延詳細枠：初期状態は左端揃えで画面いっぱいに表示 */
 .train-detail-box{
   width:100%;
   overflow:hidden;
@@ -356,18 +355,13 @@ body{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-i
 .train-item.warn .train-detail-content{
   color:#fff2e6;
 }
-/* はみ出ている時のみ、左端で一時停止→左へスライド→末尾で停止→戻る 往復ティッカー */
 .train-detail-box.marquee .train-detail-content{
   padding-left:0;
   animation:scroll-text var(--duration, 8s) ease-in-out infinite alternate;
 }
 @keyframes scroll-text{
-  0%, 25%{
-    transform:translateX(0);
-  }
-  75%, 100%{
-    transform:translateX(calc(-1 * var(--scroll-dist, 0px)));
-  }
+  0%, 25%{transform:translateX(0)}
+  75%, 100%{transform:translateX(calc(-1 * var(--scroll-dist, 0px)))}
 }
 
 /* ========== News ========== */
@@ -437,12 +431,12 @@ body{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-i
   overflow:hidden;
 }
 
-/* ========== Quake ========== */
+/* ========== Quake（過去4件のフォントサイズを2倍に拡大） ========== */
 .eq-wrap{
   flex:1;
   min-height:0;
   display:grid;
-  grid-template-rows:1.35fr 1fr;
+  grid-template-rows:1.55fr 1fr;
   gap:1.4vmin;
 }
 .eq-older-list{
@@ -453,19 +447,43 @@ body{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-i
 }
 .eq-old{
   display:grid;
-  grid-template-columns:9vmin 1fr auto auto;
+  grid-template-columns:minmax(65px, 11vmin) 1fr auto auto;
   gap:1.8vmin;
   align-items:center;
   padding:0 2.2vmin;
   border-radius:1.1vmin;
-  font-size:clamp(12.5px, 2.6vmin, 17px);
   color:var(--sub);
   min-height:0;
 }
-.eq-old-mag{font-weight:800;color:#ffffff}
-.eq-old-place{color:#ffffff;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.eq-old-time{font-size:clamp(11.5px, 2.2vmin, 15px);font-variant-numeric:tabular-nums;color:#c0ccd8}
-.eq-old-int{font-size:clamp(11.5px, 2.3vmin, 15px);padding:.35vmin 1.2vmin;background:rgba(21,27,35,0.85);border:1px solid rgba(255,255,255,0.12);border-radius:.7vmin;color:#ffffff;font-weight:700}
+.eq-old-mag{
+  font-size:clamp(19px, 4.2vmin, 28px);
+  font-weight:800;
+  color:#ffffff;
+  line-height:1;
+}
+.eq-old-place{
+  font-size:clamp(18px, 3.8vmin, 26px);
+  color:#ffffff;
+  font-weight:700;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.eq-old-time{
+  font-size:clamp(15px, 3.2vmin, 21px);
+  font-variant-numeric:tabular-nums;
+  color:#c0ccd8;
+  font-weight:600;
+}
+.eq-old-int{
+  font-size:clamp(15px, 3.4vmin, 22px);
+  padding:.3vmin 1.2vmin;
+  background:rgba(21,27,35,0.85);
+  border:1.5px solid rgba(255,255,255,0.14);
+  border-radius:.8vmin;
+  color:#ffffff;
+  font-weight:800;
+}
 
 .eq-latest{
   min-height:0;
@@ -510,7 +528,7 @@ body{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-i
 .eq-latest-place{font-size:clamp(20px, 4.8vmin, 34px);font-weight:800;color:#ffffff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.2}
 .eq-latest-meta{font-size:clamp(14px, 3.1vmin, 21px);color:var(--acc);font-weight:700;line-height:1.2}
 
-/* ========== Calendar（フォントサイズ2倍化） ========== */
+/* ========== Calendar ========== */
 .cal-list{
   flex:1;
   min-height:0;
@@ -662,7 +680,7 @@ body.open #scrim{opacity:1;pointer-events:auto}
       <button type="button" id="btnAllLines">全選択</button>
       <button type="button" id="btnClearLines">全解除</button>
       <button type="button" id="btnKantoLines">主要路線</button>
-      <button type="button" id="btnShinkansen">東海道新幹線</button>
+      <button type="button" id="btnShinkansen">新幹線全線</button>
     </div>
     <div class="line-grid" id="lineCheckboxes"></div>
   </fieldset>
@@ -751,11 +769,23 @@ body.open #scrim{opacity:1;pointer-events:auto}
 (()=>{
 'use strict';
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
-const KC='dash.cfg.v18', KD='dash.cache.v18';
+const KC='dash.cfg.v19', KD='dash.cache.v19';
 
-/* ---- 路線カタログ ---- */
+/* ---- 路線カタログ（全国新幹線を含む全路線） ---- */
 const RAILWAY_CATALOG = [
+  // 新幹線
   { id:'tokaido_shinkansen', name:'東海道新幹線', match:['東海道新幹線'], file:'Shinkansen_jrc.svg', company:'JR東海', group:'shinkansen' },
+  { id:'sanyo_shinkansen', name:'山陽新幹線', match:['山陽新幹線'], file:'Shinkansen_jrw.svg', company:'JR西日本', group:'shinkansen' },
+  { id:'tohoku_shinkansen', name:'東北新幹線', match:['東北新幹線'], file:'Shinkansen_jre.svg', company:'JR東日本', group:'shinkansen' },
+  { id:'joetsu_shinkansen', name:'上越新幹線', match:['上越新幹線'], file:'Shinkansen_jre.svg', company:'JR東日本', group:'shinkansen' },
+  { id:'hokuriku_shinkansen', name:'北陸新幹線', match:['北陸新幹線'], file:'Shinkansen_jre.svg', company:'JR東日本/JR西日本', group:'shinkansen' },
+  { id:'yamagata_shinkansen', name:'山形新幹線', match:['山形新幹線'], file:'Shinkansen_jre.svg', company:'JR東日本', group:'shinkansen' },
+  { id:'akita_shinkansen', name:'秋田新幹線', match:['秋田新幹線'], file:'Shinkansen_jre.svg', company:'JR東日本', group:'shinkansen' },
+  { id:'hokkaido_shinkansen', name:'北海道新幹線', match:['北海道新幹線'], file:'Shinkansen_jrh.svg', company:'JR北海道', group:'shinkansen' },
+  { id:'kyushu_shinkansen', name:'九州新幹線', match:['九州新幹線'], file:'Shinkansen_jrk.svg', company:'JR九州', group:'shinkansen' },
+  { id:'nishi_kyushu_shinkansen', name:'西九州新幹線', match:['西九州新幹線'], file:'Shinkansen_jrk.svg', company:'JR九州', group:'shinkansen' },
+
+  // JR東日本 在来線
   { id:'nex', name:'成田エクスプレス', match:['成田エクスプレス','成田線[千葉','成田線[成田'], file:'Sign_of_NEX_in_station.svg', company:'JR東日本', group:'kanto' },
   { id:'jb_sobu', name:'中央・総武各駅停車', match:['中央・総武線[各停]','中央・総武各駅停車','総武線[各停]'], file:'JR_JB_line_symbol.svg', company:'JR東日本', group:'kanto' },
   { id:'jo_sobu_rapid', name:'総武快速線', match:['総武線[快速]','横須賀線','総武快速線'], file:'JR_JO_line_symbol.svg', company:'JR東日本', group:'kanto' },
@@ -773,6 +803,8 @@ const RAILWAY_CATALOG = [
   { id:'jh_yokohama', name:'横浜線', match:['横浜線'], file:'JR_JH_line_symbol.svg', company:'JR東日本', group:'kanto' },
   { id:'jn_nambu', name:'南武線', match:['南武線'], file:'JR_JN_line_symbol.svg', company:'JR東日本', group:'kanto' },
   { id:'ji_tsurumi', name:'鶴見線', match:['鶴見線'], file:'JR_JI_line_symbol.svg', company:'JR東日本', group:'kanto' },
+
+  // 地下鉄・私鉄
   { id:'g_ginza', name:'銀座線', match:['東京メトロ銀座線','銀座線'], file:'Logo_of_Tokyo_Metro_Ginza_Line.svg', company:'東京メトロ', group:'kanto' },
   { id:'m_marunouchi', name:'丸ノ内線', match:['東京メトロ丸ノ内線','丸ノ内線'], file:'Logo_of_Tokyo_Metro_Marunouchi_Line.svg', company:'東京メトロ', group:'kanto' },
   { id:'mb_marunouchi_br', name:'丸ノ内線方南町支線', match:['東京メトロ丸ノ内線','丸ノ内線'], file:'Logo_of_Tokyo_Metro_Marunouchi_branch_Line.svg', company:'東京メトロ', group:'kanto' },
@@ -972,7 +1004,8 @@ function buildLineCheckboxes(){
   };
   $('#btnShinkansen').onclick=()=>{
     $$('.line-chk').forEach(c=>{
-      if(c.value==='tokaido_shinkansen') c.checked=true;
+      const l = RAILWAY_CATALOG.find(x=>x.id===c.value);
+      c.checked = (l && l.group === 'shinkansen');
     });
   };
 }
@@ -1215,7 +1248,6 @@ const R={
         dateStr = fmtEventDate(ev.start);
         const t1 = fmtEventTime(ev.start);
         const t2 = ev.end ? fmtEventTime(ev.end) : '';
-        // 0:00-0:00 または 開始と終了が同時刻の場合は「終日」
         if(ev.isAllDay || (t1 === '00:00' && (t2 === '00:00' || !t2)) || (t2 && t1 === t2)){
           timeStr = '終日';
         } else {
@@ -1245,7 +1277,6 @@ function checkMarquee(){
     if(overflow > 4){
       box.classList.add('marquee');
       box.style.setProperty('--scroll-dist', `${overflow + 14}px`);
-      // 移動速度：はみ出し量に応じて可変（最低6秒）
       const dur = Math.max(6, Math.round(overflow / 30) + 4);
       box.style.setProperty('--duration', `${dur}s`);
     }else{
@@ -1256,7 +1287,6 @@ function checkMarquee(){
   });
 }
 
-// データに変更がない場合にDOM再生成を抑止し、マーキーのリセットを防ぐ
 let prevTrainHash = '';
 function apply(data){
   if(!data)return;
