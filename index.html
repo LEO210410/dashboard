@@ -273,7 +273,7 @@ body{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-i
   font-weight:600;
 }
 
-/* ========== Train Info（パネル全幅＆はみ出し時自動ティッカーアニメーション） ========== */
+/* ========== Train Info（初期全幅表示 ＆ 往復ティッカースライド） ========== */
 .train-list{display:flex;flex-direction:column;gap:1.4vmin;overflow-y:auto;flex:1;padding-right:.6vmin;scrollbar-width:thin}
 .train-item{
   display:flex;
@@ -330,7 +330,7 @@ body{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-i
 .train-status.warm{background:rgba(240,163,94,0.28);color:#ffc085}
 .train-status.info{background:rgba(143,208,232,0.25);color:var(--acc)}
 
-/* 遅延詳細の横幅全開枠 ＆ 自動ティッカー */
+/* 遅延詳細枠：初期状態は左端揃えで画面いっぱいに表示 */
 .train-detail-box{
   width:100%;
   overflow:hidden;
@@ -351,18 +351,23 @@ body{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-i
   font-weight:500;
   line-height:1.35;
   white-space:nowrap;
+  will-change:transform;
 }
 .train-item.warn .train-detail-content{
   color:#fff2e6;
 }
+/* はみ出ている時のみ、左端で一時停止→左へスライド→末尾で停止→戻る 往復ティッカー */
 .train-detail-box.marquee .train-detail-content{
-  display:inline-block;
-  padding-left:100%;
-  animation:marquee 14s linear infinite;
+  padding-left:0;
+  animation:scroll-text var(--duration, 8s) ease-in-out infinite alternate;
 }
-@keyframes marquee{
-  0%{transform:translateX(0%)}
-  100%{transform:translateX(-100%)}
+@keyframes scroll-text{
+  0%, 25%{
+    transform:translateX(0);
+  }
+  75%, 100%{
+    transform:translateX(calc(-1 * var(--scroll-dist, 0px)));
+  }
 }
 
 /* ========== News ========== */
@@ -505,7 +510,7 @@ body{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-i
 .eq-latest-place{font-size:clamp(20px, 4.8vmin, 34px);font-weight:800;color:#ffffff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.2}
 .eq-latest-meta{font-size:clamp(14px, 3.1vmin, 21px);color:var(--acc);font-weight:700;line-height:1.2}
 
-/* ========== Calendar（フォントサイズ2倍＆大型レイアウト） ========== */
+/* ========== Calendar（フォントサイズ2倍化） ========== */
 .cal-list{
   flex:1;
   min-height:0;
@@ -746,7 +751,7 @@ body.open #scrim{opacity:1;pointer-events:auto}
 (()=>{
 'use strict';
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
-const KC='dash.cfg.v17', KD='dash.cache.v17';
+const KC='dash.cfg.v18', KD='dash.cache.v18';
 
 /* ---- 路線カタログ ---- */
 const RAILWAY_CATALOG = [
@@ -1013,7 +1018,7 @@ function updateBurnInProtection(){
 });
 setInterval(updateBurnInProtection, 60000);
 
-/* ---- clock ---- */
+/* ---- clock（2026年11月5日(木) 形式） ---- */
 const cl=['h','m','s'].map(k=>{const p=$('#'+k);return{p,s:[...p.querySelectorAll('span')],t:0,x:undefined}});
 let last=['','',''],lastDay=-1;
 function fin(c){clearTimeout(c.t);c.s[1].textContent=c.s[2].textContent=c.x;c.p.classList.remove('go')}
@@ -1029,7 +1034,8 @@ function tick(){
   v.forEach((x,i)=>{if(x!==last[i]){put(cl[i],x);last[i]=x}});
   if(d.getDate()!==lastDay){
     lastDay=d.getDate();
-    $('#date').textContent=d.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'});
+    const days=['日','月','火','水','木','金','土'];
+    $('#date').textContent=`${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日(${days[d.getDay()]})`;
   }
   setTimeout(tick,1005-d.getMilliseconds());
 }
@@ -1230,27 +1236,41 @@ const R={
   }
 };
 
-/* 鉄道詳細テキストのはみ出し自動判定（マーキー追加） */
+/* 鉄道詳細テキストのはみ出し自動判定（往復スクロールアニメーション設定） */
 function checkMarquee(){
   document.querySelectorAll('.train-detail-box').forEach(box=>{
     const content = box.querySelector('.train-detail-content');
-    if(content && content.scrollWidth > box.clientWidth + 2){
+    if(!content) return;
+    const overflow = content.scrollWidth - box.clientWidth;
+    if(overflow > 4){
       box.classList.add('marquee');
-      const dur = Math.max(10, Math.round(content.scrollWidth / 35));
-      content.style.animationDuration = `${dur}s`;
+      box.style.setProperty('--scroll-dist', `${overflow + 14}px`);
+      // 移動速度：はみ出し量に応じて可変（最低6秒）
+      const dur = Math.max(6, Math.round(overflow / 30) + 4);
+      box.style.setProperty('--duration', `${dur}s`);
     }else{
       box.classList.remove('marquee');
+      box.style.removeProperty('--scroll-dist');
+      box.style.removeProperty('--duration');
     }
   });
 }
 
+// データに変更がない場合にDOM再生成を抑止し、マーキーのリセットを防ぐ
+let prevTrainHash = '';
 function apply(data){
   if(!data)return;
   for(const k in R){
     if(data[k]!=null){
-      $('#b-'+k).innerHTML=R[k](data[k]);
       if(k==='train'){
-        setTimeout(checkMarquee, 100);
+        const curHash = JSON.stringify(data[k]);
+        if(curHash !== prevTrainHash){
+          prevTrainHash = curHash;
+          $('#b-train').innerHTML=R.train(data.train);
+          setTimeout(checkMarquee, 100);
+        }
+      } else {
+        $('#b-'+k).innerHTML=R[k](data[k]);
       }
     }
   }
