@@ -1,73 +1,813 @@
-async function fetchYahooTrainTroubles(){
-  if(cfg.gasUrl && cfg.gasUrl.startsWith('https://script.google.com/')){
-    try{
-      const j = await fetchJsonp(cfg.gasUrl, 16000);
-      if(j && j.ok && Array.isArray(j.htmlList)){
-        const allTroubles = [];
-        let parsedRows = 0;
-        const fullDetails = j.fullDetails || {};
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Dashboard">
+<meta name="application-name" content="Dashboard">
+<meta name="theme-color" content="#0b0f14">
+<meta name="color-scheme" content="dark">
+<meta name="format-detection" content="telephone=no">
+<link rel="icon" href="data:,">
+<title>Dashboard</title>
+<style>
+:root{--bg:#0b0f14;--panel:#151b23;--panel2:#1d252f;--line:#252e3a;--text:#ece9e1;--sub:#8794a3;--acc:#8fd0e8;--warm:#f0a35e;--bad:#e8685f;--good:#4ade80;--px:0px;--py:0px;--dim:1}
+*{box-sizing:border-box;margin:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden;overscroll-behavior:none;background:var(--bg);color:var(--text);touch-action:manipulation;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;font-family:"Hiragino Sans","Noto Sans JP","Yu Gothic UI",system-ui,sans-serif}
+body{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
 
-        j.htmlList.forEach(h=>{
-          const res = parseYahooTransitHtml(h);
-          parsedRows += res.totalRows;
-          res.troubles.forEach(tr=>{
-            // GASが個別ページから取得した「省略されていない全文」があればそれを優先適用
-            if(fullDetails[tr.name]){
-              tr.detail = fullDetails[tr.name];
-            } else {
-              // 路線名の部分一致でも検索（例: [東京～千葉] などの差異を吸収）
-              const matchedKey = Object.keys(fullDetails).find(k => k.includes(tr.name) || tr.name.includes(k));
-              if(matchedKey) tr.detail = fullDetails[matchedKey];
-            }
-
-            if(!allTroubles.some(x=>x.name===tr.name)) allTroubles.push(tr);
-          });
-        });
-        return { ok: parsedRows > 0, parsedRows, troubles: allTroubles, source: 'GAS(JSONP)' };
-      }
-    }catch(e){
-      console.warn('GAS JSONP fetch error:', e);
-    }
-  }
-
-  const targets = [
-    'https://transit.yahoo.co.jp/diainfo/area/4',
-    'https://transit.yahoo.co.jp/diainfo/shinkansen'
-  ];
-
-  async function tryProxy(u){
-    try{
-      const r = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(u)}`, {cache:'no-store'});
-      if(r.ok){
-        const j = await r.json();
-        if(j.contents && j.contents.includes('<table')) return j.contents;
-      }
-    }catch(_){}
-    try{
-      const r2 = await fetch(`https://corsproxy.io/?${encodeURIComponent(u)}`, {cache:'no-store'});
-      if(r2.ok){
-        const t = await r2.text();
-        if(t && t.includes('<table')) return t;
-      }
-    }catch(_){}
-    return '';
-  }
-
-  const htmlList = await Promise.all(targets.map(tryProxy));
-  const allTroubles = [];
-  let parsedRows = 0;
-  htmlList.forEach(h=>{
-    const res = parseYahooTransitHtml(h);
-    parsedRows += res.totalRows;
-    res.troubles.forEach(tr=>{
-      if(!allTroubles.some(x=>x.name===tr.name)) allTroubles.push(tr);
-    });
-  });
-
-  return {
-    ok: parsedRows > 0,
-    parsedRows,
-    troubles: allTroubles,
-    source: 'CORS-Proxy'
-  };
+#app{
+  height:100%;
+  display:grid;
+  grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);
+  gap:2.4vmin;
+  padding:3vmin;
+  transform:translate3d(var(--px),var(--py),0);
+  opacity:var(--dim);
+  transition:transform 4s ease-in-out, opacity 1.5s ease;
 }
+
+/* clock */
+.clock{position:relative;container-type:size;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4vh;min-width:0}
+.flips{--h:min(48vh,17vw);display:flex;gap:calc(var(--h)*.05)}
+@supports (container-type:size){.flips{--h:min(52cqh,35cqw)}}
+.flip{
+  position:relative;
+  perspective:calc(var(--h)*3);
+  width:calc(var(--h)*.84);
+  height:var(--h);
+  border-radius:calc(var(--h)*.08);
+  box-shadow:0 .6vmin 1.8vmin #0009,inset 0 0 0 1px #ffffff0d;
+  font:700 calc(var(--h)*.50)/1 "SF Pro Display","Helvetica Neue",Roboto,sans-serif;
+  font-variant-numeric:tabular-nums;
+  letter-spacing:-.02em;
+}
+.flip div{position:absolute;left:0;right:0;height:50%;overflow:hidden;backface-visibility:hidden;-webkit-backface-visibility:hidden}
+.flip span{position:absolute;left:0;right:0;height:200%;display:grid;place-items:center;padding:0 2px}
+.u,.fa{top:0;background:var(--panel2);border-radius:calc(var(--h)*.08) calc(var(--h)*.08) 0 0}
+.l,.fb{top:50%;background:var(--panel);border-radius:0 0 calc(var(--h)*.08) calc(var(--h)*.08)}
+.l span,.fb span{top:-100%}
+.fa{transform-origin:50% 100%;z-index:2}
+.fb{transform-origin:50% 0;transform:rotateX(90deg);z-index:2}
+.flip.go .fa{animation:fa .3s ease-in forwards}
+.flip.go .fb{animation:fb .3s .3s ease-out forwards}
+.flip::after{content:"";position:absolute;left:0;right:0;top:50%;z-index:5;height:calc(var(--h)*.014);background:#000b;transform:translateY(-50%)}
+.flip.s{color:var(--sub)}
+@keyframes fa{to{transform:rotateX(-90deg)}}
+@keyframes fb{to{transform:none}}
+.meta{display:flex;align-items:baseline;gap:3vmin;font-size:min(4.4vh,2.4vw)}
+#temp{color:var(--acc);font-weight:600}
+
+/* 左下フッター */
+.clock-foot{
+  position:absolute;
+  left:.5vmin;
+  bottom:0;
+  display:flex;
+  align-items:center;
+  gap:1.6vmin;
+}
+#cfgBtn{
+  width:clamp(32px,4.6vmin,42px);
+  height:clamp(32px,4.6vmin,42px);
+  border-radius:1.2vmin;
+  background:var(--panel2);
+  border:1px solid var(--line);
+  color:var(--sub);
+  display:grid;
+  place-items:center;
+  cursor:pointer;
+  padding:0;
+  transition:color .2s, border-color .2s, background .2s;
+}
+#cfgBtn:hover,#cfgBtn:active{
+  color:var(--acc);
+  border-color:var(--acc);
+  background:#222c38;
+}
+#cfgBtn svg{
+  width:54%;
+  height:54%;
+  stroke:currentColor;
+  fill:none;
+  stroke-width:1.8;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+}
+#stat{font-size:max(2.1vmin,11px);color:var(--sub)}
+#stat.err{color:var(--warm)}
+
+/* cards */
+.stage{position:relative;min-width:0;min-height:0}
+#pager{position:relative;height:100%;overflow-y:auto;scroll-snap-type:y mandatory;scrollbar-width:none;overscroll-behavior:contain;border-radius:2vmin;touch-action:pan-y}
+#pager::-webkit-scrollbar{display:none}
+.card{
+  height:100%;
+  scroll-snap-align:start;
+  scroll-snap-stop:always;
+  display:flex;
+  flex-direction:column;
+  gap:1.6vmin;
+  padding:2.6vmin 4.6vmin 2.6vmin 3.6vmin;
+  overflow:hidden;
+  background-color:var(--panel);
+  border-radius:2vmin;
+  box-shadow:inset 0 0 0 1px var(--line);
+  position:relative;
+}
+.card[hidden]{display:none}
+.card-hdr{display:flex;justify-content:space-between;align-items:center;z-index:2}
+.card h2{font-size:max(2.4vmin,13px);font-weight:600;color:var(--sub)}
+.body{flex:1;min-height:0;display:flex;flex-direction:column;z-index:2}
+.empty{margin:auto;color:var(--sub);font-size:3.2vmin;text-align:center}
+#dots{position:absolute;right:1.2vmin;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:2vmin;z-index:10}
+#dots button{position:relative;width:1.2vmin;height:1.2vmin;min-width:8px;min-height:8px;padding:0;border:0;border-radius:50%;background:#ffffff33;cursor:pointer}
+#dots button::before{content:"";position:absolute;inset:-12px}
+#dots button.on{background:var(--acc)}
+
+/* 背景画像＆半透明すりガラス共通 */
+.card[data-k="train"]{
+  background:linear-gradient(rgba(11, 15, 20, 0.70), rgba(11, 15, 20, 0.88)), url('train-bg.jpg') center/cover no-repeat, var(--panel);
+}
+.card[data-k="news"]{
+  background:linear-gradient(rgba(11, 15, 20, 0.70), rgba(11, 15, 20, 0.88)), url('news-bg.jpg') center/cover no-repeat, var(--panel);
+}
+.card[data-k="quake"]{
+  background:linear-gradient(rgba(11, 15, 20, 0.70), rgba(11, 15, 20, 0.88)), url('earthquake-bg.jpg') center/cover no-repeat, var(--panel);
+}
+.card[data-k="calendar"]{
+  background:linear-gradient(rgba(11, 15, 20, 0.75), rgba(11, 15, 20, 0.90)), url('calendar-bg.jpg') center/cover no-repeat, var(--panel);
+}
+.glass-item{
+  background:rgba(18, 24, 33, 0.68) !important;
+  backdrop-filter:blur(8px);
+  -webkit-backdrop-filter:blur(8px);
+  border:1px solid rgba(255, 255, 255, 0.08) !important;
+  box-shadow:0 4px 12px rgba(0, 0, 0, 0.35);
+}
+
+/* ========== Weather ========== */
+.card[data-k="weather"].wx-morning{
+  background:linear-gradient(165deg, #2b507c 0%, #1c3554 55%, #152238 100%);
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,0.12);
+}
+.card[data-k="weather"].wx-day{
+  background:linear-gradient(165deg, #2e5f96 0%, #1e416e 55%, #162a4a 100%);
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,0.14);
+}
+.card[data-k="weather"].wx-evening{
+  background:linear-gradient(165deg, #3c3568 0%, #26254c 55%, #171932 100%);
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,0.12);
+}
+.card[data-k="weather"].wx-night{
+  background:linear-gradient(165deg, #10162b 0%, #131933 55%, #171d38 100%);
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,0.08);
+}
+.card[data-k="weather"] .card-hdr h2{color:rgba(255,255,255,0.65)}
+
+.wx-main{
+  flex:1;
+  min-height:0;
+  display:flex;
+  align-items:center;
+  gap:4.2vmin;
+  padding:1.2vmin 1vmin;
+}
+.wx-ic{
+  width:clamp(74px, 16.5vmin, 140px);
+  height:clamp(74px, 16.5vmin, 140px);
+  flex-shrink:0;
+  display:grid;
+  place-items:center;
+}
+.wx-ic svg{width:100%;height:100%;overflow:visible}
+.wx-t{
+  font-size:clamp(60px, 16vmin, 128px);
+  font-weight:700;
+  line-height:1;
+  color:var(--text);
+  font-variant-numeric:tabular-nums;
+  letter-spacing:-.03em;
+}
+.wx-details{
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  gap:1.6vmin;
+  min-width:0;
+}
+.wx-d{
+  font-size:clamp(22px, 4.8vmin, 38px);
+  font-weight:700;
+  color:#ffffff;
+  line-height:1.15;
+}
+.wx-hl{
+  font-size:clamp(14px, 3.2vmin, 22px);
+  color:rgba(255,255,255,0.85);
+  font-weight:600;
+  line-height:1.2;
+}
+.wx-loc-pop{
+  display:flex;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:2vmin;
+  font-size:clamp(14px, 3.0vmin, 21px);
+  color:rgba(255,255,255,0.92);
+  font-weight:600;
+  line-height:1.2;
+}
+.wx-pop-badge{
+  display:inline-flex;
+  align-items:center;
+  gap:.6vmin;
+  color:var(--acc);
+}
+.wx-pop-badge svg{
+  width:clamp(14px, 2.8vmin, 20px);
+  height:clamp(14px, 2.8vmin, 20px);
+}
+
+.hrs{
+  display:grid;
+  grid-auto-flow:column;
+  grid-auto-columns:1fr;
+  gap:1.2vmin;
+  margin-top:auto;
+}
+.hr{
+  background:rgba(29, 37, 47, 0.72);
+  border:1px solid rgba(255, 255, 255, 0.08);
+  border-radius:1.4vmin;
+  padding:1.5vmin .4vmin;
+  text-align:center;
+  font-size:clamp(12px, 2.6vmin, 17px);
+  font-weight:600;
+  color:var(--text);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:.7vmin;
+}
+.hr-ic{
+  width:clamp(26px, 5vmin, 38px);
+  height:clamp(26px, 5vmin, 38px);
+  display:grid;
+  place-items:center;
+  margin:.2vmin 0;
+}
+.hr-ic svg{width:100%;height:100%;overflow:visible}
+.hr-temp{
+  font-size:clamp(13px, 2.8vmin, 19px);
+  font-weight:700;
+  color:#ffffff;
+}
+.hr small{
+  color:var(--acc);
+  font-size:clamp(10.5px, 2.1vmin, 14px);
+  font-weight:600;
+}
+
+/* ========== Train Info（パネル全幅＆はみ出し時自動ティッカーアニメーション） ========== */
+.train-list{display:flex;flex-direction:column;gap:1.4vmin;overflow-y:auto;flex:1;padding-right:.6vmin;scrollbar-width:thin}
+.train-item{
+  display:flex;
+  flex-direction:column;
+  gap:1.2vmin;
+  padding:1.5vmin 2vmin;
+  border-radius:1.4vmin;
+  width:100%;
+}
+.train-item.delay{border-color:rgba(232,104,95,0.85) !important;background:linear-gradient(90deg, rgba(232,104,95,0.28), rgba(18,24,33,0.82)) !important}
+.train-item.warn{border-color:rgba(240,163,94,0.85) !important;background:linear-gradient(90deg, rgba(240,163,94,0.25), rgba(18,24,33,0.82)) !important}
+
+.train-main-row{
+  display:grid;
+  grid-template-columns:auto 1fr auto;
+  gap:1.8vmin;
+  align-items:center;
+  width:100%;
+}
+.line-icon-svg{
+  width:clamp(34px, 5.4vmin, 46px);
+  height:clamp(34px, 5.4vmin, 46px);
+  object-fit:contain;
+  display:block;
+  flex-shrink:0;
+}
+.train-info-col{min-width:0;display:flex;flex-direction:column;gap:2px}
+.train-name{font-size:clamp(13.5px,3.3vmin,21px);font-weight:600;line-height:1.2}
+.train-comp{font-size:clamp(10.5px,2.1vmin,13.5px);color:var(--sub)}
+
+.train-status{
+  display:inline-flex;
+  align-items:center;
+  gap:.6vmin;
+  font-size:clamp(11.5px,2.4vmin,15px);
+  font-weight:700;
+  padding:.6vmin 1.5vmin;
+  border-radius:.9vmin;
+  background:rgba(74,222,128,0.18);
+  color:var(--good);
+  white-space:nowrap;
+}
+.train-status svg{
+  width:clamp(13px, 2.4vmin, 16px);
+  height:clamp(13px, 2.4vmin, 16px);
+  stroke:currentColor;
+  fill:none;
+  stroke-width:2.2;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+  flex-shrink:0;
+}
+.train-status.bad{background:rgba(232,104,95,0.28);color:#ff948d}
+.train-status.warm{background:rgba(240,163,94,0.28);color:#ffc085}
+.train-status.info{background:rgba(143,208,232,0.25);color:var(--acc)}
+
+/* 遅延詳細の横幅全開枠 ＆ 自動ティッカー */
+.train-detail-box{
+  width:100%;
+  overflow:hidden;
+  white-space:nowrap;
+  position:relative;
+  background:rgba(0,0,0,0.32);
+  border-left:3.5px solid var(--bad);
+  border-radius:4px;
+  padding:0.9vmin 1.4vmin;
+}
+.train-item.warn .train-detail-box{
+  border-left-color:var(--warm);
+}
+.train-detail-content{
+  display:inline-block;
+  font-size:clamp(12px, 2.4vmin, 16px);
+  color:#ffe6e4;
+  font-weight:500;
+  line-height:1.35;
+  white-space:nowrap;
+}
+.train-item.warn .train-detail-content{
+  color:#fff2e6;
+}
+.train-detail-box.marquee .train-detail-content{
+  display:inline-block;
+  padding-left:100%;
+  animation:marquee 14s linear infinite;
+}
+@keyframes marquee{
+  0%{transform:translateX(0%)}
+  100%{transform:translateX(-100%)}
+}
+
+/* ========== News ========== */
+.nw-stack{
+  flex:1;
+  min-height:0;
+  display:grid;
+  grid-template-rows:repeat(3, minmax(0, 1fr));
+  gap:1.4vmin;
+}
+.nw-item{
+  border-radius:1.4vmin;
+  padding:1.8vmin 2.4vmin 1.5vmin;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  gap:.8vmin;
+  min-height:0;
+  overflow:hidden;
+}
+.nw-item-top{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:1.6vmin;
+  margin-top:.5vmin;
+}
+.nw-item-title{
+  font-size:clamp(15.5px, 3.2vmin, 22px);
+  font-weight:700;
+  color:#ffffff;
+  line-height:1.35;
+  display:-webkit-box;
+  -webkit-line-clamp:1;
+  -webkit-box-orient:vertical;
+  overflow:hidden;
+  flex:1;
+}
+.nw-item-time{
+  display:inline-flex;
+  align-items:center;
+  gap:.5vmin;
+  font-size:clamp(10.5px, 2vmin, 13.5px);
+  color:var(--acc);
+  font-variant-numeric:tabular-nums;
+  white-space:nowrap;
+  flex-shrink:0;
+  font-weight:600;
+  margin-top:.2vmin;
+}
+.nw-item-time svg{
+  width:clamp(11px, 2vmin, 14px);
+  height:clamp(11px, 2vmin, 14px);
+  stroke:currentColor;
+  fill:none;
+  stroke-width:2;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+}
+.nw-item-desc{
+  font-size:clamp(12px, 2.35vmin, 16px);
+  color:#d5dee8;
+  line-height:1.48;
+  display:-webkit-box;
+  -webkit-line-clamp:2;
+  -webkit-box-orient:vertical;
+  overflow:hidden;
+}
+
+/* ========== Quake ========== */
+.eq-wrap{
+  flex:1;
+  min-height:0;
+  display:grid;
+  grid-template-rows:1.35fr 1fr;
+  gap:1.4vmin;
+}
+.eq-older-list{
+  min-height:0;
+  display:grid;
+  grid-template-rows:repeat(4, minmax(0, 1fr));
+  gap:1vmin;
+}
+.eq-old{
+  display:grid;
+  grid-template-columns:9vmin 1fr auto auto;
+  gap:1.8vmin;
+  align-items:center;
+  padding:0 2.2vmin;
+  border-radius:1.1vmin;
+  font-size:clamp(12.5px, 2.6vmin, 17px);
+  color:var(--sub);
+  min-height:0;
+}
+.eq-old-mag{font-weight:800;color:#ffffff}
+.eq-old-place{color:#ffffff;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.eq-old-time{font-size:clamp(11.5px, 2.2vmin, 15px);font-variant-numeric:tabular-nums;color:#c0ccd8}
+.eq-old-int{font-size:clamp(11.5px, 2.3vmin, 15px);padding:.35vmin 1.2vmin;background:rgba(21,27,35,0.85);border:1px solid rgba(255,255,255,0.12);border-radius:.7vmin;color:#ffffff;font-weight:700}
+
+.eq-latest{
+  min-height:0;
+  height:100%;
+  display:grid;
+  grid-template-columns:auto 1fr;
+  gap:3vmin;
+  align-items:center;
+  padding:2vmin 3vmin;
+  border:1.5px solid var(--acc) !important;
+  border-radius:1.5vmin;
+  box-shadow:0 6px 20px rgba(0,0,0,0.45);
+}
+.eq-latest-badge{
+  height:100%;
+  background:rgba(21,27,35,0.85);
+  border:1px solid rgba(255,255,255,0.12);
+  border-radius:1.2vmin;
+  padding:1vmin 2.6vmin;
+  min-width:15.5vmin;
+  text-align:center;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  gap:.8vmin;
+}
+.eq-latest-badge.hi{background:rgba(232,104,95,0.3);border-color:var(--bad)}
+.eq-latest-badge.mid{background:rgba(240,163,94,0.3);border-color:var(--warm)}
+.eq-latest-lbl{font-size:clamp(12px, 2.3vmin, 16px);color:var(--sub);font-weight:700}
+.eq-latest-int{font-size:clamp(32px, 7.2vmin, 56px);font-weight:800;line-height:1;color:#ffffff}
+
+.eq-latest-info{
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  gap:1.5vmin;
+  min-width:0;
+}
+.eq-latest-top{display:flex;align-items:center;gap:1.5vmin}
+.eq-latest-tag{font-size:clamp(11.5px, 2.2vmin, 15px);font-weight:800;background:var(--acc);color:#08202b;padding:.3vmin 1.2vmin;border-radius:5px}
+.eq-latest-time{font-size:clamp(13px, 2.8vmin, 19px);color:#d5dee8;font-weight:600;font-variant-numeric:tabular-nums}
+.eq-latest-place{font-size:clamp(20px, 4.8vmin, 34px);font-weight:800;color:#ffffff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.2}
+.eq-latest-meta{font-size:clamp(14px, 3.1vmin, 21px);color:var(--acc);font-weight:700;line-height:1.2}
+
+/* ========== Calendar（フォントサイズ2倍＆大型レイアウト） ========== */
+.cal-list{
+  flex:1;
+  min-height:0;
+  display:grid;
+  grid-template-rows:repeat(5, minmax(0, 1fr));
+  gap:1.4vmin;
+}
+.cal-item{
+  border-radius:1.4vmin;
+  padding:1.2vmin 2.4vmin;
+  display:grid;
+  grid-template-columns:auto 1fr;
+  gap:3vmin;
+  align-items:center;
+  min-height:0;
+}
+.cal-time-col{
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;
+  min-width:clamp(110px, 22vmin, 170px);
+}
+.cal-date{
+  font-size:clamp(14px, 3.0vmin, 20px);
+  color:var(--sub);
+  font-weight:700;
+  letter-spacing:0.02em;
+}
+.cal-time{
+  font-size:clamp(18px, 4.2vmin, 28px);
+  color:var(--acc);
+  font-weight:800;
+  font-variant-numeric:tabular-nums;
+  white-space:nowrap;
+  line-height:1.15;
+}
+.cal-title{
+  font-size:clamp(18px, 4.4vmin, 30px);
+  font-weight:700;
+  color:#ffffff;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  line-height:1.2;
+}
+
+/* drawer */
+#edge{position:fixed;left:0;top:0;bottom:0;width:18px;z-index:20;padding:0;border:0;background:none}
+#scrim{position:fixed;inset:0;z-index:30;background:#000a;opacity:0;pointer-events:none;transition:opacity .35s}
+#drawer{position:fixed;left:0;top:0;bottom:0;z-index:40;width:min(500px,92vw);padding:22px;display:flex;flex-direction:column;gap:16px;overflow-y:auto;font-size:14px;background:var(--panel);transform:translateX(-100%);transition:transform .38s cubic-bezier(.22,1,.36,1)}
+body.open #drawer{transform:none;box-shadow:0 0 5vmin #000c}
+body.open #scrim{opacity:1;pointer-events:auto}
+#drawer h3{font-size:18px;display:flex;justify-content:space-between;align-items:center}
+#drawer label{display:flex;flex-direction:column;gap:6px;color:var(--sub)}
+#drawer .chk{flex-direction:row;align-items:center;gap:8px;color:var(--text);cursor:pointer}
+#drawer fieldset{display:flex;flex-direction:column;gap:10px;border:1px solid var(--line);border-radius:10px;padding:12px}
+#drawer legend{padding:0 6px;color:var(--acc);font-weight:600;font-size:13px}
+#drawer input[type=number],#drawer input[type=text],#drawer select{font:inherit;color:var(--text);background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:8px 10px;user-select:text;-webkit-user-select:text}
+#drawer input[type=checkbox]{width:18px;height:18px;accent-color:var(--acc);cursor:pointer}
+#drawer button{font:inherit;padding:10px 12px;border-radius:8px;border:1px solid var(--line);background:var(--panel2);color:var(--text);cursor:pointer}
+#drawer #save{background:var(--acc);color:#08202b;border:0;font-weight:700}
+
+.line-filter-btns{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:4px}
+.line-filter-btns button{padding:5px 10px !important;font-size:12px !important;border-radius:6px !important}
+.line-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(145px,1fr));gap:6px 10px;max-height:220px;overflow-y:auto;padding:4px 2px}
+.line-chk-item{display:flex !important;flex-direction:row !important;align-items:center;gap:6px;font-size:12px;color:var(--text) !important;cursor:pointer}
+.mini-sym-img{width:22px;height:22px;object-fit:contain;flex-shrink:0;background:transparent}
+
+.source-info{
+  background:var(--panel2);
+  border:1px solid var(--line);
+  border-radius:10px;
+  padding:12px 14px;
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  font-size:12px;
+  line-height:1.45;
+}
+.source-info h4{font-size:13px;color:var(--text);margin-bottom:2px}
+.source-row{display:flex;flex-direction:column;border-top:1px solid var(--line);padding-top:6px}
+.source-row:first-of-type{border-top:0;padding-top:0}
+.source-row strong{color:var(--acc);font-weight:600}
+.source-url{color:var(--sub);font-family:monospace;font-size:11px;word-break:break-all}
+.diag-box{
+  margin-top:4px;
+  padding:8px 10px;
+  background:#11161d;
+  border:1px solid var(--line);
+  border-radius:6px;
+  font-size:11.5px;
+  color:#cfd8e3;
+  max-height:120px;
+  overflow-y:auto;
+}
+</style>
+</head>
+<body>
+<div id="app">
+  <section class="clock">
+    <div class="flips">
+      <div class="flip" id="h"><div class="u"><span>00</span></div><div class="l"><span>00</span></div><div class="fa"><span>00</span></div><div class="fb"><span>00</span></div></div>
+      <div class="flip" id="m"><div class="u"><span>00</span></div><div class="l"><span>00</span></div><div class="fa"><span>00</span></div><div class="fb"><span>00</span></div></div>
+      <div class="flip s" id="s"><div class="u"><span>00</span></div><div class="l"><span>00</span></div><div class="fa"><span>00</span></div><div class="fb"><span>00</span></div></div>
+    </div>
+    <div class="meta"><span id="date"></span><span id="temp"></span></div>
+    <div class="clock-foot">
+      <button id="cfgBtn" aria-label="設定を開く" title="設定">
+        <svg viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="3.2"></circle>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+        </svg>
+      </button>
+      <div id="stat"></div>
+    </div>
+  </section>
+
+  <section class="stage">
+    <div id="pager">
+      <article class="card wx-night" id="cardWeather" data-k="weather" data-t="天気"><div class="card-hdr"><h2>天気と3時間ごとの予報</h2></div><div class="body" id="b-weather"></div></article>
+      <article class="card" data-k="train" data-t="鉄道"><div class="card-hdr"><h2>鉄道運行情報</h2></div><div class="body" id="b-train"></div></article>
+      <article class="card" data-k="news" data-t="ニュース"><div class="card-hdr"><h2>トピックニュース</h2></div><div class="body" id="b-news"></div></article>
+      <article class="card" data-k="quake" data-t="地震情報"><div class="card-hdr"><h2>地震情報</h2></div><div class="body" id="b-quake"></div></article>
+      <article class="card" data-k="calendar" data-t="予定"><div class="card-hdr"><h2>カレンダーの予定</h2></div><div class="body" id="b-calendar"></div></article>
+    </div>
+    <div id="dots"></div>
+  </section>
+</div>
+
+<button id="edge" aria-label="設定を開く"></button>
+<div id="scrim"></div>
+<aside id="drawer" aria-label="設定">
+  <h3><span>設定</span></h3>
+  <label>自動スクロールの間隔（秒・0でオフ）<input id="sAuto" type="number" min="0" max="600" inputmode="numeric"></label>
+  <fieldset>
+    <legend>表示するカード</legend>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+      <label class="chk"><input type="checkbox" data-k="weather">天気</label>
+      <label class="chk"><input type="checkbox" data-k="train">鉄道運行情報</label>
+      <label class="chk"><input type="checkbox" data-k="news">ニュース</label>
+      <label class="chk"><input type="checkbox" data-k="quake">地震情報</label>
+      <label class="chk"><input type="checkbox" data-k="calendar">予定</label>
+    </div>
+  </fieldset>
+
+  <fieldset>
+    <legend>監視する路線（チェックボックス選択）</legend>
+    <div class="line-filter-btns">
+      <button type="button" id="btnAllLines">全選択</button>
+      <button type="button" id="btnClearLines">全解除</button>
+      <button type="button" id="btnKantoLines">主要路線</button>
+      <button type="button" id="btnShinkansen">東海道新幹線</button>
+    </div>
+    <div class="line-grid" id="lineCheckboxes"></div>
+  </fieldset>
+
+  <fieldset>
+    <legend>📅 Googleカレンダー設定</legend>
+    <label>Googleカレンダー iCal URL
+      <input id="sCalUrl" type="text" placeholder="https://calendar.google.com/calendar/ical/.../basic.ics">
+    </label>
+    <small style="color:var(--sub);font-size:11px">Googleカレンダーの設定 ＞「マイカレンダーの設定」＞「iCal形式の非公開URL」または公開URLを入力してください。</small>
+  </fieldset>
+
+  <fieldset>
+    <legend>運行情報プロキシ設定（GAS）</legend>
+    <label>運行情報中継 URL (GASウェブアプリURL)
+      <input id="sGasUrl" type="text" placeholder="https://script.google.com/macros/s/.../exec">
+    </label>
+    <small style="color:var(--sub);font-size:11px">Google Apps Scriptで作成したウェブアプリURLを登録すると、Yahoo!遮断を100%回避して即座に反映されます。</small>
+  </fieldset>
+
+  <fieldset>
+    <legend>ニュース設定</legend>
+    <label>配信元プリセット
+      <select id="sNewsPreset">
+        <option value="https://news.web.nhk/n-data/conf/na/rss/cat0.xml">NHK ニュース（主要・最新URL）</option>
+        <option value="https://news.web.nhk/n-data/conf/na/rss/cat1.xml">NHK ニュース（社会）</option>
+        <option value="https://news.web.nhk/n-data/conf/na/rss/cat3.xml">NHK ニュース（科学・文化）</option>
+        <option value="https://news.web.nhk/n-data/conf/na/rss/cat5.xml">NHK ニュース（経済）</option>
+        <option value="https://news.yahoo.co.jp/rss/topics/top-picks.xml">Yahoo!ニュース（主要トピックス）</option>
+        <option value="https://news.yahoo.co.jp/rss/topics/it.xml">Yahoo!ニュース（IT・テクノロジー）</option>
+        <option value="custom">カスタム（下の欄に直接URLを入力）</option>
+      </select>
+    </label>
+    <label>RSS フィード URL
+      <input id="sNewsRss" type="text" placeholder="https://news.web.nhk/n-data/conf/na/rss/cat0.xml">
+    </label>
+  </fieldset>
+
+  <fieldset>
+    <legend>画面の焼き付き防止・減光設定</legend>
+    <label class="chk"><input type="checkbox" id="sBurnShift">自動ピクセルシフト（1分毎に±6px微動）</label>
+    <label class="chk"><input type="checkbox" id="sNightDim">夜間自動減光（ナイトモード）</label>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:4px">
+      <label>減光開始（時）<input id="sNightStart" type="number" min="0" max="23" inputmode="numeric"></label>
+      <label>減光終了（時）<input id="sNightEnd" type="number" min="0" max="23" inputmode="numeric"></label>
+    </div>
+  </fieldset>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+    <label>表示地域名（天気カード用）<input id="sCityName" type="text" placeholder="例: 千葉県船橋市"></label>
+    <div></div>
+    <label>緯度<input id="sLat" type="number" step="any" inputmode="decimal"></label>
+    <label>経度<input id="sLon" type="number" step="any" inputmode="decimal"></label>
+  </div>
+
+  <button id="save">保存して更新</button>
+  <button id="fs">全画面にする / 解除する（画面の2回タップでも切替可）</button>
+  <button id="close">閉じる</button>
+
+  <div class="source-info">
+    <h4>データ取得元 ＆ リアルタイム取得診断</h4>
+    <div class="source-row">
+      <strong>鉄道運行情報（Yahoo!路線情報 取得ステータス）</strong>
+      <span class="source-url">https://transit.yahoo.co.jp/diainfo/area/4</span>
+      <div class="diag-box" id="diag-train-box">取得状況を確認中…</div>
+    </div>
+    <div class="source-row">
+      <strong>天気・気温・降水確率</strong>
+      <span>Open-Meteo Weather Forecast API</span>
+      <span class="source-url">https://api.open-meteo.com/v1/forecast</span>
+    </div>
+    <div class="source-row">
+      <strong>ニュース記事</strong>
+      <span>NHK ONE 公式RSSフィード等</span>
+      <span class="source-url" id="info-rss-url">https://news.web.nhk/n-data/conf/na/rss/cat0.xml</span>
+    </div>
+    <div class="source-row">
+      <strong>地震情報（震度・震源・規模）</strong>
+      <span>P2P地震情報 JSON API v2</span>
+      <span class="source-url">https://api.p2pquake.net/v2/history?codes=551</span>
+    </div>
+  </div>
+</aside>
+
+<script>
+(()=>{
+'use strict';
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const KC='dash.cfg.v17', KD='dash.cache.v17';
+
+/* ---- 路線カタログ ---- */
+const RAILWAY_CATALOG = [
+  { id:'tokaido_shinkansen', name:'東海道新幹線', match:['東海道新幹線'], file:'Shinkansen_jrc.svg', company:'JR東海', group:'shinkansen' },
+  { id:'nex', name:'成田エクスプレス', match:['成田エクスプレス','成田線[千葉','成田線[成田'], file:'Sign_of_NEX_in_station.svg', company:'JR東日本', group:'kanto' },
+  { id:'jb_sobu', name:'中央・総武各駅停車', match:['中央・総武線[各停]','中央・総武各駅停車','総武線[各停]'], file:'JR_JB_line_symbol.svg', company:'JR東日本', group:'kanto' },
+  { id:'jo_sobu_rapid', name:'総武快速線', match:['総武線[快速]','横須賀線','総武快速線'], file:'JR_JO_line_symbol.svg', company:'JR東日本', group:'kanto' },
+  { id:'jc_chuo', name:'中央線快速', match:['中央線[快速]','中央線快速','中央本線[東京'], file:'JR_JC_line_symbol.svg', company:'JR東日本', group:'kanto' },
+  { id:'jy_yamanote', name:'山手線', match:['山手線'], file:'JR_JY_line_symbol.svg', company:'JR東日本', group:'kanto' },
+  { id:'jk_keihintohoku', name:'京浜東北線', match:['京浜東北根岸線','京浜東北線','根岸線'], file:'JR_JK_line_symbol.svg', company:'JR東日本', group:'kanto' },
+  { id:'je_keiyo', name:'京葉線', match:['京葉線'], file:'JR_JE_line_symbol.svg', company:'JR東日本', group:'kanto' },
+  { id:'jm_musashino', name:'武蔵野線', match:['武蔵野線'], file:'JR_JM_line_symbol.svg', company:'JR東日本', group:'kanto' },
+  { id:'ja_saikyo', name:'埼京線', match:['埼京川越線','埼京線','川越線'], file:'JR_JA_line_symbol.svg', company:'JR東日本', group:'kanto' },
+  { id:'jj_joban', name:'常磐線快速', match:['常磐線[快速]','常磐線[品川','常磐線[上野'], file:'JR_JJ_line_symbol.svg', company:'JR東日本', group:'kanto' },
+  { id:'jl_joban_local', name:'常磐線各駅停車', match:['常磐線[各停]','常磐線各駅停車'], file:'JR_JL_line_symbol.svg', company:'JR東日本', group:'kanto' },
+  { id:'js_shonan', name:'湘南新宿ライン', match:['湘南新宿ライン'], file:'JR_JS_line_symbol.svg', company:'JR東日本', group:'kanto' },
+  { id:'jt_tokaido', name:'東海道線・上野東京', match:['東海道本線[東京','東海道線','上野東京ライン'], file:'JR_JT_line_symbol.svg', company:'JR東日本', group:'kanto' },
+  { id:'ju_utsunomiya', name:'宇都宮線・高崎線', match:['宇都宮線','高崎線','東北本線[東京'], file:'JR_JU_line_symbol.svg', company:'JR東日本', group:'kanto' },
+  { id:'jh_yokohama', name:'横浜線', match:['横浜線'], file:'JR_JH_line_symbol.svg', company:'JR東日本', group:'kanto' },
+  { id:'jn_nambu', name:'南武線', match:['南武線'], file:'JR_JN_line_symbol.svg', company:'JR東日本', group:'kanto' },
+  { id:'ji_tsurumi', name:'鶴見線', match:['鶴見線'], file:'JR_JI_line_symbol.svg', company:'JR東日本', group:'kanto' },
+  { id:'g_ginza', name:'銀座線', match:['東京メトロ銀座線','銀座線'], file:'Logo_of_Tokyo_Metro_Ginza_Line.svg', company:'東京メトロ', group:'kanto' },
+  { id:'m_marunouchi', name:'丸ノ内線', match:['東京メトロ丸ノ内線','丸ノ内線'], file:'Logo_of_Tokyo_Metro_Marunouchi_Line.svg', company:'東京メトロ', group:'kanto' },
+  { id:'mb_marunouchi_br', name:'丸ノ内線方南町支線', match:['東京メトロ丸ノ内線','丸ノ内線'], file:'Logo_of_Tokyo_Metro_Marunouchi_branch_Line.svg', company:'東京メトロ', group:'kanto' },
+  { id:'h_hibiya', name:'日比谷線', match:['東京メトロ日比谷線','日比谷線'], file:'Logo_of_Tokyo_Metro_Hibiya_Line.svg', company:'東京メトロ', group:'kanto' },
+  { id:'t_tozai', name:'東西線', match:['東京メトロ東西線','東西線'], file:'Logo_of_Tokyo_Metro_Tōzai_Line.svg', company:'東京メトロ', group:'kanto' },
+  { id:'c_chiyoda', name:'千代田線', match:['東京メトロ千代田線','千代田線'], file:'Logo_of_Tokyo_Metro_Chiyoda_Line.svg', company:'東京メトロ', group:'kanto' },
+  { id:'y_yurakucho', name:'有楽町線', match:['東京メトロ有楽町線','有楽町線'], file:'Logo_of_Tokyo_Metro_Yūrakuchō_Line.svg', company:'東京メトロ', group:'kanto' },
+  { id:'z_hanzomon', name:'半蔵門線', match:['東京メトロ半蔵門線','半蔵門線'], file:'Logo_of_Tokyo_Metro_Hanzōmon_Line.svg', company:'東京メトロ', group:'kanto' },
+  { id:'n_namboku', name:'南北線', match:['東京メトロ南北線','南北線'], file:'Logo_of_Tokyo_Metro_Namboku_Line.svg', company:'東京メトロ', group:'kanto' },
+  { id:'f_fukutoshin', name:'副都心線', match:['東京メトロ副都心線','副都心線'], file:'Logo_of_Tokyo_Metro_Fukutoshin_Line.svg', company:'東京メトロ', group:'kanto' },
+  { id:'a_asakusa', name:'都営浅草線', match:['都営浅草線'], file:'Toei_Asakusa_line_symbol.svg', company:'都営地下鉄', group:'kanto' },
+  { id:'i_mita', name:'都営三田線', match:['都営三田線'], file:'Toei_Mita_line_symbol.svg', company:'都営地下鉄', group:'kanto' },
+  { id:'s_shinjuku', name:'都営新宿線', match:['都営新宿線'], file:'Toei_Shinjuku_line_symbol.svg', company:'都営地下鉄', group:'kanto' },
+  { id:'e_oedo', name:'都営大江戸線', match:['都営大江戸線'], file:'Toei_Oedo_line_symbol.svg', company:'都営地下鉄', group:'kanto' },
+  { id:'nt_liner', name:'日暮里・舎人ライナー', match:['日暮里・舎人ライナー'], file:'Nippori-Toneri_Liner_symbol.svg', company:'東京都交通局', group:'kanto' },
+  { id:'sa_tram', name:'東京さくらトラム（都電荒川線）', match:['都電荒川線','東京さくらトラム'], file:'Tokyo_Sakura_Tram_symbol.svg', company:'東京都交通局', group:'kanto' },
+  { id:'tr_toyo', name:'東葉高速線', match:['東葉高速線'], file:'Number_prefix_Toyo-Rapid.svg', company:'東葉高速鉄道', group:'kanto' },
+  { id:'ks_keisei', name:'京成本線', match:['京成本線','京成押上線','京成千葉線','京成千原線','京成金町線'], file:'Number_prefix_Keisei.svg', company:'京成電鉄', group:'kanto' },
+  { id:'ks_skyaccess', name:'成田スカイアクセス', match:['成田スカイアクセス線','成田スカイアクセス'], file:'Number_prefix_SkyAccess.svg', company:'京成電鉄', group:'kanto' },
+  { id:'hs_hokusou', name:'北総線', match:['北総線'], file:'Number_prefix_Hokusō.svg', company:'北総鉄道', group:'kanto' },
+  { id:'sr_shibayama', name:'芝山鉄道線', match:['芝山鉄道線'], file:'Number_prefix_Shibayama.svg', company:'芝山鉄道', group:'kanto' },
+  { id:'r_rinkai', name:'りんかい線', match:['りんかい線'], file:'Rinkai_Line_symbol.svg', company:'東京臨海高速鉄道', group:'kanto' },
+  { id:'u_yurikamome', name:'ゆりかもめ', match:['ゆりかもめ'], file:'Yurikamome_line_symbol.svg', company:'ゆりかもめ', group:'kanto' },
+  { id:'tx_tsukuba', name:'つくばエクスプレス', match:['つくばエクスプレス線','つくばエクスプレス'], file:'Tsukuba_Express_symbol.svg', company:'首都圏新都市鉄道', group:'kanto' },
+  { id:'mo_monorail', name:'東京モノレール', match:['東京モノレール羽田空港線','東京モノレール'], file:'Tokyo_Monorail_Line_symbol.svg', company:'東京モノレール', group:'kanto' },
+  { id:'en_enoden', name:'江ノ電', match:['江ノ島電鉄線','江ノ電'], file:'Number_prefix_Enoden.svg', company:'江ノ島電鉄', group:'kanto' },
+  { id:'ty_toyoko', name:'東急東横線', match:['東急東横線'], file:'Tokyu_TY_line_symbol.svg', company:'東急電鉄', group:'kanto' },
+  { id:'dt_denentoshi', name:'東急田園都市線', match:['東急田園都市線'], file:'Tokyu_DT_line_symbol.svg', company:'東急電鉄', group:'kanto' },
+  { id:'mg_meguro', name:'東急目黒線', match:['東急目黒線'], file:'Tokyu_MG_line_symbol.svg', company:'東急電鉄', group:'kanto' },
+  { id:'om_oimachi', name:'東急大井町線', match:['東急大井町線'], file:'Tokyu_OM_line_symbol.svg', company:'東急電鉄', group:'kanto' },
+  { id:'ik_ikegami', name:'東急池上線', match:['東急池上線'], file:'Tokyu_IK_line_symbol.svg', company:'東急電鉄', group:'kanto' },
+  { id:'tm_tamagawa', name:'東急多摩川線', match:['東急多摩川線'], file:'Tokyu_TM_line_symbol.svg', company:'東急電鉄', group:'kanto' },
+  { id:'sg_setagaya', name:'東急世田谷線', match:['東急世田谷線'], file:'Tokyu_SG_line_symbol.svg', company:'東急電鉄', group:'kanto' },
+  { id:'sh_shinyokohama', name:'東急新横浜線', match:['東急新横浜線'], file:'Tokyu_SH_line_symbol.svg', company:'東急電鉄', group:'kanto' },
+  { id:'kd_kodomo', name:'東急こどもの国線', match:['こどもの国線'], file:'Tokyu_KD_line_symbol.svg', company:'東急電鉄', group:'kanto' },
+  { id:'oh_odawara', name:'小田急小田原線', match:['小田急小田原線','小田急線'], file:'Odakyu_odawara.svg', company:'小田急電鉄', group:'kanto' },
+  { id:'oe_enoshima', name:'小田急江ノ島線', match:['小田急江ノ島線'], file:'Odakyu_enoshima.svg', company:'小田急電鉄', group:'kanto' },
+  { id:'ot_tama', name:'小田急多摩線', match:['小田急多摩線'], file:'Odakyu_tama.svg', company:'小田急電鉄', group:'kanto' },
+  { id:'oh_hakone', name:'箱根登山鉄道', match:['箱根登山鉄道線','箱根登山線'], file:'Odakyu_Hakone_StaNo.svg', company:'箱根登山鉄道', group:'kanto' },
+  { id:'ko_keio', name:'京王線', match:['京王線','京王相模原線','京王高尾線','京王新線'], file:'Number_prefix_Keio-line.svg', company:'京王電鉄', group:'kanto' },
+  { id:'in_inokashira', name:'京王井の頭線', match:['京王井の頭線'], file:'Number_prefix_Keio-Inokashira-line.svg', company:'京王電鉄', group:'kanto' },
+  { id:'si_ikebukuro', name:'西武池袋線', match:['西武池袋線','西武有楽町線','西武豊島線','西武秩父線'], file:'SeibuIkebukuro.svg', company:'西武鉄道', group:'kanto' },
+  { id:'ss_shinjuku', name:'西
