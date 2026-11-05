@@ -138,6 +138,9 @@ body{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-i
 .card[data-k="quake"]{
   background:linear-gradient(rgba(11, 15, 20, 0.70), rgba(11, 15, 20, 0.88)), url('earthquake-bg.jpg') center/cover no-repeat, var(--panel);
 }
+.card[data-k="calendar"]{
+  background:linear-gradient(rgba(11, 15, 20, 0.75), rgba(11, 15, 20, 0.90)), url('calendar-bg.jpg') center/cover no-repeat, var(--panel);
+}
 .glass-item{
   background:rgba(18, 24, 33, 0.68) !important;
   backdrop-filter:blur(8px);
@@ -270,12 +273,25 @@ body{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-i
   font-weight:600;
 }
 
-/* ========== Train Info ========== */
+/* ========== Train Info（CSS製運行情報バッジ ＆ 2段組詳細） ========== */
 .train-list{display:flex;flex-direction:column;gap:1.4vmin;overflow-y:auto;flex:1;padding-right:.6vmin;scrollbar-width:thin}
-.train-item{display:grid;grid-template-columns:auto 1fr auto;gap:2vmin;align-items:center;padding:1.6vmin 2.2vmin;border-radius:1.4vmin}
+.train-item{
+  display:flex;
+  flex-direction:column;
+  gap:1.2vmin;
+  padding:1.5vmin 2vmin;
+  border-radius:1.4vmin;
+}
 .train-item.delay{border-color:rgba(232,104,95,0.85) !important;background:linear-gradient(90deg, rgba(232,104,95,0.28), rgba(18,24,33,0.82)) !important}
 .train-item.warn{border-color:rgba(240,163,94,0.85) !important;background:linear-gradient(90deg, rgba(240,163,94,0.25), rgba(18,24,33,0.82)) !important}
 
+.train-main-row{
+  display:grid;
+  grid-template-columns:auto 1fr auto;
+  gap:1.8vmin;
+  align-items:center;
+  width:100%;
+}
 .line-icon-svg{
   width:clamp(34px, 5.4vmin, 46px);
   height:clamp(34px, 5.4vmin, 46px);
@@ -286,19 +302,58 @@ body{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-i
 .train-info-col{min-width:0;display:flex;flex-direction:column;gap:2px}
 .train-name{font-size:clamp(13.5px,3.3vmin,21px);font-weight:600;line-height:1.2}
 .train-comp{font-size:clamp(10.5px,2.1vmin,13.5px);color:var(--sub)}
-.train-detail{
-  font-size:clamp(11.5px, 2.25vmin, 14.5px);
-  color:#ffd8d6;
-  line-height:1.38;
-  margin-top:4px;
-  display:-webkit-box;
-  -webkit-line-clamp:2;
-  -webkit-box-orient:vertical;
-  overflow:hidden;
+
+/* CSS/SVG製ステータスバッジ（OS絵文字不使用） */
+.train-status{
+  display:inline-flex;
+  align-items:center;
+  gap:.6vmin;
+  font-size:clamp(11.5px,2.4vmin,15px);
+  font-weight:700;
+  padding:.6vmin 1.5vmin;
+  border-radius:.9vmin;
+  background:rgba(74,222,128,0.18);
+  color:var(--good);
+  white-space:nowrap;
 }
-.train-status{font-size:clamp(11.5px,2.5vmin,15.5px);font-weight:700;padding:.6vmin 1.5vmin;border-radius:.9vmin;background:rgba(74,222,128,0.18);color:var(--good);white-space:nowrap}
-.train-item.delay .train-status{background:rgba(232,104,95,0.32);color:#ff948d}
-.train-item.warn .train-status{background:rgba(240,163,94,0.32);color:#ffc085}
+.train-status svg{
+  width:clamp(13px, 2.4vmin, 16px);
+  height:clamp(13px, 2.4vmin, 16px);
+  stroke:currentColor;
+  fill:none;
+  stroke-width:2.2;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+  flex-shrink:0;
+}
+.train-status.bad{
+  background:rgba(232,104,95,0.28);
+  color:#ff948d;
+}
+.train-status.warm{
+  background:rgba(240,163,94,0.28);
+  color:#ffc085;
+}
+.train-status.info{
+  background:rgba(143,208,232,0.25);
+  color:var(--acc);
+}
+
+.train-detail{
+  font-size:clamp(11.5px, 2.3vmin, 15px);
+  color:#ffe4e2;
+  line-height:1.45;
+  padding:0.8vmin 1.2vmin;
+  background:rgba(0,0,0,0.28);
+  border-left:3px solid var(--bad);
+  border-radius:4px;
+  word-break:break-all;
+  white-space:normal;
+}
+.train-item.warn .train-detail{
+  border-left-color:var(--warm);
+  color:#fff0e0;
+}
 
 /* ========== News ========== */
 .nw-stack{
@@ -440,9 +495,49 @@ body{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-i
 .eq-latest-place{font-size:clamp(20px, 4.8vmin, 34px);font-weight:800;color:#ffffff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.2}
 .eq-latest-meta{font-size:clamp(14px, 3.1vmin, 21px);color:var(--acc);font-weight:700;line-height:1.2}
 
-/* Calendar */
-.ev{display:grid;grid-template-columns:minmax(14vmin,max-content) 1fr;gap:2.4vmin;align-items:baseline;padding:2vmin 0;border-top:1px solid var(--line);font-size:3.8vmin}
-.ev time{color:var(--acc);font-variant-numeric:tabular-nums}
+/* ========== Calendar（直近5件の予定リスト表示） ========== */
+.cal-list{
+  flex:1;
+  min-height:0;
+  display:grid;
+  grid-template-rows:repeat(5, minmax(0, 1fr));
+  gap:1.2vmin;
+}
+.cal-item{
+  border-radius:1.2vmin;
+  padding:1vmin 2vmin;
+  display:grid;
+  grid-template-columns:auto 1fr;
+  gap:2.2vmin;
+  align-items:center;
+  min-height:0;
+}
+.cal-time-col{
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;
+  min-width:clamp(75px, 14vmin, 110px);
+}
+.cal-date{
+  font-size:clamp(10px, 1.9vmin, 13px);
+  color:var(--sub);
+  font-weight:600;
+}
+.cal-time{
+  font-size:clamp(12px, 2.4vmin, 16px);
+  color:var(--acc);
+  font-weight:700;
+  font-variant-numeric:tabular-nums;
+  white-space:nowrap;
+}
+.cal-title{
+  font-size:clamp(13px, 2.6vmin, 18px);
+  font-weight:600;
+  color:#ffffff;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
 
 /* drawer */
 #edge{position:fixed;left:0;top:0;bottom:0;width:18px;z-index:20;padding:0;border:0;background:none}
@@ -555,6 +650,14 @@ body.open #scrim{opacity:1;pointer-events:auto}
   </fieldset>
 
   <fieldset>
+    <legend>📅 Googleカレンダー設定</legend>
+    <label>Googleカレンダー iCal URL
+      <input id="sCalUrl" type="text" placeholder="https://calendar.google.com/calendar/ical/.../basic.ics">
+    </label>
+    <small style="color:var(--sub);font-size:11px">Googleカレンダーの設定 ＞「マイカレンダーの設定」＞「iCal形式の非公開URL」または公開URLを入力してください。</small>
+  </fieldset>
+
+  <fieldset>
     <legend>運行情報プロキシ設定（GAS）</legend>
     <label>運行情報中継 URL (GASウェブアプリURL)
       <input id="sGasUrl" type="text" placeholder="https://script.google.com/macros/s/.../exec">
@@ -630,7 +733,7 @@ body.open #scrim{opacity:1;pointer-events:auto}
 (()=>{
 'use strict';
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
-const KC='dash.cfg.v13', KD='dash.cache.v13';
+const KC='dash.cfg.v15', KD='dash.cache.v15';
 
 /* ---- 路線カタログ ---- */
 const RAILWAY_CATALOG = [
@@ -708,11 +811,12 @@ const RAILWAY_CATALOG = [
 
 const DEF={
   auto:12,
-  show:{weather:true,train:true,news:true,quake:true,calendar:false},
+  show:{weather:true,train:true,news:true,quake:true,calendar:true},
   cityName:'千葉県船橋市',
   lat:35.6908,
   lon:139.9984,
   selectedLines:['jb_sobu','jo_sobu_rapid','je_keiyo','t_tozai','ks_keisei','tr_toyo','jy_yamanote','tokaido_shinkansen'],
+  calUrl:'',
   gasUrl:'',
   newsRss:'https://news.web.nhk/n-data/conf/na/rss/cat0.xml',
   burnShift:true,
@@ -957,21 +1061,54 @@ const R={
   },
   train(t){
     if(!t||!t.length) return empty('監視する路線が選択されていません（設定から選択してください）');
+
+    // CSS/SVG製ステータスバッジの生成（OS絵文字不使用）
+    const getBadgeHtml = (statusText) => {
+      const isWarn = statusText.includes('遅延') || statusText.includes('遅れ');
+      const isBad = statusText.includes('見合') || statusText.includes('運休');
+      const isInfo = statusText.includes('計画') || statusText.includes('情報');
+
+      if (isBad) {
+        return `<span class="train-status bad">
+          <svg viewBox="0 0 24 24"><path d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          ${esc(statusText)}
+        </span>`;
+      } else if (isWarn) {
+        return `<span class="train-status warm">
+          <svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0zM12 9v4m0 4h.01"/></svg>
+          ${esc(statusText)}
+        </span>`;
+      } else if (isInfo) {
+        return `<span class="train-status info">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+          ${esc(statusText)}
+        </span>`;
+      } else {
+        return `<span class="train-status">
+          <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+          平常運転
+        </span>`;
+      }
+    };
+
     return `<div class="train-list">${t.map(item=>{
       const cat = RAILWAY_CATALOG.find(x=>x.id===item.id) || item;
       const svgFile = cat.file || item.file || '';
       const statusText = item.statusText || (item.delay ? '列車遅延' : '平常運転');
-      const isSuspend = statusText.includes('見合') || statusText.includes('運休');
-      const rowCls = item.delay ? (isSuspend ? 'delay' : 'warn') : '';
+      const isBad = statusText.includes('見合') || statusText.includes('運休');
+      const isWarn = statusText.includes('遅延') || statusText.includes('遅れ');
+      const rowCls = item.delay ? (isBad ? 'delay' : (isWarn ? 'warn' : '')) : '';
       return `
         <div class="train-item glass-item ${rowCls}">
-          <img class="line-icon-svg" src="icon/${encodeURI(svgFile)}" alt="${esc(item.name)}" onerror="if(!this.dataset.r){this.dataset.r=1;this.src='icons/${encodeURI(svgFile)}';}">
-          <div class="train-info-col">
-            <div class="train-name">${esc(item.name)}</div>
-            <div class="train-comp">${esc(item.company||'')}</div>
-            ${item.detail ? `<div class="train-detail">${esc(item.detail)}</div>` : ''}
+          <div class="train-main-row">
+            <img class="line-icon-svg" src="icon/${encodeURI(svgFile)}" alt="${esc(item.name)}" onerror="if(!this.dataset.r){this.dataset.r=1;this.src='icons/${encodeURI(svgFile)}';}">
+            <div class="train-info-col">
+              <div class="train-name">${esc(item.name)}</div>
+              <div class="train-comp">${esc(item.company||'')}</div>
+            </div>
+            ${getBadgeHtml(statusText)}
           </div>
-          <div class="train-status">${esc(statusText)}</div>
+          ${item.detail ? `<div class="train-detail">${esc(item.detail)}</div>` : ''}
         </div>
       `;
     }).join('')}</div>`;
@@ -1044,9 +1181,31 @@ const R={
       </div>
     `;
   },
-  calendar(a){
-    if(!a||!a.length) return empty('直近の予定はありません');
-    return a.slice(0,5).map(e=>`<div class="ev"><time>${esc(e.time||'予定')}</time><div>${esc(e.title)}</div></div>`).join('');
+  calendar(events){
+    if(!events || !events.length) return empty('直近の予定はありません（設定からiCal URLをご登録ください）');
+    const fmtEventDate = (d) => `${d.getMonth()+1}/${d.getDate()}`;
+    const fmtEventTime = (d) => `${pad(d.getHours())}:${pad(d.getMinutes())}`;
+
+    return `<div class="cal-list">${events.slice(0, 5).map(ev=>{
+      let timeStr = '終日';
+      let dateStr = '';
+      if(ev.start){
+        dateStr = fmtEventDate(ev.start);
+        if(!ev.isAllDay){
+          timeStr = fmtEventTime(ev.start);
+          if(ev.end) timeStr += ` - ${fmtEventTime(ev.end)}`;
+        }
+      }
+      return `
+        <div class="cal-item glass-item">
+          <div class="cal-time-col">
+            <span class="cal-date">${esc(dateStr)}</span>
+            <span class="cal-time">${esc(timeStr)}</span>
+          </div>
+          <div class="cal-title">${esc(ev.title)}</div>
+        </div>
+      `;
+    }).join('')}</div>`;
   }
 };
 
@@ -1125,7 +1284,7 @@ async function fetchNewsWithFallback(rssUrl){
   return [];
 }
 
-/* ---- JSONP通信ヘルパー（CORSエラーを完全回避） ---- */
+/* ---- JSONP通信ヘルパー（CORS回避） ---- */
 function fetchJsonp(url, timeout = 12000) {
   return new Promise((resolve, reject) => {
     const cbName = 'gas_cb_' + Math.floor(Math.random() * 1000000);
@@ -1158,6 +1317,91 @@ function fetchJsonp(url, timeout = 12000) {
   });
 }
 
+/* ---- Googleカレンダー iCal 取得 ＆ 解析パーサー ---- */
+function parseIcsDate(str) {
+  if (!str) return null;
+  // 形式: 20261105T140000Z や 20261105
+  const m = str.match(/^(\d{4})(\d{2})(\d{2})(?:T(\d{2})(\d{2})(\d{2})(Z)?)?/);
+  if (!m) return new Date(str);
+  const isUtc = !!m[7];
+  if (m[4]) {
+    if (isUtc) {
+      return new Date(Date.UTC(+m[1], +m[2] - 1, +m[3], +m[4], +m[5], +m[6]));
+    }
+    return new Date(+m[1], +m[2] - 1, +m[3], +m[4], +m[5], +m[6]);
+  }
+  return new Date(+m[1], +m[2] - 1, +m[3]);
+}
+
+function parseIcsEvents(icsText) {
+  if (!icsText) return [];
+  const events = [];
+  const lines = icsText.replace(/\r\n /g, '').replace(/\n /g, '').split(/\r\n|\n|\r/);
+  let cur = null;
+
+  for (let line of lines) {
+    if (line.startsWith('BEGIN:VEVENT')) {
+      cur = { title: '名称未設定', isAllDay: false };
+    } else if (line.startsWith('END:VEVENT')) {
+      if (cur && cur.start) {
+        events.push(cur);
+      }
+      cur = null;
+    } else if (cur) {
+      const idx = line.indexOf(':');
+      if (idx !== -1) {
+        const key = line.substring(0, idx);
+        const val = line.substring(idx + 1).replace(/\\,/g, ',').replace(/\\;/g, ';').replace(/\\n/g, ' ');
+        if (key.startsWith('SUMMARY')) {
+          cur.title = val.trim();
+        } else if (key.startsWith('DTSTART')) {
+          cur.isAllDay = !key.includes('T') && !val.includes('T');
+          cur.start = parseIcsDate(val);
+        } else if (key.startsWith('DTEND')) {
+          cur.end = parseIcsDate(val);
+        }
+      }
+    }
+  }
+
+  // 直近以降（終了が現在より後）の予定を昇順ソートして上位5件抽出
+  const now = new Date();
+  return events
+    .filter(ev => {
+      const checkEnd = ev.end || (ev.start ? new Date(ev.start.getTime() + 86400000) : null);
+      return checkEnd && checkEnd >= now;
+    })
+    .sort((a, b) => a.start - b.start)
+    .slice(0, 5);
+}
+
+async function fetchCalendarEvents(calUrl) {
+  if (!calUrl) return [];
+  // 1. GAS経由での取得（CORS完全回避）
+  if (cfg.gasUrl && cfg.gasUrl.startsWith('https://script.google.com/')) {
+    try {
+      const sep = cfg.gasUrl.includes('?') ? '&' : '?';
+      const target = `${cfg.gasUrl}${sep}icalUrl=${encodeURIComponent(calUrl)}`;
+      const res = await fetchJsonp(target, 12000);
+      if (res && res.ok && res.ics) {
+        return parseIcsEvents(res.ics);
+      }
+    } catch(e) {}
+  }
+
+  // 2. GAS未設定時のプロキシフォールバック
+  try {
+    const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(calUrl)}`;
+    const r = await fetch(proxyUrl, { cache: 'no-store' });
+    if (r.ok) {
+      const txt = await r.text();
+      return parseIcsEvents(txt);
+    }
+  } catch(e) {}
+
+  return [];
+}
+
 /* ---- Yahoo!路線情報のHTML解析 ---- */
 function parseYahooTransitHtml(html){
   const troubles = [];
@@ -1178,11 +1422,11 @@ function parseYahooTransitHtml(html){
     if(!lineName || !statusRaw) return;
     if(!statusRaw.includes('平常運転')){
       let badge = statusRaw.replace(/^[!！\s]+/, '');
-      if(statusRaw.includes('運転見合わせ')) badge = '⚠️ 運転見合わせ';
-      else if(statusRaw.includes('列車遅延') || statusRaw.includes('遅延')) badge = '⚠️ 列車遅延';
-      else if(statusRaw.includes('運転再開')) badge = '⚠️ 運転再開・遅れ';
-      else if(statusRaw.includes('運転計画')) badge = 'ℹ️ 運転計画';
-      else if(statusRaw.includes('その他') || statusRaw.includes('情報')) badge = 'ℹ️ 運行情報あり';
+      if(statusRaw.includes('運転見合わせ')) badge = '運転見合わせ';
+      else if(statusRaw.includes('列車遅延') || statusRaw.includes('遅延')) badge = '列車遅延';
+      else if(statusRaw.includes('運転再開')) badge = '運転再開・遅れ';
+      else if(statusRaw.includes('運転計画')) badge = '運転計画';
+      else if(statusRaw.includes('その他') || statusRaw.includes('情報')) badge = '運行情報あり';
 
       troubles.push({
         name: lineName,
@@ -1196,7 +1440,6 @@ function parseYahooTransitHtml(html){
 }
 
 async function fetchYahooTrainTroubles(){
-  // 1. GASの中継URLが設定されている場合は JSONP 経由で最優先取得
   if(cfg.gasUrl && cfg.gasUrl.startsWith('https://script.google.com/')){
     try{
       const j = await fetchJsonp(cfg.gasUrl, 14000);
@@ -1217,7 +1460,6 @@ async function fetchYahooTrainTroubles(){
     }
   }
 
-  // 2. GAS未設定・または通信失敗時の予備プロキシ
   const targets = [
     'https://transit.yahoo.co.jp/diainfo/area/4',
     'https://transit.yahoo.co.jp/diainfo/shinkansen'
@@ -1260,7 +1502,7 @@ async function fetchYahooTrainTroubles(){
   };
 }
 
-/* ---- 括弧表記を維持した正確な照合処理 ---- */
+/* ---- 照合処理 ---- */
 function cleanLineKey(s){
   return String(s||'')
     .replace(/[［\[\(（]/g, '(')
@@ -1394,13 +1636,16 @@ async function load(){
       });
     }catch(e){}
 
+    // 5. カレンダー予定（iCal解析）
+    const calData = await fetchCalendarEvents(cfg.calUrl);
+
     const prev=(ls.get(KD)||{}).data||{};
     const aggregated={
       weather:weatherData||prev.weather,
       train:trainData,
       news:newsData.length?newsData:(prev.news||[]),
       quake:quakeData.length?quakeData:(prev.quake||[]),
-      calendar:[]
+      calendar:calData.length?calData:(prev.calendar||[])
     };
 
     apply(aggregated);
@@ -1470,6 +1715,7 @@ function fill(){
   $('#sCityName').value=cfg.cityName||'千葉県船橋市';
   $('#sLat').value=cfg.lat;
   $('#sLon').value=cfg.lon;
+  $('#sCalUrl').value=cfg.calUrl||'';
   $('#sGasUrl').value=cfg.gasUrl||'';
   $('#sNewsRss').value=cfg.newsRss||'';
   $('#sBurnShift').checked=!!cfg.burnShift;
@@ -1506,6 +1752,7 @@ $('#save').onclick=()=>{
   if(!isNaN(la))cfg.lat=la;
   if(!isNaN(lo))cfg.lon=lo;
   cfg.selectedLines=$$('.line-chk').filter(c=>c.checked).map(c=>c.value);
+  cfg.calUrl=$('#sCalUrl').value.trim();
   cfg.gasUrl=$('#sGasUrl').value.trim();
   cfg.newsRss=$('#sNewsRss').value.trim();
   cfg.burnShift=$('#sBurnShift').checked;
