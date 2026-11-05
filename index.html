@@ -128,7 +128,7 @@ body{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-i
 #dots button::before{content:"";position:absolute;inset:-12px}
 #dots button.on{background:var(--acc)}
 
-/* 背景画像＆半透明すりガラス共通 */
+/* 背景画像設定 */
 .card[data-k="train"]{
   background:linear-gradient(rgba(11, 15, 20, 0.70), rgba(11, 15, 20, 0.88)), url('train-bg.jpg') center/cover no-repeat, var(--panel);
 }
@@ -431,7 +431,7 @@ body{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-i
   overflow:hidden;
 }
 
-/* ========== Quake（過去4件のフォントサイズを2倍に拡大） ========== */
+/* ========== Quake ========== */
 .eq-wrap{
   flex:1;
   min-height:0;
@@ -662,12 +662,12 @@ body.open #scrim{opacity:1;pointer-events:auto}
 <div id="scrim"></div>
 <aside id="drawer" aria-label="設定">
   <h3><span>設定</span></h3>
-  <label>自動スクロールの間隔（秒・0でオフ）<input id="sAuto" type="number" min="0" max="600" inputmode="numeric"></label>
+  <label>自動スクロールの間隔<input id="sAuto" type="number" min="0" max="600" inputmode="numeric"></label>
   <fieldset>
     <legend>表示するカード</legend>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
       <label class="chk"><input type="checkbox" data-k="weather">天気</label>
-      <label class="chk"><input type="checkbox" data-k="train">鉄道運行情報</label>
+      <label class="chk"><input type="checkbox" data-k="train">運行情報</label>
       <label class="chk"><input type="checkbox" data-k="news">ニュース</label>
       <label class="chk"><input type="checkbox" data-k="quake">地震情報</label>
       <label class="chk"><input type="checkbox" data-k="calendar">予定</label>
@@ -675,7 +675,7 @@ body.open #scrim{opacity:1;pointer-events:auto}
   </fieldset>
 
   <fieldset>
-    <legend>監視する路線（チェックボックス選択）</legend>
+    <legend>路線を選択する</legend>
     <div class="line-filter-btns">
       <button type="button" id="btnAllLines">全選択</button>
       <button type="button" id="btnClearLines">全解除</button>
@@ -686,11 +686,11 @@ body.open #scrim{opacity:1;pointer-events:auto}
   </fieldset>
 
   <fieldset>
-    <legend>📅 Googleカレンダー設定</legend>
+    <legend>Googleカレンダー設定</legend>
     <label>Googleカレンダー iCal URL
       <input id="sCalUrl" type="text" placeholder="https://calendar.google.com/calendar/ical/.../basic.ics">
     </label>
-    <small style="color:var(--sub);font-size:11px">Googleカレンダーの設定 ＞「マイカレンダーの設定」＞「iCal形式の非公開URL」または公開URLを入力してください。</small>
+    <small style="color:var(--sub);font-size:11px">Googleカレンダーの設定 ＞「マイカレンダーの設定」＞「iCal形式の非公開URL」を入力してください。</small>
   </fieldset>
 
   <fieldset>
@@ -698,7 +698,7 @@ body.open #scrim{opacity:1;pointer-events:auto}
     <label>運行情報中継 URL (GASウェブアプリURL)
       <input id="sGasUrl" type="text" placeholder="https://script.google.com/macros/s/.../exec">
     </label>
-    <small style="color:var(--sub);font-size:11px">Google Apps Scriptで作成したウェブアプリURLを登録すると、Yahoo!遮断を100%回避して即座に反映されます。</small>
+    <small style="color:var(--sub);font-size:11px">Google Apps Scriptで作成したウェブアプリURLを経由しないと、運行情報が取得できません</small>
   </fieldset>
 
   <fieldset>
@@ -720,12 +720,12 @@ body.open #scrim{opacity:1;pointer-events:auto}
   </fieldset>
 
   <fieldset>
-    <legend>画面の焼き付き防止・減光設定</legend>
-    <label class="chk"><input type="checkbox" id="sBurnShift">自動ピクセルシフト（1分毎に±6px微動）</label>
+    <legend>画面焼け防止・減光設定</legend>
+    <label class="chk"><input type="checkbox" id="sBurnShift">画面焼け防止</label>
     <label class="chk"><input type="checkbox" id="sNightDim">夜間自動減光（ナイトモード）</label>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:4px">
-      <label>減光開始（時）<input id="sNightStart" type="number" min="0" max="23" inputmode="numeric"></label>
-      <label>減光終了（時）<input id="sNightEnd" type="number" min="0" max="23" inputmode="numeric"></label>
+      <label>減光開始時刻<input id="sNightStart" type="number" min="0" max="23" inputmode="numeric"></label>
+      <label>減光終了時刻<input id="sNightEnd" type="number" min="0" max="23" inputmode="numeric"></label>
     </div>
   </fieldset>
 
@@ -737,7 +737,7 @@ body.open #scrim{opacity:1;pointer-events:auto}
   </div>
 
   <button id="save">保存して更新</button>
-  <button id="fs">全画面にする / 解除する（画面の2回タップでも切替可）</button>
+  <button id="fs">全画面にする（画面2回タップでも切替可）</button>
   <button id="close">閉じる</button>
 
   <div class="source-info">
@@ -768,10 +768,69 @@ body.open #scrim{opacity:1;pointer-events:auto}
 <script>
 (()=>{
 'use strict';
-const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
-const KC='dash.cfg.v19', KD='dash.cache.v19';
 
-/* ---- 路線カタログ（全国新幹線を含む全路線） ---- */
+/* ==========================================================================
+   ▼▼▼ 初期設定 ▼▼▼
+   ========================================================================== */
+const APP_CONFIG = {
+  // 1. 各カードの表示/非表示（true: 表示 / false: 非表示）
+  show: {
+    weather:  true,   // 天気
+    train:    true,   // 鉄道運行情報
+    news:     true,   // ニュース
+    quake:    true,   // 地震情報
+    calendar: true    // カレンダーの予定
+  },
+
+  // 2. 表示する鉄道路線のID一覧（デフォルトで表示したい路線IDを記述）
+  //    ※新幹線: 'tokaido_shinkansen', 'sanyo_shinkansen', 'tohoku_shinkansen', 'joetsu_shinkansen', 'hokuriku_shinkansen', 等
+  //    ※主要路線: 'jb_sobu', 'jo_sobu_rapid', 'je_keiyo', 't_tozai', 'ks_keisei', 'tr_toyo', 'jy_yamanote', 等
+  selectedLines: [
+    'jb_sobu',              // 中央・総武各駅停車
+    'jo_sobu_rapid',        // 総武快速線
+    'je_keiyo',             // 京葉線
+    't_tozai',              // 東西線
+    'ks_keisei',            // 京成本線
+    'r_rinkai',             // りんかい線
+    'jy_yamanote',          // 山手線
+    'tokaido_shinkansen'    // 東海道新幹線
+  ],
+
+  // 3. 運行情報中継 URL（Google Apps Script ウェブアプリの公開URL）
+  gasUrl: 'https://script.google.com/macros/s/AKfycbz0TFWGaL7GzNdM4R48vz1Lj-rNAxXiciCurd--pBuLb_433CjXRfGrOJHSmdxktA-1/exec',
+
+  // 4. Googleカレンダー iCal URL（非公開URLまたは公開URLの .ics リンク）
+  calUrl: 'https://calendar.google.com/calendar/ical/reo4glx10%40gmail.com/private-799db8e79ae7a9d6b5e2081e338d083c/basic.ics',
+
+  // 5. 天気カード用の表示場所名および緯度・経度
+  cityName: '千葉県船橋市',
+  lat: 35.6908,
+  lon: 139.9984,
+
+  // 6. ニュースの配信元 RSS フィード URL
+  newsRss: 'https://news.web.nhk/n-data/conf/na/rss/cat0.xml',
+
+  // 7. 自動スライドの間隔（秒数、0で自動スクロール停止）
+  autoScrollSeconds: 15,
+
+  // 8. ディスプレイ焼き付き防止・減光設定
+  burnShift: true,          // ピクセル微動（焼き付き防止）
+  nightDim: false,           // 夜間自動減光
+  nightStartHour: 23,       // 減光開始（23時〜）
+  nightEndHour: 6,          // 減光終了（〜翌朝6時）
+
+  // 9. 施設設定を最優先するフラグ
+  //    true に設定すると、以前ブラウザに保存された設定をリセットし、常に上記の設定値で起動します
+  FORCE_DEFAULT_SETTINGS: false
+};
+/* ==========================================================================
+   ▲▲▲ 初期設定ここまで ▲▲▲
+   ========================================================================== */
+
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const KC='dash.cfg.v20', KD='dash.cache.v20';
+
+/* ---- 路線カタログ ---- */
 const RAILWAY_CATALOG = [
   // 新幹線
   { id:'tokaido_shinkansen', name:'東海道新幹線', match:['東海道新幹線'], file:'Shinkansen_jrc.svg', company:'JR東海', group:'shinkansen' },
@@ -859,26 +918,37 @@ const RAILWAY_CATALOG = [
   { id:'tj_tojo', name:'東武東上線', match:['東武東上線','東武越生線'], file:'Tobu_Tojo_Line_(TJ)_symbol.svg', company:'東武鉄道', group:'kanto' }
 ];
 
-const DEF={
-  auto:12,
-  show:{weather:true,train:true,news:true,quake:true,calendar:true},
-  cityName:'千葉県船橋市',
-  lat:35.6908,
-  lon:139.9984,
-  selectedLines:['jb_sobu','jo_sobu_rapid','je_keiyo','t_tozai','ks_keisei','tr_toyo','jy_yamanote','tokaido_shinkansen'],
-  calUrl:'',
-  gasUrl:'',
-  newsRss:'https://news.web.nhk/n-data/conf/na/rss/cat0.xml',
-  burnShift:true,
-  nightDim:true,
-  nightStart:23,
-  nightEnd:6
+// 初期設定の解決
+const DEF = {
+  auto: APP_CONFIG.autoScrollSeconds,
+  show: Object.assign({}, APP_CONFIG.show),
+  cityName: APP_CONFIG.cityName,
+  lat: APP_CONFIG.lat,
+  lon: APP_CONFIG.lon,
+  selectedLines: [...APP_CONFIG.selectedLines],
+  calUrl: APP_CONFIG.calUrl,
+  gasUrl: APP_CONFIG.gasUrl,
+  newsRss: APP_CONFIG.newsRss,
+  burnShift: APP_CONFIG.burnShift,
+  nightDim: APP_CONFIG.nightDim,
+  nightStart: APP_CONFIG.nightStartHour,
+  nightEnd: APP_CONFIG.nightEndHour
 };
 
-const ls={get(k){try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
-const cfg=Object.assign({},DEF,ls.get(KC));
-cfg.show=Object.assign({},DEF.show,cfg.show);
-if(!Array.isArray(cfg.selectedLines)||!cfg.selectedLines.length) cfg.selectedLines=DEF.selectedLines;
+const ls = {
+  get(k){try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}},
+  set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
+};
+
+let cfg;
+if(APP_CONFIG.FORCE_DEFAULT_SETTINGS){
+  cfg = Object.assign({}, DEF);
+  ls.set(KC, cfg);
+} else {
+  cfg = Object.assign({}, DEF, ls.get(KC));
+  cfg.show = Object.assign({}, DEF.show, cfg.show);
+  if(!Array.isArray(cfg.selectedLines) || !cfg.selectedLines.length) cfg.selectedLines = DEF.selectedLines;
+}
 
 const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const stripHtml=s=>String(s==null?'':s).replace(/<[^>]*>/g,'').replace(/\s+/g,' ').trim();
@@ -930,7 +1000,7 @@ document.addEventListener('dblclick', e=>{
   toggleFullscreen();
 });
 
-/* ---- 時間帯に応じた天気背景 ---- */
+/* ---- 時間帯に応じた天気背景にする ---- */
 function updateWeatherBgTheme(){
   const card=$('#cardWeather');
   if(!card)return;
@@ -1011,7 +1081,7 @@ function buildLineCheckboxes(){
 }
 buildLineCheckboxes();
 
-/* ---- 焼き付き防止 ---- */
+/* ---- 画面焼け防止 ---- */
 let shiftStep=0;
 let lastActive=Date.now();
 const shiftCoords=[[0,0],[4,-3],[6,0],[4,3],[0,5],[-4,3],[-6,0],[-4,-3]];
@@ -1112,11 +1182,11 @@ const R={
     `;
   },
   train(t){
-    if(!t||!t.length) return empty('監視する路線が選択されていません（設定から選択してください）');
+    if(!t||!t.length) return empty('表示する路線が選択されていません（設定から選択してください）');
 
     const getBadgeHtml = (statusText) => {
       const isWarn = statusText.includes('遅延') || statusText.includes('遅れ');
-      const isBad = statusText.includes('見合') || statusText.includes('運休');
+      const isBad = statusText.includes('見合わせ') || statusText.includes('運休');
       const isInfo = statusText.includes('計画') || statusText.includes('情報');
 
       if (isBad) {
@@ -1146,7 +1216,7 @@ const R={
       const cat = RAILWAY_CATALOG.find(x=>x.id===item.id) || item;
       const svgFile = cat.file || item.file || '';
       const statusText = item.statusText || (item.delay ? '列車遅延' : '平常運転');
-      const isBad = statusText.includes('見合') || statusText.includes('運休');
+      const isBad = statusText.includes('見合わせ') || statusText.includes('運休');
       const isWarn = statusText.includes('遅延') || statusText.includes('遅れ');
       const rowCls = item.delay ? (isBad ? 'delay' : (isWarn ? 'warn' : '')) : '';
       return `
@@ -1807,7 +1877,7 @@ function applyCfg(){
 const open=v=>{document.body.classList.toggle('open',v);if(v)fill()};
 function fill(){
   $('#sAuto').value=cfg.auto;
-  $('#sCityName').value=cfg.cityName||'千葉県船橋市';
+  $('#sCityName').value=cfg.cityName||'';
   $('#sLat').value=cfg.lat;
   $('#sLon').value=cfg.lon;
   $('#sCalUrl').value=cfg.calUrl||'';
@@ -1843,7 +1913,7 @@ $('#save').onclick=()=>{
   const a=parseInt($('#sAuto').value,10),la=parseFloat($('#sLat').value),lo=parseFloat($('#sLon').value);
   const ns=parseInt($('#sNightStart').value,10),ne=parseInt($('#sNightEnd').value,10);
   cfg.auto=isNaN(a)||a<0?0:a;
-  cfg.cityName=$('#sCityName').value.trim()||'現在地';
+  cfg.cityName=$('#sCityName').value.trim()||'';
   if(!isNaN(la))cfg.lat=la;
   if(!isNaN(lo))cfg.lon=lo;
   cfg.selectedLines=$$('.line-chk').filter(c=>c.checked).map(c=>c.value);
