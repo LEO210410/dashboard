@@ -796,4 +796,758 @@ function getWeatherSvg(code, hour){
         <line x1="18" y1="5" x2="18" y2="7.5"/><line x1="18" y1="28.5" x2="18" y2="31"/>
         <line x1="5" y1="18" x2="7.5" y2="18"/><line x1="28.5" y1="18" x2="31" y2="18"/>
         <line x1="8.8" y1="8.8" x2="10.6" y2="10.6"/><line x1="25.4" y1="25.4" x2="27.2" y2="27.2"/>
-        <line x1="27.2
+        <line x1="27.2" y1="8.8" x2="25.4" y2="10.6"/><line x1="10.6" y1="25.4" x2="8.8" y2="27.2"/>
+      </g>
+    </svg>`;
+  }
+
+  if(c <= 2){
+    if(isNight){
+      return `<svg viewBox="0 0 36 36">
+        ${cloudBack}
+        <path d="M14 6.5A7.5 7.5 0 1 0 18.5 19a6.2 6.2 0 0 1-4.5-12.5z" fill="#facc15" filter="drop-shadow(0 2px 4px rgba(0,0,0,0.5))"/>
+      </svg>`;
+    }
+    return `<svg viewBox="0 0 36 36">
+      ${cloudBack}
+      <circle cx="12" cy="12" r="6" fill="#fbbf24" filter="drop-shadow(0 2px 4px rgba(0,0,0,0.4))"/>
+    </svg>`;
+  }
+
+  if(c <= 48){
+    return `<svg viewBox="0 0 36 36">
+      <path d="M9 22h13a4.5 4.5 0 0 0 .4-8.97A6 6 0 0 0 10 10.5a4.8 4.8 0 0 0-1 11.5z" fill="rgba(255,255,255,0.5)"/>
+      <path d="M12 26h15a5.5 5.5 0 0 0 .6-10.97A7.5 7.5 0 0 0 13.3 12a6 6 0 0 0-1.3 14z" fill="#ffffff"/>
+    </svg>`;
+  }
+
+  if((c >= 51 && c <= 67) || (c >= 80 && c <= 82)){
+    return `<svg viewBox="0 0 36 36">
+      <path d="M12 24h14a5.5 5.5 0 0 0 .6-10.97A7.5 7.5 0 0 0 13.3 10a6 6 0 0 0-1.3 14z" fill="#ffffff"/>
+      <g stroke="#60a5fa" stroke-width="2.2" stroke-linecap="round">
+        <line x1="14" y1="27" x2="12.5" y2="31"/>
+        <line x1="19.5" y1="27" x2="18" y2="31"/>
+        <line x1="25" y1="27" x2="23.5" y2="31"/>
+      </g>
+    </svg>`;
+  }
+
+  if((c >= 71 && c <= 77) || (c >= 85 && c <= 86)){
+    return `<svg viewBox="0 0 36 36">
+      <path d="M12 24h14a5.5 5.5 0 0 0 .6-10.97A7.5 7.5 0 0 0 13.3 10a6 6 0 0 0-1.3 14z" fill="#ffffff"/>
+      <g fill="#bae6fd">
+        <circle cx="14" cy="29" r="1.8"/><circle cx="19.5" cy="30" r="1.8"/><circle cx="25" cy="29" r="1.8"/>
+      </g>
+    </svg>`;
+  }
+
+  return `<svg viewBox="0 0 36 36">
+    <path d="M12 23h14a5.5 5.5 0 0 0 .6-10.97A7.5 7.5 0 0 0 13.3 9a6 6 0 0 0-1.3 14z" fill="#ffffff"/>
+    <polygon points="19,23 14,29 18,29 16.5,33 23,26.5 19,26.5" fill="#facc15"/>
+  </svg>`;
+}
+
+function wxLabel(c){
+  c=+c;
+  if(c===0) return '快晴';
+  if(c<=2) return '晴れ時々曇';
+  if(c===3) return '曇り';
+  if(c<=48) return '霧';
+  if(c<=57) return '小雨';
+  if(c<=67) return '雨';
+  if(c<=77) return '雪';
+  if(c<=82) return '強い雨';
+  if(c>=95) return '雷雨';
+  return '曇り';
+}
+
+/* ---- 設定ドロワーの路線チェックボックス生成 ---- */
+function buildLineCheckboxes(){
+  const wrap=$('#lineCheckboxes');
+  if(!wrap)return;
+  wrap.innerHTML = RAILWAY_CATALOG.map(line=>`
+    <label class="line-chk-item">
+      <input type="checkbox" class="line-chk" value="${line.id}">
+      <img class="mini-sym-img" src="icon/${encodeURI(line.file)}" alt="" onerror="if(!this.dataset.r){this.dataset.r=1;this.src='icons/${encodeURI(line.file)}';}">
+      <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(line.name)}</span>
+    </label>
+  `).join('');
+
+  $('#btnAllLines').onclick=()=>$$('.line-chk').forEach(c=>c.checked=true);
+  $('#btnClearLines').onclick=()=>$$('.line-chk').forEach(c=>c.checked=false);
+  $('#btnKantoLines').onclick=()=>{
+    const kantoMain=['jb_sobu','jo_sobu_rapid','jc_chuo','jy_yamanote','jk_keihintohoku','je_keiyo','t_tozai','ks_keisei','tr_toyo'];
+    $$('.line-chk').forEach(c=>{
+      c.checked = kantoMain.includes(c.value);
+    });
+  };
+  $('#btnShinkansen').onclick=()=>{
+    $$('.line-chk').forEach(c=>{
+      if(c.value==='tokaido_shinkansen') c.checked=true;
+    });
+  };
+}
+buildLineCheckboxes();
+
+/* ---- 焼き付き防止 ---- */
+let shiftStep=0;
+let lastActive=Date.now();
+const shiftCoords=[[0,0],[4,-3],[6,0],[4,3],[0,5],[-4,3],[-6,0],[-4,-3]];
+
+function updateBurnInProtection(){
+  const root=document.documentElement.style;
+  if(cfg.burnShift){
+    const [dx,dy]=shiftCoords[shiftStep%shiftCoords.length];
+    root.setProperty('--px', dx+'px');
+    root.setProperty('--py', dy+'px');
+    shiftStep++;
+  }else{
+    root.setProperty('--px','0px');
+    root.setProperty('--py','0px');
+  }
+
+  const hr=new Date().getHours();
+  let isNight=false;
+  if(cfg.nightDim){
+    if(cfg.nightStart > cfg.nightEnd){
+      isNight = (hr >= cfg.nightStart || hr < cfg.nightEnd);
+    }else if(cfg.nightStart < cfg.nightEnd){
+      isNight = (hr >= cfg.nightStart && hr < cfg.nightEnd);
+    }
+  }
+  const isIdle = (Date.now() - lastActive) > 300000;
+  const targetDim = isNight ? 0.35 : (isIdle ? 0.90 : 1.0);
+  root.setProperty('--dim', targetDim);
+  updateWeatherBgTheme();
+}
+
+['touchstart','pointerdown','wheel','keydown'].forEach(ev=>{
+  addEventListener(ev,()=>{
+    lastActive=Date.now();
+    updateBurnInProtection();
+  },{passive:true});
+});
+setInterval(updateBurnInProtection, 60000);
+
+/* ---- clock ---- */
+const cl=['h','m','s'].map(k=>{const p=$('#'+k);return{p,s:[...p.querySelectorAll('span')],t:0,x:undefined}});
+let last=['','',''],lastDay=-1;
+function fin(c){clearTimeout(c.t);c.s[1].textContent=c.s[2].textContent=c.x;c.p.classList.remove('go')}
+function put(c,x){
+  if(c.x===undefined){c.s.forEach(e=>{e.textContent=x});c.x=x;return}
+  if(c.p.classList.contains('go'))fin(c);
+  c.s[0].textContent=c.s[3].textContent=c.x=x;
+  c.p.classList.remove('go');void c.p.offsetWidth;c.p.classList.add('go');
+  c.t=setTimeout(()=>fin(c),640);
+}
+function tick(){
+  const d=new Date(),v=[pad(d.getHours()),pad(d.getMinutes()),pad(d.getSeconds())];
+  v.forEach((x,i)=>{if(x!==last[i]){put(cl[i],x);last[i]=x}});
+  if(d.getDate()!==lastDay){
+    lastDay=d.getDate();
+    $('#date').textContent=d.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'});
+  }
+  setTimeout(tick,1005-d.getMilliseconds());
+}
+
+/* ---- renderers ---- */
+const R={
+  weather(w){
+    if(!w) return empty('天気データを取得中…');
+    updateWeatherBgTheme();
+    const curHr = new Date().getHours();
+    const hrs=(w.hourly||[]).slice(0,6).map(h=>{
+      const d=new Date(h.time);
+      const hrNum=isNaN(d)?0:d.getHours();
+      const timeLabel=isNaN(d)?esc(h.time||''):hrNum+'時';
+      return `
+        <div class="hr">
+          <div>${timeLabel}</div>
+          <div class="hr-ic">${getWeatherSvg(h.code, hrNum)}</div>
+          <div class="hr-temp">${num(h.temp)}°</div>
+          <small>${num(h.pop)}%</small>
+        </div>
+      `;
+    }).join('');
+
+    const dropSvg = `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>`;
+
+    return `
+      <div class="wx-main">
+        <span class="wx-ic">${getWeatherSvg(w.code, curHr)}</span>
+        <span class="wx-t">${num(w.temp)}°</span>
+        <div class="wx-details">
+          <div class="wx-d">${esc(w.desc)}</div>
+          <div class="wx-hl">最高 ${num(w.hi)}° / 最低 ${num(w.lo)}°</div>
+          <div class="wx-loc-pop">
+            <span>${esc(cfg.cityName||'現在地')}</span>
+            <span class="wx-pop-badge">${dropSvg}降水 ${num(w.pop)}%</span>
+          </div>
+        </div>
+      </div>
+      <div class="hrs">${hrs}</div>
+    `;
+  },
+  train(t){
+    if(!t||!t.length) return empty('監視する路線が選択されていません（設定から選択してください）');
+    return `<div class="train-list">${t.map(item=>{
+      const cat = RAILWAY_CATALOG.find(x=>x.id===item.id) || item;
+      const svgFile = cat.file || item.file || '';
+      const statusText = item.statusText || (item.delay ? '列車遅延' : '平常運転');
+      const isSuspend = statusText.includes('見合') || statusText.includes('運休');
+      const rowCls = item.delay ? (isSuspend ? 'delay' : 'warn') : '';
+      return `
+        <div class="train-item glass-item ${rowCls}">
+          <img class="line-icon-svg" src="icon/${encodeURI(svgFile)}" alt="${esc(item.name)}" onerror="if(!this.dataset.r){this.dataset.r=1;this.src='icons/${encodeURI(svgFile)}';}">
+          <div class="train-info-col">
+            <div class="train-name">${esc(item.name)}</div>
+            <div class="train-comp">${esc(item.company||'')}</div>
+            ${item.detail ? `<div class="train-detail">${esc(item.detail)}</div>` : ''}
+          </div>
+          <div class="train-status">${esc(statusText)}</div>
+        </div>
+      `;
+    }).join('')}</div>`;
+  },
+  news(a){
+    const valid = (a||[]).filter(n=>n && n.title);
+    if(!valid.length) return empty('ニュースを取得しています…');
+    const list = valid.slice(0, 3);
+    const clockSvg = `<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15.5 14"/></svg>`;
+
+    return `<div class="nw-stack">${list.map(n=>{
+      const desc = n.desc ? stripHtml(n.desc) : '';
+      return `
+        <div class="nw-item glass-item">
+          <div class="nw-item-top">
+            <div class="nw-item-title">${esc(n.title)}</div>
+            <span class="nw-item-time">${clockSvg}${esc(n.date||'最新')}</span>
+          </div>
+          <div class="nw-item-desc">${esc(desc)}</div>
+        </div>
+      `;
+    }).join('')}</div>`;
+  },
+  quake(a){
+    if(!a||!a.length) return empty('直近の地震情報はありません');
+    const latest = a[0];
+    const older = a.slice(1, 5).reverse();
+
+    const fmtTime = tStr => {
+      const d=new Date(tStr);
+      return isNaN(d)?esc(tStr||''):`${d.getMonth()+1}/${d.getDate()} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    };
+
+    const olderHtml = older.map(q=>{
+      const m=+q.mag;
+      return `
+        <div class="eq-old glass-item">
+          <span class="eq-old-mag">M${isNaN(m)?'-':m.toFixed(1)}</span>
+          <span class="eq-old-place">${esc(q.place)}</span>
+          <span class="eq-old-time">${fmtTime(q.time)}</span>
+          <span class="eq-old-int">震度${esc(q.intensity||'-')}</span>
+        </div>
+      `;
+    }).join('');
+
+    const lm = +latest.mag;
+    const badgeCls = lm>=6 ? 'hi' : (lm>=4.5 ? 'mid' : '');
+
+    const latestHtml = `
+      <div class="eq-latest glass-item">
+        <div class="eq-latest-badge ${badgeCls}">
+          <span class="eq-latest-lbl">最大震度</span>
+          <span class="eq-latest-int">${esc(latest.intensity||'-')}</span>
+        </div>
+        <div class="eq-latest-info">
+          <div class="eq-latest-top">
+            <span class="eq-latest-tag">最新</span>
+            <span class="eq-latest-time">${fmtTime(latest.time)} 発生</span>
+          </div>
+          <div class="eq-latest-place">${esc(latest.place)}</div>
+          <div class="eq-latest-meta">規模 M${isNaN(lm)?'-':lm.toFixed(1)} ／ 深さ ${esc(latest.depth)}</div>
+        </div>
+      </div>
+    `;
+
+    return `
+      <div class="eq-wrap">
+        <div class="eq-older-list">${olderHtml}</div>
+        ${latestHtml}
+      </div>
+    `;
+  },
+  calendar(a){
+    if(!a||!a.length) return empty('直近の予定はありません');
+    return a.slice(0,5).map(e=>`<div class="ev"><time>${esc(e.time||'予定')}</time><div>${esc(e.title)}</div></div>`).join('');
+  }
+};
+
+function apply(data){
+  if(!data)return;
+  for(const k in R){
+    if(data[k]!=null){
+      $('#b-'+k).innerHTML=R[k](data[k]);
+    }
+  }
+  if(data.weather&&data.weather.temp!=null) $('#temp').textContent=num(data.weather.temp)+'°C';
+}
+
+/* ---- ニュースRSS多重取得 ---- */
+function formatPubDate(str){
+  if(!str) return '';
+  const d=new Date(str.replace(/-/g,'/'));
+  const d2=isNaN(d)?new Date(str):d;
+  return isNaN(d2)?'':`${d2.getMonth()+1}/${d2.getDate()} ${pad(d2.getHours())}:${pad(d2.getMinutes())}`;
+}
+
+function parseXmlString(xmlText){
+  const parser=new DOMParser();
+  const xml=parser.parseFromString(xmlText,"text/xml");
+  const feedTitle=stripHtml(xml.querySelector("channel > title, feed > title")?.textContent||"NHKニュース");
+  const items=Array.from(xml.querySelectorAll("item, entry")).slice(0,6);
+  return items.map(item=>{
+    const title=stripHtml(item.querySelector("title")?.textContent||"");
+    const desc=stripHtml(item.querySelector("description, summary, content")?.textContent||"");
+    let link=item.querySelector("link")?.textContent?.trim()||item.querySelector("link")?.getAttribute("href")||"";
+    const pub=item.querySelector("pubDate, updated, date")?.textContent||item.getElementsByTagName("dc:date")[0]?.textContent||"";
+    return {title, desc, url:link, date:formatPubDate(pub), source:feedTitle};
+  }).filter(it=>it.title);
+}
+
+async function fetchNewsWithFallback(rssUrl){
+  if(!rssUrl) return [];
+  try{
+    const r1=await fetch(`https://corsproxy.io/?${encodeURIComponent(rssUrl)}`);
+    if(r1.ok){
+      const txt=await r1.text();
+      const parsed=parseXmlString(txt);
+      if(parsed.length>0) return parsed;
+    }
+  }catch(e){}
+
+  try{
+    const r2=await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(rssUrl)}`);
+    if(r2.ok){
+      const j=await r2.json();
+      if(j.contents){
+        const parsed=parseXmlString(j.contents);
+        if(parsed.length>0) return parsed;
+      }
+    }
+  }catch(e){}
+
+  try{
+    const r3=await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`);
+    if(r3.ok){
+      const j=await r3.json();
+      if(j.status==='ok' && j.items && j.items.length>0){
+        const src=stripHtml(j.feed?.title||'NHKニュース');
+        const list=j.items.map(it=>({
+          title:stripHtml(it.title),
+          desc:stripHtml(it.description||it.content||''),
+          url:it.link,
+          date:formatPubDate(it.pubDate),
+          source:src
+        })).filter(it=>it.title);
+        if(list.length>0) return list;
+      }
+    }
+  }catch(e){}
+
+  return [];
+}
+
+/* ---- Yahoo!路線情報 HTML取得（EEAブロック検知・キャッシュ回避・4重プロキシ） ---- */
+function isValidYahooHtml(html){
+  if(!html || typeof html !== 'string') return false;
+  if(html.includes('欧州経済領域') || html.includes('EEA')) return false;
+  return html.includes('elmTblLstLine') || html.includes('mdAreaMajorLine') || html.includes('<table');
+}
+
+async function fetchYahooHtmlWithProxy(baseUrl){
+  // プロキシキャッシュを防ぐため5分単位のタイムスタンプクエリを付与
+  const sep = baseUrl.includes('?') ? '&' : '?';
+  const targetUrl = `${baseUrl}${sep}_t=${Math.floor(Date.now()/300000)}`;
+
+  const proxies = [
+    async () => {
+      const r = await fetch(`https://corsproxy.io/?${encodeURIComponent(targetUrl)}`, {cache:'no-store'});
+      return r.ok ? await r.text() : '';
+    },
+    async () => {
+      const r = await fetch(`https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(targetUrl)}`, {cache:'no-store'});
+      return r.ok ? await r.text() : '';
+    },
+    async () => {
+      const r = await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`, {cache:'no-store'});
+      return r.ok ? await r.text() : '';
+    },
+    async () => {
+      const r = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`, {cache:'no-store'});
+      if(!r.ok) return '';
+      const j = await r.json();
+      return j?.contents || '';
+    }
+  ];
+
+  for(const fn of proxies){
+    try{
+      const html = await fn();
+      if(isValidYahooHtml(html)) return html;
+    }catch(e){}
+  }
+  return '';
+}
+
+function parseYahooTransitHtml(html){
+  const troubles = [];
+  let totalRows = 0;
+  if(!html) return { troubles, totalRows };
+
+  const doc = new DOMParser().parseFromString(html, 'text/html');
+
+  // 1. Yahoo!路線情報のすべてのテーブル行（tr）を走査
+  doc.querySelectorAll('table tr').forEach(tr=>{
+    const tds = tr.querySelectorAll('td');
+    if(tds.length < 2) return;
+    totalRows++;
+
+    const lineName = tds[0].textContent.replace(/\s+/g,' ').trim();
+    const statusRaw = tds[1].textContent.replace(/\s+/g,' ').trim();
+    const detailText = tds[2] ? tds[2].textContent.replace(/\s+/g,' ').trim() : '';
+
+    if(!lineName || !statusRaw) return;
+    if(!statusRaw.includes('平常運転')){
+      let badge = statusRaw.replace(/^[!！\s]+/, '');
+      if(statusRaw.includes('運転見合わせ')) badge = '⚠️ 運転見合わせ';
+      else if(statusRaw.includes('列車遅延') || statusRaw.includes('遅延')) badge = '⚠️ 列車遅延';
+      else if(statusRaw.includes('運転再開')) badge = '⚠️ 運転再開・遅れ';
+      else if(statusRaw.includes('運転計画')) badge = 'ℹ️ 運転計画';
+      else if(statusRaw.includes('その他') || statusRaw.includes('情報')) badge = 'ℹ️ 運行情報あり';
+
+      troubles.push({
+        name: lineName,
+        status: badge,
+        detail: detailText
+      });
+    }
+  });
+
+  // 2. 万が一次世代レイアウト（Next.jsの __NEXT_DATA__ JSON）で返ってきた場合も自動抽出
+  const nextDataEl = doc.querySelector('#__NEXT_DATA__');
+  if(nextDataEl && troubles.length === 0){
+    try{
+      const jsonStr = nextDataEl.textContent;
+      const matches = jsonStr.matchAll(/"railName"\s*:\s*"([^"]+)"[^}]*?"status"\s*:\s*"([^"]+)"/g);
+      for(const m of matches){
+        totalRows++;
+        const rName = m[1], rStat = m[2];
+        if(!rStat.includes('平常')){
+          troubles.push({ name: rName, status: `⚠️ ${rStat}`, detail: '' });
+        }
+      }
+    }catch(e){}
+  }
+
+  return { troubles, totalRows };
+}
+
+async function fetchYahooTrainTroubles(){
+  const urls = [
+    'https://transit.yahoo.co.jp/diainfo/area/4',      // 関東エリア
+    'https://transit.yahoo.co.jp/diainfo/shinkansen'   // 全国新幹線
+  ];
+  const htmlList = await Promise.all(urls.map(u=>fetchYahooHtmlWithProxy(u)));
+
+  const allTroubles = [];
+  let parsedRows = 0;
+  htmlList.forEach(h=>{
+    const res = parseYahooTransitHtml(h);
+    parsedRows += res.totalRows;
+    res.troubles.forEach(tr=>{
+      if(!allTroubles.some(x=>x.name===tr.name)){
+        allTroubles.push(tr);
+      }
+    });
+  });
+
+  return {
+    ok: parsedRows > 0,
+    parsedRows,
+    troubles: allTroubles
+  };
+}
+
+/* ---- 括弧内の重要語句（[快速]・[各停]など）を消さずに正規化する関数 ---- */
+function cleanLineKey(s){
+  return String(s||'')
+    .replace(/[［\[\(（]/g, '(')
+    .replace(/[］\]\)）]/g, ')')
+    .replace(/[\s・〜～ー−\-]/g, '')
+    .toLowerCase();
+}
+
+function matchTroubleForLine(lineObj, troubles){
+  return troubles.find(tr=>{
+    const yKey = cleanLineKey(tr.name);
+    // Yahoo側の路線名から括弧区間を除いたベース名（例: "総武本線(東京銚子)" → "総武本線"）
+    const yBase = yKey.replace(/\(.*?\)/g, '');
+
+    return lineObj.match.some(m=>{
+      const mKey = cleanLineKey(m);
+      // 1. 括弧を含めた完全部分一致（例: "総武線(快速)" と "総武線(快速)"）
+      if(yKey.includes(mKey) || mKey.includes(yKey)) return true;
+      // 2. マッチ条件側に括弧指定が無い場合のみ、ベース名との一致を許可（快速と各停の混同を防止）
+      if(!mKey.includes('(') && yBase && (yBase === mKey || yBase.includes(mKey))) return true;
+      return false;
+    });
+  });
+}
+
+/* ---- Direct API fetch ---- */
+const st={ok:true,t:0};let busy=false,wl=null;
+function status(){
+  const el=$('#stat'),d=new Date(st.t),tm=st.t?`${pad(d.getHours())}:${pad(d.getMinutes())}`:'--:--';
+  el.className=st.ok?'':'err';
+  el.textContent=(st.ok?`${tm} 更新`:`${tm} 更新試行中`);
+}
+
+async function load(){
+  if(busy)return;busy=true;
+  $('#info-rss-url').textContent=cfg.newsRss||'未設定';
+  try{
+    // 1. 天気
+    let weatherData=null;
+    try{
+      const wxUrl=`https://api.open-meteo.com/v1/forecast?latitude=${cfg.lat}&longitude=${cfg.lon}&current=temperature_2m,weather_code&hourly=temperature_2m,weather_code,precipitation_probability&daily=temperature_2m_max,temperature_2m_min&timezone=Asia%2FTokyo&forecast_days=2`;
+      const wxRes=await fetch(wxUrl).then(r=>r.json());
+      const curCode=wxRes.current.weather_code;
+      const nowHour=new Date().getHours();
+      
+      const hourly=[];
+      for(let i=nowHour;i<nowHour+18;i+=3){
+        if(wxRes.hourly.time[i]){
+          hourly.push({
+            time:wxRes.hourly.time[i],
+            temp:wxRes.hourly.temperature_2m[i],
+            pop:wxRes.hourly.precipitation_probability[i],
+            code:wxRes.hourly.weather_code[i]
+          });
+        }
+      }
+      weatherData={
+        temp:wxRes.current.temperature_2m,
+        code:curCode,
+        desc:wxLabel(curCode),
+        pop:wxRes.hourly.precipitation_probability[nowHour]||0,
+        hi:wxRes.daily.temperature_2m_max[0],
+        lo:wxRes.daily.temperature_2m_min[0],
+        hourly:hourly
+      };
+    }catch(e){}
+
+    // 2. 鉄道運行情報（Yahoo!路線情報から取得＆診断表示更新）
+    const yahooRes = await fetchYahooTrainTroubles();
+    const diagBox = $('#diag-train-box');
+    if(diagBox){
+      if(!yahooRes.ok){
+        diagBox.innerHTML = `<span style="color:var(--bad)">⚠️ Yahoo!路線情報のHTML取得に失敗しました（プロキシ制限）</span>`;
+      }else if(yahooRes.troubles.length === 0){
+        diagBox.innerHTML = `<span style="color:var(--good)">✅ 取得成功（${yahooRes.parsedRows}路線を検査：現在トラブル路線は0件です）</span>`;
+      }else{
+        diagBox.innerHTML = `<div style="color:var(--warm);font-weight:700;margin-bottom:4px">⚠️ 現在Yahoo!上で検出中の路線（${yahooRes.troubles.length}件）:</div>` +
+          yahooRes.troubles.map(t=>`・<b>${esc(t.name)}</b>（${esc(t.status)}）`).join('<br>');
+      }
+    }
+
+    const chosen = RAILWAY_CATALOG.filter(line=>cfg.selectedLines.includes(line.id));
+    const trainData = chosen.map(line=>{
+      if(!yahooRes.ok){
+        return {
+          id: line.id,
+          name: line.name,
+          file: line.file,
+          company: line.company,
+          delay: false,
+          statusText: '情報取得中',
+          detail: ''
+        };
+      }
+      const hit = matchTroubleForLine(line, yahooRes.troubles);
+      return {
+        id: line.id,
+        name: line.name,
+        file: line.file,
+        company: line.company,
+        delay: !!hit,
+        statusText: hit ? hit.status : '平常運転',
+        detail: hit ? hit.detail : ''
+      };
+    });
+    // 遅延・情報ありの路線を最上部にソート
+    trainData.sort((a,b)=>(b.delay?1:0)-(a.delay?1:0));
+
+    // 3. ニュース
+    const newsData=await fetchNewsWithFallback(cfg.newsRss);
+
+    // 4. 地震情報
+    let quakeData=[];
+    try{
+      const qRes=await fetch('https://api.p2pquake.net/v2/history?codes=551&limit=5').then(r=>r.json());
+      const intMap={10:'1',20:'2',30:'3',40:'4',45:'5弱',50:'5強',55:'6弱',60:'6強',70:'7'};
+      quakeData=qRes.map(q=>{
+        const eq = q.earthquake;
+        const hypo = eq?.hypocenter;
+        const dVal = hypo?.depth;
+        let depthText = '不明';
+        if(dVal !== undefined && dVal !== null){
+          if(dVal === 0) depthText = 'ごく浅い';
+          else if(dVal === -1) depthText = '不明';
+          else depthText = `${dVal}km`;
+        }
+        const mVal = hypo?.magnitude;
+        return {
+          time: eq?.time || q.time,
+          place: hypo?.name || '情報なし',
+          mag: (mVal !== undefined && mVal >= 0) ? mVal.toFixed(1) : '-',
+          depth: depthText,
+          intensity: intMap[eq?.maxScale] || '-'
+        };
+      });
+    }catch(e){}
+
+    const prev=(ls.get(KD)||{}).data||{};
+    const aggregated={
+      weather:weatherData||prev.weather,
+      train:trainData,
+      news:newsData.length?newsData:(prev.news||[]),
+      quake:quakeData.length?quakeData:(prev.quake||[]),
+      calendar:[]
+    };
+
+    apply(aggregated);
+    st.ok=true;st.t=Date.now();
+    ls.set(KD,{t:st.t,data:aggregated});
+  }catch(e){
+    st.ok=false;
+  }finally{
+    busy=false;status();
+  }
+}
+
+/* ---- wake lock ---- */
+async function lock(){
+  try{
+    if(!('wakeLock' in navigator)||wl)return;
+    wl=await navigator.wakeLock.request('screen');
+    wl.addEventListener('release',()=>{wl=null;status()});
+    status();
+  }catch(e){wl=null}
+}
+
+/* ---- pager / dots / scroll ---- */
+const pager=$('#pager'),dots=$('#dots');let cur=0,touched=0,timer=0;
+const vis=()=>$$('.card').filter(c=>!c.hidden);
+function mark(){[...dots.children].forEach((b,i)=>b.classList.toggle('on',i===cur))}
+function go(i){
+  const n=vis().length;if(!n)return;
+  cur=(i+n)%n;
+  pager.scrollTo({top:cur*pager.clientHeight,behavior:'smooth'});
+  mark();
+}
+function buildDots(){
+  dots.innerHTML='';const v=vis();
+  dots.style.display=v.length>1?'':'none';
+  v.forEach((c,i)=>{
+    const b=document.createElement('button');
+    b.setAttribute('aria-label',c.dataset.t);
+    b.onclick=()=>{touched=Date.now();go(i)};
+    dots.appendChild(b);
+  });
+  mark();
+}
+pager.addEventListener('scroll',()=>{
+  const i=Math.round(pager.scrollTop/pager.clientHeight);
+  if(i!==cur){cur=i;mark()}
+},{passive:true});
+['touchstart','wheel'].forEach(e=>pager.addEventListener(e,()=>{touched=Date.now()},{passive:true}));
+
+function setAuto(){
+  clearInterval(timer);
+  if(cfg.auto>0)timer=setInterval(()=>{
+    if(Date.now()-touched<15000||document.body.classList.contains('open'))return;
+    go(cur+1);
+  },cfg.auto*1000);
+}
+
+function applyCfg(){
+  $$('.card').forEach(c=>{c.hidden=!cfg.show[c.dataset.k]});
+  cur=0;pager.scrollTop=0;buildDots();setAuto();updateBurnInProtection();status();
+}
+
+/* ---- drawer ---- */
+const open=v=>{document.body.classList.toggle('open',v);if(v)fill()};
+function fill(){
+  $('#sAuto').value=cfg.auto;
+  $('#sCityName').value=cfg.cityName||'千葉県船橋市';
+  $('#sLat').value=cfg.lat;
+  $('#sLon').value=cfg.lon;
+  $('#sNewsRss').value=cfg.newsRss||'';
+  $('#sBurnShift').checked=!!cfg.burnShift;
+  $('#sNightDim').checked=!!cfg.nightDim;
+  $('#sNightStart').value=cfg.nightStart;
+  $('#sNightEnd').value=cfg.nightEnd;
+  $('#info-rss-url').textContent=cfg.newsRss||'未設定';
+
+  $$('.line-chk').forEach(c=>{
+    c.checked = cfg.selectedLines.includes(c.value);
+  });
+
+  const presetEl=$('#sNewsPreset');
+  const match=Array.from(presetEl.options).some(opt=>opt.value===cfg.newsRss);
+  presetEl.value=match?cfg.newsRss:'custom';
+
+  $$('#drawer [data-k]').forEach(c=>{c.checked=!!cfg.show[c.dataset.k]});
+}
+
+$('#sNewsPreset').onchange=e=>{
+  if(e.target.value!=='custom'){
+    $('#sNewsRss').value=e.target.value;
+  }
+};
+
+$('#cfgBtn').onclick=()=>open(true);
+$('#edge').onclick=()=>open(true);
+$('#scrim').onclick=$('#close').onclick=()=>open(false);
+$('#save').onclick=()=>{
+  const a=parseInt($('#sAuto').value,10),la=parseFloat($('#sLat').value),lo=parseFloat($('#sLon').value);
+  const ns=parseInt($('#sNightStart').value,10),ne=parseInt($('#sNightEnd').value,10);
+  cfg.auto=isNaN(a)||a<0?0:a;
+  cfg.cityName=$('#sCityName').value.trim()||'現在地';
+  if(!isNaN(la))cfg.lat=la;
+  if(!isNaN(lo))cfg.lon=lo;
+  cfg.selectedLines=$$('.line-chk').filter(c=>c.checked).map(c=>c.value);
+  cfg.newsRss=$('#sNewsRss').value.trim();
+  cfg.burnShift=$('#sBurnShift').checked;
+  cfg.nightDim=$('#sNightDim').checked;
+  if(!isNaN(ns)&&ns>=0&&ns<=23)cfg.nightStart=ns;
+  if(!isNaN(ne)&&ne>=0&&ne<=23)cfg.nightEnd=ne;
+  $$('#drawer [data-k]').forEach(c=>{cfg.show[c.dataset.k]=c.checked});
+  if(!Object.values(cfg.show).some(Boolean))cfg.show.weather=true;
+  ls.set(KC,cfg);applyCfg();open(false);load();
+};
+$('#fs').onclick=()=>{
+  toggleFullscreen();
+  open(false);
+};
+
+/* ---- boot ---- */
+applyCfg();
+const c=ls.get(KD);if(c&&c.data){apply(c.data);st.t=c.t}
+tick();status();lock();load();
+setInterval(load,60000);
+})();
+</script>
+</body>
+</html>
