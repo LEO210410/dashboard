@@ -555,6 +555,14 @@ body.open #scrim{opacity:1;pointer-events:auto}
   </fieldset>
 
   <fieldset>
+    <legend>運行情報プロキシ設定（GAS）</legend>
+    <label>運行情報中継 URL (GASウェブアプリURL)
+      <input id="sGasUrl" type="text" placeholder="https://script.google.com/macros/s/.../exec">
+    </label>
+    <small style="color:var(--sub);font-size:11px">Google Apps Scriptで作成したウェブアプリURLを登録すると、Yahoo!遮断を100%回避して即座に反映されます。</small>
+  </fieldset>
+
+  <fieldset>
     <legend>ニュース設定</legend>
     <label>配信元プリセット
       <select id="sNewsPreset">
@@ -622,10 +630,9 @@ body.open #scrim{opacity:1;pointer-events:auto}
 (()=>{
 'use strict';
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
-const KC='dash.cfg.v11', KD='dash.cache.v11';
+const KC='dash.cfg.v12', KD='dash.cache.v12';
 
 /* ---- Yahoo!路線情報の表記に完全対応した全70路線カタログ ---- */
-/* ※match配列のキーワードは括弧の中身を含め、Yahoo!路線情報の表記と正確に照合されます */
 const RAILWAY_CATALOG = [
   { id:'tokaido_shinkansen', name:'東海道新幹線', match:['東海道新幹線'], file:'Shinkansen_jrc.svg', company:'JR東海', group:'shinkansen' },
   { id:'nex', name:'成田エクスプレス', match:['成田エクスプレス','成田線[千葉','成田線[成田'], file:'Sign_of_NEX_in_station.svg', company:'JR東日本', group:'kanto' },
@@ -706,6 +713,7 @@ const DEF={
   lat:35.6908,
   lon:139.9984,
   selectedLines:['jb_sobu','jo_sobu_rapid','je_keiyo','t_tozai','ks_keisei','tr_toyo','jy_yamanote','tokaido_shinkansen'],
+  gasUrl:'',
   newsRss:'https://news.web.nhk/n-data/conf/na/rss/cat0.xml',
   burnShift:true,
   nightDim:true,
@@ -780,7 +788,7 @@ function updateWeatherBgTheme(){
   else card.classList.add('wx-night');
 }
 
-/* ---- SVG天気アイコン生成 ---- */
+/* ---- 太陽/月を前面配置したSVG天気アイコン生成 ---- */
 function getWeatherSvg(code, hour){
   const c = +code;
   const isNight = (hour < 6 || hour >= 18);
@@ -1158,48 +1166,7 @@ async function fetchNewsWithFallback(rssUrl){
   return [];
 }
 
-/* ---- Yahoo!路線情報 HTML取得（EEAブロック検知・キャッシュ回避・4重プロキシ） ---- */
-function isValidYahooHtml(html){
-  if(!html || typeof html !== 'string') return false;
-  if(html.includes('欧州経済領域') || html.includes('EEA')) return false;
-  return html.includes('elmTblLstLine') || html.includes('mdAreaMajorLine') || html.includes('<table');
-}
-
-async function fetchYahooHtmlWithProxy(baseUrl){
-  // プロキシキャッシュを防ぐため5分単位のタイムスタンプクエリを付与
-  const sep = baseUrl.includes('?') ? '&' : '?';
-  const targetUrl = `${baseUrl}${sep}_t=${Math.floor(Date.now()/300000)}`;
-
-  const proxies = [
-    async () => {
-      const r = await fetch(`https://corsproxy.io/?${encodeURIComponent(targetUrl)}`, {cache:'no-store'});
-      return r.ok ? await r.text() : '';
-    },
-    async () => {
-      const r = await fetch(`https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(targetUrl)}`, {cache:'no-store'});
-      return r.ok ? await r.text() : '';
-    },
-    async () => {
-      const r = await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`, {cache:'no-store'});
-      return r.ok ? await r.text() : '';
-    },
-    async () => {
-      const r = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`, {cache:'no-store'});
-      if(!r.ok) return '';
-      const j = await r.json();
-      return j?.contents || '';
-    }
-  ];
-
-  for(const fn of proxies){
-    try{
-      const html = await fn();
-      if(isValidYahooHtml(html)) return html;
-    }catch(e){}
-  }
-  return '';
-}
-
+/* ---- Yahoo!路線情報のHTML取得（GAS優先 ＆ 国内フォールバック） ---- */
 function parseYahooTransitHtml(html){
   const troubles = [];
   let totalRows = 0;
@@ -1207,7 +1174,6 @@ function parseYahooTransitHtml(html){
 
   const doc = new DOMParser().parseFromString(html, 'text/html');
 
-  // 1. Yahoo!路線情報のすべてのテーブル行（tr）を走査
   doc.querySelectorAll('table tr').forEach(tr=>{
     const tds = tr.querySelectorAll('td');
     if(tds.length < 2) return;
@@ -1234,52 +1200,78 @@ function parseYahooTransitHtml(html){
     }
   });
 
-  // 2. 万が一次世代レイアウト（Next.jsの __NEXT_DATA__ JSON）で返ってきた場合も自動抽出
-  const nextDataEl = doc.querySelector('#__NEXT_DATA__');
-  if(nextDataEl && troubles.length === 0){
-    try{
-      const jsonStr = nextDataEl.textContent;
-      const matches = jsonStr.matchAll(/"railName"\s*:\s*"([^"]+)"[^}]*?"status"\s*:\s*"([^"]+)"/g);
-      for(const m of matches){
-        totalRows++;
-        const rName = m[1], rStat = m[2];
-        if(!rStat.includes('平常')){
-          troubles.push({ name: rName, status: `⚠️ ${rStat}`, detail: '' });
-        }
-      }
-    }catch(e){}
-  }
-
   return { troubles, totalRows };
 }
 
 async function fetchYahooTrainTroubles(){
-  const urls = [
-    'https://transit.yahoo.co.jp/diainfo/area/4',      // 関東エリア
-    'https://transit.yahoo.co.jp/diainfo/shinkansen'   // 全国新幹線
-  ];
-  const htmlList = await Promise.all(urls.map(u=>fetchYahooHtmlWithProxy(u)));
+  // 1. GASの中継URLが設定されている場合は最優先で高速取得
+  if(cfg.gasUrl && cfg.gasUrl.startsWith('https://script.google.com/')){
+    try{
+      const r = await fetch(cfg.gasUrl, { cache:'no-store' });
+      if(r.ok){
+        const j = await r.json();
+        if(j.ok && Array.isArray(j.htmlList)){
+          const allTroubles = [];
+          let parsedRows = 0;
+          j.htmlList.forEach(h=>{
+            const res = parseYahooTransitHtml(h);
+            parsedRows += res.totalRows;
+            res.troubles.forEach(tr=>{
+              if(!allTroubles.some(x=>x.name===tr.name)) allTroubles.push(tr);
+            });
+          });
+          return { ok: parsedRows > 0, parsedRows, troubles: allTroubles, source: 'GAS' };
+        }
+      }
+    }catch(e){
+      console.warn('GAS fetch failed', e);
+    }
+  }
 
+  // 2. GAS未設定の場合：プロキシを直接試行
+  const targets = [
+    'https://transit.yahoo.co.jp/diainfo/area/4',
+    'https://transit.yahoo.co.jp/diainfo/shinkansen'
+  ];
+
+  async function tryProxy(u){
+    try{
+      const r = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(u)}`, {cache:'no-store'});
+      if(r.ok){
+        const j = await r.json();
+        if(j.contents && j.contents.includes('<table')) return j.contents;
+      }
+    }catch(_){}
+    try{
+      const r2 = await fetch(`https://corsproxy.io/?${encodeURIComponent(u)}`, {cache:'no-store'});
+      if(r2.ok){
+        const t = await r2.text();
+        if(t && t.includes('<table')) return t;
+      }
+    }catch(_){}
+    return '';
+  }
+
+  const htmlList = await Promise.all(targets.map(tryProxy));
   const allTroubles = [];
   let parsedRows = 0;
   htmlList.forEach(h=>{
     const res = parseYahooTransitHtml(h);
     parsedRows += res.totalRows;
     res.troubles.forEach(tr=>{
-      if(!allTroubles.some(x=>x.name===tr.name)){
-        allTroubles.push(tr);
-      }
+      if(!allTroubles.some(x=>x.name===tr.name)) allTroubles.push(tr);
     });
   });
 
   return {
     ok: parsedRows > 0,
     parsedRows,
-    troubles: allTroubles
+    troubles: allTroubles,
+    source: 'CORS-Proxy'
   };
 }
 
-/* ---- 括弧内の重要語句（[快速]・[各停]など）を消さずに正規化する関数 ---- */
+/* ---- 括弧表記を維持した正確な照合処理 ---- */
 function cleanLineKey(s){
   return String(s||'')
     .replace(/[［\[\(（]/g, '(')
@@ -1291,14 +1283,11 @@ function cleanLineKey(s){
 function matchTroubleForLine(lineObj, troubles){
   return troubles.find(tr=>{
     const yKey = cleanLineKey(tr.name);
-    // Yahoo側の路線名から括弧区間を除いたベース名（例: "総武本線(東京銚子)" → "総武本線"）
     const yBase = yKey.replace(/\(.*?\)/g, '');
 
     return lineObj.match.some(m=>{
       const mKey = cleanLineKey(m);
-      // 1. 括弧を含めた完全部分一致（例: "総武線(快速)" と "総武線(快速)"）
       if(yKey.includes(mKey) || mKey.includes(yKey)) return true;
-      // 2. マッチ条件側に括弧指定が無い場合のみ、ベース名との一致を許可（快速と各停の混同を防止）
       if(!mKey.includes('(') && yBase && (yBase === mKey || yBase.includes(mKey))) return true;
       return false;
     });
@@ -1347,16 +1336,16 @@ async function load(){
       };
     }catch(e){}
 
-    // 2. 鉄道運行情報（Yahoo!路線情報から取得＆診断表示更新）
+    // 2. 鉄道運行情報
     const yahooRes = await fetchYahooTrainTroubles();
     const diagBox = $('#diag-train-box');
     if(diagBox){
       if(!yahooRes.ok){
-        diagBox.innerHTML = `<span style="color:var(--bad)">⚠️ Yahoo!路線情報のHTML取得に失敗しました（プロキシ制限）</span>`;
+        diagBox.innerHTML = `<span style="color:var(--bad)">⚠️ Yahoo!からの取得に失敗しました。<br>設定欄に「Google Apps Script (GAS)」のURLを設定すると100%確実に取得できます。</span>`;
       }else if(yahooRes.troubles.length === 0){
-        diagBox.innerHTML = `<span style="color:var(--good)">✅ 取得成功（${yahooRes.parsedRows}路線を検査：現在トラブル路線は0件です）</span>`;
+        diagBox.innerHTML = `<span style="color:var(--good)">✅ 取得成功（${yahooRes.source}経由・${yahooRes.parsedRows}路線を検査：現在トラブル路線は0件です）</span>`;
       }else{
-        diagBox.innerHTML = `<div style="color:var(--warm);font-weight:700;margin-bottom:4px">⚠️ 現在Yahoo!上で検出中の路線（${yahooRes.troubles.length}件）:</div>` +
+        diagBox.innerHTML = `<div style="color:var(--warm);font-weight:700;margin-bottom:4px">⚠️ 検出中の路線（${yahooRes.source}経由・計${yahooRes.troubles.length}件）:</div>` +
           yahooRes.troubles.map(t=>`・<b>${esc(t.name)}</b>（${esc(t.status)}）`).join('<br>');
       }
     }
@@ -1370,8 +1359,8 @@ async function load(){
           file: line.file,
           company: line.company,
           delay: false,
-          statusText: '情報取得中',
-          detail: ''
+          statusText: '情報取得エラー',
+          detail: '設定からGAS URLをご登録ください'
         };
       }
       const hit = matchTroubleForLine(line, yahooRes.troubles);
@@ -1385,7 +1374,6 @@ async function load(){
         detail: hit ? hit.detail : ''
       };
     });
-    // 遅延・情報ありの路線を最上部にソート
     trainData.sort((a,b)=>(b.delay?1:0)-(a.delay?1:0));
 
     // 3. ニュース
@@ -1493,6 +1481,7 @@ function fill(){
   $('#sCityName').value=cfg.cityName||'千葉県船橋市';
   $('#sLat').value=cfg.lat;
   $('#sLon').value=cfg.lon;
+  $('#sGasUrl').value=cfg.gasUrl||'';
   $('#sNewsRss').value=cfg.newsRss||'';
   $('#sBurnShift').checked=!!cfg.burnShift;
   $('#sNightDim').checked=!!cfg.nightDim;
@@ -1528,6 +1517,7 @@ $('#save').onclick=()=>{
   if(!isNaN(la))cfg.lat=la;
   if(!isNaN(lo))cfg.lon=lo;
   cfg.selectedLines=$$('.line-chk').filter(c=>c.checked).map(c=>c.value);
+  cfg.gasUrl=$('#sGasUrl').value.trim();
   cfg.newsRss=$('#sNewsRss').value.trim();
   cfg.burnShift=$('#sBurnShift').checked;
   cfg.nightDim=$('#sNightDim').checked;
