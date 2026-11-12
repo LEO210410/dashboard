@@ -40,8 +40,10 @@ export const Clock: React.FC<ClockProps> = React.memo(
       const fin = (u: FlipUnitState) => {
         if (!u.el) return;
         window.clearTimeout(u.timerId);
-        if (u.spans[1] && u.val !== undefined) u.spans[1].textContent = u.val;
-        if (u.spans[2] && u.val !== undefined) u.spans[2].textContent = u.val;
+        if (u.val !== undefined) {
+          if (u.spans[1]) u.spans[1].textContent = u.val;
+          if (u.spans[2]) u.spans[2].textContent = u.val;
+        }
         u.el.classList.remove('go');
       };
 
@@ -57,9 +59,10 @@ export const Clock: React.FC<ClockProps> = React.memo(
         if (u.el.classList.contains('go')) {
           fin(u);
         }
-        if (u.spans[0]) u.spans[0].textContent = u.val;
-        if (u.spans[3]) u.spans[3].textContent = u.val;
+        // 元の index.html (c.s[0].textContent=c.s[3].textContent=c.x=x) と完全に同一の順序で更新
         u.val = x;
+        if (u.spans[0]) u.spans[0].textContent = x;
+        if (u.spans[3]) u.spans[3].textContent = x;
         u.el.classList.remove('go');
         void u.el.offsetWidth;
         u.el.classList.add('go');
@@ -68,31 +71,24 @@ export const Clock: React.FC<ClockProps> = React.memo(
 
       const tick = () => {
         if (unmounted) return;
-        try {
-          const d = new Date();
-          const v = [pad(d.getHours()), pad(d.getMinutes()), pad(d.getSeconds())];
-          v.forEach((x, i) => {
-            if (x !== lastVals[i]) {
-              put(units[i], x);
-              lastVals[i] = x;
-            }
-          });
-          if (d.getDate() !== lastDay) {
-            lastDay = d.getDate();
-            if (dateRef.current) {
-              dateRef.current.textContent = `${d.getFullYear()}年${
-                d.getMonth() + 1
-              }月${d.getDate()}日(${DAYS[d.getDay()]})`;
-            }
+        const d = new Date();
+        const v = [pad(d.getHours()), pad(d.getMinutes()), pad(d.getSeconds())];
+        v.forEach((x, i) => {
+          if (x !== lastVals[i]) {
+            put(units[i], x);
+            lastVals[i] = x;
           }
-        } catch (err) {
-          console.error('Clock tick error:', err);
-        } finally {
-          if (!unmounted) {
-            const now = new Date();
-            const delay = Math.max(200, 1000 - now.getMilliseconds());
-            tickTimerId = window.setTimeout(tick, delay);
+        });
+        if (d.getDate() !== lastDay) {
+          lastDay = d.getDate();
+          if (dateRef.current) {
+            dateRef.current.textContent = `${d.getFullYear()}年${
+              d.getMonth() + 1
+            }月${d.getDate()}日(${DAYS[d.getDay()]})`;
           }
+        }
+        if (!unmounted) {
+          tickTimerId = window.setTimeout(tick, 1005 - d.getMilliseconds());
         }
       };
 
