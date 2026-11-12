@@ -1,8 +1,8 @@
 {
   "name": "Dashboard",
   "short_name": "Dashboard",
-  "description": "デジタルサイネージ・ダッシュボード（時計・天気・運行情報・ニュース・地震・予定）",
-  "lang": "ja",
+  "description": "Display Dashboard",
+  "lang": "en",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
