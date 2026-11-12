@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#151d27"/>
+      <stop offset="100%" stop-color="#0b0f14"/>
+    </linearGradient>
+    <linearGradient id="clockTop" x1="8" y1="12" x2="8" y2="26" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#222d3b"/>
+      <stop offset="100%" stop-color="#1b2430"/>
+    </linearGradient>
+    <linearGradient id="clockBot" x1="8" y1="26" x2="8" y2="52" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#161d27"/>
+      <stop offset="100%" stop-color="#131922"/>
+    </linearGradient>
+    <linearGradient id="wxCard" x1="36" y1="12" x2="56" y2="30" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#234875"/>
+      <stop offset="100%" stop-color="#152640"/>
+    </linearGradient>
+    <linearGradient id="subCard" x1="36" y1="34" x2="56" y2="52" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#1d2530"/>
+      <stop offset="100%" stop-color="#141a22"/>
+    </linearGradient>
+    <clipPath id="leftClip">
+      <rect x="8" y="12" width="24" height="40" rx="5.5"/>
+    </clipPath>
+  </defs>
+
+  <!-- App icon squircle base -->
+  <rect x="2" y="2" width="60" height="60" rx="14" fill="url(#bg)"/>
+  <rect x="2.5" y="2.5" width="59" height="59" rx="13.5" stroke="#252e3a" stroke-width="1"/>
+
+  <!-- Left Column: Precision Clock + Split-Flap Card -->
+  <g clip-path="url(#leftClip)">
+    <rect x="8" y="12" width="24" height="14" fill="url(#clockTop)"/>
+    <rect x="8" y="26" width="24" height="26" fill="url(#clockBot)"/>
+    <rect x="8" y="25.5" width="24" height="1" fill="#0b0f14" fill-opacity="0.85"/>
+  </g>
+  <rect x="8.5" y="12.5" width="23" height="39" rx="5" stroke="#2a3544" stroke-width="1"/>
+
+  <!-- Minimalist precision clock dial -->
+  <circle cx="20" cy="25.5" r="7.4" fill="#151c25" stroke="#ece9e1" stroke-width="1.7"/>
+  <path d="M20 20.6V25.5L23.3 27.4" stroke="#8fd0e8" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="20" cy="25.5" r="1.1" fill="#ece9e1"/>
+
+  <!-- Meta bar (Date & Temp) -->
+  <rect x="13" y="39.2" width="8.5" height="2" rx="1" fill="#8794a3"/>
+  <rect x="23.5" y="39.2" width="3.5" height="2" rx="1" fill="#8fd0e8"/>
+  <rect x="13" y="43.8" width="14" height="1.8" rx="0.9" fill="#252e3a"/>
+
+  <!-- Right Column: Bento Dashboard Cards -->
+  <!-- Top Card (Weather) -->
+  <rect x="36" y="12" width="20" height="18" rx="5.5" fill="url(#wxCard)"/>
+  <rect x="36.5" y="12.5" width="19" height="17" rx="5" stroke="#8fd0e8" stroke-opacity="0.32" stroke-width="1"/>
+  <circle cx="41.5" cy="18.5" r="2.1" fill="#8fd0e8"/>
+  <rect x="45.8" y="17.5" width="6.2" height="2" rx="1" fill="#ece9e1"/>
+  <rect x="39.5" y="23.8" width="12.5" height="1.8" rx="0.9" fill="#ece9e1" fill-opacity="0.5"/>
+
+  <!-- Bottom Card (Transit / Status) -->
+  <rect x="36" y="34" width="20" height="18" rx="5.5" fill="url(#subCard)"/>
+  <rect x="36.5" y="34.5" width="19" height="17" rx="5" stroke="#252e3a" stroke-width="1"/>
+  <circle cx="41.5" cy="40.5" r="1.9" fill="#4ade80"/>
+  <rect x="45.5" y="39.5" width="6.5" height="2" rx="1" fill="#ece9e1"/>
+  <rect x="39.5" y="45.2" width="12.5" height="1.8" rx="0.9" fill="#8794a3" fill-opacity="0.6"/>
+</svg>
