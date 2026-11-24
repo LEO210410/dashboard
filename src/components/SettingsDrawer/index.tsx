@@ -31,9 +31,9 @@ const CARD_LABELS: { key: CardKey; label: string }[] = [
 ];
 
 const TRAIN_MARQUEE_OPTIONS: { value: TrainMarqueeMode; label: string }[] = [
-  { value: 'oneway', label: 'パターン1：右から左へ一方向（標準・デフォルト）' },
-  { value: 'pause-scroll', label: 'パターン2：冒頭静止後に左へスライド（電車内LED風）' },
-  { value: 'seamless', label: 'パターン3：シームレス循環ループ（途切れなし）' },
+  { value: 'oneway', label: 'パターン1：右から左へ' },
+  { value: 'pause-scroll', label: 'パターン2：冒頭静止後に左へスライド' },
+  { value: 'seamless', label: 'パターン3：シームレス循環ループ' },
 ];
 
 type IconName = 'refresh' | 'pin' | 'warn' | 'check';
