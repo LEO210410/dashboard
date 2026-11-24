@@ -411,20 +411,18 @@ body.hide-cursor, body.hide-cursor * { cursor: none !important; }
   display:flex;
   flex-direction:column;
   gap:1.2vmin;
+  overflow-y:auto;
+  padding-right:.4vmin;
+  scrollbar-width:thin;
 }
 .nw-item{
-  flex:1 1 auto;
+  flex:1 0 auto;
   border-radius:1.4vmin;
   padding:1.3vmin 2vmin;
   display:flex;
   flex-direction:column;
-  justify-content:flex-start;
-  gap:.6vmin;
-  min-height:0;
-  overflow-y:auto;
-  scrollbar-width:none;
+  justify-content:center;
 }
-.nw-item::-webkit-scrollbar{display:none}
 .nw-item-top{
   display:flex;
   justify-content:space-between;
@@ -432,7 +430,7 @@ body.hide-cursor, body.hide-cursor * { cursor: none !important; }
   gap:1.6vmin;
 }
 .nw-item-title{
-  font-size:clamp(14px, 2.8vmin, 19.5px);
+  font-size:clamp(16.8px, 3.36vmin, 23.4px);
   font-weight:700;
   color:#ffffff;
   line-height:1.32;
@@ -446,17 +444,17 @@ body.hide-cursor, body.hide-cursor * { cursor: none !important; }
   display:inline-flex;
   align-items:center;
   gap:.5vmin;
-  font-size:clamp(10.5px, 2vmin, 13.5px);
+  font-size:clamp(11.5px, 2.2vmin, 15.5px);
   color:var(--acc);
   font-variant-numeric:tabular-nums;
   white-space:nowrap;
   flex-shrink:0;
   font-weight:600;
-  margin-top:.2vmin;
+  margin-top:.25vmin;
 }
 .nw-item-time svg{
-  width:clamp(11px, 2vmin, 14px);
-  height:clamp(11px, 2vmin, 14px);
+  width:clamp(12px, 2.2vmin, 15.5px);
+  height:clamp(12px, 2.2vmin, 15.5px);
   stroke:currentColor;
   fill:none;
   stroke-width:2;
@@ -464,10 +462,14 @@ body.hide-cursor, body.hide-cursor * { cursor: none !important; }
   stroke-linejoin:round;
 }
 .nw-item-desc{
-  font-size:clamp(11.5px, 2.15vmin, 15px);
+  margin-top:1.4em;
+  font-size:clamp(13.8px, 2.58vmin, 18px);
   color:#d5dee8;
   line-height:1.4;
   overflow-wrap:anywhere;
+}
+.nw-item-desc:empty{
+  display:none;
 }
 
 /* ========== Quake ========== */
