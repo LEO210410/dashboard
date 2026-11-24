@@ -1,9 +1,11 @@
 import React, { useCallback, useEffect, useRef } from 'react';
+import { TrainMarqueeMode } from '../../config/appConfig';
 import { RAILWAY_CATALOG } from '../../config/railwayCatalog';
 import { TrainStatusItem } from '../../services/trainService';
 
 export interface TrainCardProps {
   items: TrainStatusItem[];
+  marqueeMode?: TrainMarqueeMode;
 }
 
 const StatusBadge: React.FC<{ statusText: string }> = ({ statusText }) => {
@@ -54,28 +56,58 @@ const StatusBadge: React.FC<{ statusText: string }> = ({ statusText }) => {
 };
 
 export const TrainCard: React.FC<TrainCardProps> = React.memo(
-  ({ items }) => {
+  ({ items, marqueeMode = 'oneway' }) => {
     const listRef = useRef<HTMLDivElement>(null);
 
     const checkMarquee = useCallback(() => {
       const container = listRef.current;
       if (!container) return;
       container.querySelectorAll<HTMLDivElement>('.train-detail-box').forEach((box) => {
-        const content = box.querySelector<HTMLSpanElement>('.train-detail-content');
+        const content = box.querySelector<HTMLSpanElement>(
+          '.train-detail-content:not(.train-detail-clone)'
+        );
         if (!content) return;
-        const overflow = content.scrollWidth - box.clientWidth;
-        if (overflow > 4) {
-          box.classList.add('marquee');
-          box.style.setProperty('--scroll-dist', `${overflow + 14}px`);
-          const dur = Math.max(6, Math.round(overflow / 30) + 4);
-          box.style.setProperty('--duration', `${dur}s`);
+
+        const contentStyle = window.getComputedStyle(content);
+        const padRight = parseFloat(contentStyle.paddingRight) || 0;
+        const textWidth = content.scrollWidth - padRight;
+
+        const boxStyle = window.getComputedStyle(box);
+        const padLeftBox = parseFloat(boxStyle.paddingLeft) || 0;
+        const padRightBox = parseFloat(boxStyle.paddingRight) || 0;
+        const boxInnerWidth = box.clientWidth - padLeftBox - padRightBox;
+
+        if (textWidth > boxInnerWidth + 2) {
+          if (!box.classList.contains('marquee')) {
+            box.classList.add('marquee');
+          }
+          const boxWVal = `${Math.round(boxInnerWidth + padRightBox)}px`;
+          if (box.style.getPropertyValue('--box-w') !== boxWVal) {
+            box.style.setProperty('--box-w', boxWVal);
+          }
+
+          let durSec = 10;
+          if (marqueeMode === 'oneway') {
+            durSec = Math.max(7, Math.round(((box.clientWidth + textWidth) / 65) * 10) / 10);
+          } else if (marqueeMode === 'pause-scroll') {
+            durSec = Math.min(14, Math.max(10, Math.round((textWidth / 85 + 2.5) * 10) / 10));
+          } else {
+            const fontSize = parseFloat(contentStyle.fontSize) || 14;
+            const unitDist = textWidth + fontSize * 3;
+            durSec = Math.max(7, Math.round((unitDist / 65) * 10) / 10);
+          }
+
+          const durVal = `${durSec}s`;
+          if (box.style.getPropertyValue('--duration') !== durVal) {
+            box.style.setProperty('--duration', durVal);
+          }
         } else {
           box.classList.remove('marquee');
-          box.style.removeProperty('--scroll-dist');
+          box.style.removeProperty('--box-w');
           box.style.removeProperty('--duration');
         }
       });
-    }, []);
+    }, [marqueeMode]);
 
     useEffect(() => {
       const timerId = window.setTimeout(checkMarquee, 100);
@@ -84,7 +116,7 @@ export const TrainCard: React.FC<TrainCardProps> = React.memo(
         window.clearTimeout(timerId);
         window.removeEventListener('resize', checkMarquee);
       };
-    }, [items, checkMarquee]);
+    }, [items, marqueeMode, checkMarquee]);
 
     if (!items || !items.length) {
       return (
@@ -132,8 +164,16 @@ export const TrainCard: React.FC<TrainCardProps> = React.memo(
                 <StatusBadge statusText={statusText} />
               </div>
               {item.detail ? (
-                <div className="train-detail-box">
-                  <span className="train-detail-content">{item.detail}</span>
+                <div className={`train-detail-box mode-${marqueeMode}`}>
+                  <div className="train-detail-track">
+                    <span className="train-detail-content">{item.detail}</span>
+                    <span
+                      className="train-detail-content train-detail-clone"
+                      aria-hidden="true"
+                    >
+                      {item.detail}
+                    </span>
+                  </div>
                 </div>
               ) : null}
             </div>
@@ -142,5 +182,7 @@ export const TrainCard: React.FC<TrainCardProps> = React.memo(
       </div>
     );
   },
-  (prev, next) => JSON.stringify(prev.items) === JSON.stringify(next.items)
+  (prev, next) =>
+    prev.marqueeMode === next.marqueeMode &&
+    JSON.stringify(prev.items) === JSON.stringify(next.items)
 );

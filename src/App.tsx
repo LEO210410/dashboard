@@ -112,7 +112,7 @@ export const App: React.FC = () => {
   const drawerOpenRef = useRef<boolean>(drawerOpen);
   drawerOpenRef.current = drawerOpen;
 
-  const { toggleFullscreen } = useFullscreen();
+  const { toggleFullscreen } = useFullscreen(drawerOpen);
   useWakeLock();
   useBurnInProtect({
     burnShift: cfg.burnShift,
@@ -346,7 +346,7 @@ export const App: React.FC = () => {
                 <h2>鉄道運行情報</h2>
               </div>
               <div className="body" id="b-train">
-                <TrainCard items={train} />
+                <TrainCard items={train} marqueeMode={cfg.trainMarqueeMode} />
               </div>
             </article>
 

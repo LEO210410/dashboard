@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   AppConfig,
   CardKey,
@@ -6,6 +6,7 @@ import {
   NEWS_PRESETS,
   ProfileMode,
   PROFILES,
+  TrainMarqueeMode,
 } from '../../config/appConfig';
 import { KANTO_MAIN_LINES, RAILWAY_CATALOG } from '../../config/railwayCatalog';
 import { fetchCurrentLocationStrict } from '../../services/geolocation';
@@ -29,6 +30,12 @@ const CARD_LABELS: { key: CardKey; label: string }[] = [
   { key: 'news', label: 'ニュース' },
   { key: 'quake', label: '地震情報' },
   { key: 'calendar', label: '予定' },
+];
+
+const TRAIN_MARQUEE_OPTIONS: { value: TrainMarqueeMode; label: string }[] = [
+  { value: 'oneway', label: 'パターン1：右から左へ' },
+  { value: 'pause-scroll', label: 'パターン2：冒頭静止後に左へスライド' },
+  { value: 'seamless', label: 'パターン3：シームレス循環ループ' },
 ];
 
 type IconName = 'home' | 'building' | 'refresh' | 'pin' | 'warn' | 'check';
@@ -206,14 +213,14 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({
     const lonVal = isNaN(draft.lon) ? PROFILES[draftMode].lon : draft.lon;
     const ns =
       !isNaN(draft.nightStartHour) &&
-      draft.nightStartHour >= 0 &&
-      draft.nightStartHour <= 23
+        draft.nightStartHour >= 0 &&
+        draft.nightStartHour <= 23
         ? Math.round(draft.nightStartHour)
         : 23;
     const ne =
       !isNaN(draft.nightEndHour) &&
-      draft.nightEndHour >= 0 &&
-      draft.nightEndHour <= 23
+        draft.nightEndHour >= 0 &&
+        draft.nightEndHour <= 23
         ? Math.round(draft.nightEndHour)
         : 6;
 
@@ -225,6 +232,11 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({
     const sanitized: AppConfig = {
       ...draft,
       profileName: PROFILES[draftMode].profileName,
+      trainMarqueeMode: TRAIN_MARQUEE_OPTIONS.some(
+        (o) => o.value === draft.trainMarqueeMode
+      )
+        ? draft.trainMarqueeMode
+        : 'oneway',
       autoScrollSeconds: autoSec,
       cityName: draft.cityName.trim(),
       lat: latVal,
@@ -330,6 +342,25 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({
 
         <fieldset>
           <legend>路線を選択する</legend>
+          <label>
+            鉄道運行情報のスクロール方式
+            <select
+              id="sTrainMarquee"
+              value={draft.trainMarqueeMode || 'oneway'}
+              onChange={(e) =>
+                setDraft((prev) => ({
+                  ...prev,
+                  trainMarqueeMode: e.target.value as TrainMarqueeMode,
+                }))
+              }
+            >
+              {TRAIN_MARQUEE_OPTIONS.map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
+                </option>
+              ))}
+            </select>
+          </label>
           <div className="line-filter-btns">
             <button type="button" id="btnAllLines" onClick={selectAllLines}>
               全選択

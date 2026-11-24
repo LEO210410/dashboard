@@ -27,6 +27,7 @@ html,body,#root{
   font-family:"Hiragino Sans","Noto Sans JP","Yu Gothic UI",system-ui,sans-serif;
 }
 body{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
+body.hide-cursor, body.hide-cursor * { cursor: none !important; }
 
 #app{
   height:100%;
@@ -352,6 +353,12 @@ body{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-i
 .train-item.warn .train-detail-box{
   border-left-color:var(--warm);
 }
+.train-detail-track{
+  display:inline-flex;
+  align-items:center;
+  white-space:nowrap;
+  will-change:transform;
+}
 .train-detail-content{
   display:inline-block;
   font-size:clamp(12px, 2.4vmin, 16px);
@@ -359,52 +366,78 @@ body{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-i
   font-weight:500;
   line-height:1.35;
   white-space:nowrap;
-  will-change:transform;
+}
+.train-detail-clone{
+  display:none;
 }
 .train-item.warn .train-detail-content{
   color:#fff2e6;
 }
-.train-detail-box.marquee .train-detail-content{
-  padding-left:0;
-  animation:scroll-text var(--duration, 8s) ease-in-out infinite alternate;
+/* パターン1：右から左へ一方向（標準） */
+.train-detail-box.marquee.mode-oneway .train-detail-track{
+  animation:marquee-oneway var(--duration, 10s) linear infinite;
 }
-@keyframes scroll-text{
+/* パターン2：冒頭静止後に左へスライド（電車内LED風） */
+.train-detail-box.marquee.mode-pause-scroll .train-detail-track{
+  animation:marquee-pause-scroll var(--duration, 10s) linear infinite;
+}
+/* パターン3：シームレス循環ループ（途切れなし） */
+.train-detail-box.marquee.mode-seamless .train-detail-content{
+  padding-right:3em;
+}
+.train-detail-box.marquee.mode-seamless .train-detail-clone{
+  display:inline-block;
+}
+.train-detail-box.marquee.mode-seamless .train-detail-track{
+  animation:marquee-seamless var(--duration, 10s) linear infinite;
+}
+@keyframes marquee-oneway{
+  0%{transform:translateX(var(--box-w, 100%))}
+  100%{transform:translateX(calc(-100% - 2vmin))}
+}
+@keyframes marquee-pause-scroll{
   0%, 25%{transform:translateX(0)}
-  75%, 100%{transform:translateX(calc(-1 * var(--scroll-dist, 0px)))}
+  96%, 100%{transform:translateX(calc(-100% - 2vmin))}
+}
+@keyframes marquee-seamless{
+  0%{transform:translateX(0)}
+  100%{transform:translateX(-50%)}
 }
 
 /* ========== News ========== */
 .nw-stack{
   flex:1;
   min-height:0;
-  display:grid;
-  grid-template-rows:repeat(3, minmax(0, 1fr));
-  gap:1.4vmin;
-}
-.nw-item{
-  border-radius:1.4vmin;
-  padding:1.8vmin 2.4vmin 1.5vmin;
   display:flex;
   flex-direction:column;
-  justify-content:center;
-  gap:.8vmin;
-  min-height:0;
-  overflow:hidden;
+  gap:1.2vmin;
 }
+.nw-item{
+  flex:1 1 auto;
+  border-radius:1.4vmin;
+  padding:1.3vmin 2vmin;
+  display:flex;
+  flex-direction:column;
+  justify-content:flex-start;
+  gap:.6vmin;
+  min-height:0;
+  overflow-y:auto;
+  scrollbar-width:none;
+}
+.nw-item::-webkit-scrollbar{display:none}
 .nw-item-top{
   display:flex;
   justify-content:space-between;
   align-items:flex-start;
   gap:1.6vmin;
-  margin-top:.5vmin;
 }
 .nw-item-title{
-  font-size:clamp(15.5px, 3.2vmin, 22px);
+  font-size:clamp(14px, 2.8vmin, 19.5px);
   font-weight:700;
   color:#ffffff;
-  line-height:1.35;
+  line-height:1.32;
   display:-webkit-box;
-  -webkit-line-clamp:1;
+  -webkit-line-clamp:2;
   -webkit-box-orient:vertical;
   overflow:hidden;
   flex:1;
@@ -431,13 +464,10 @@ body{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-i
   stroke-linejoin:round;
 }
 .nw-item-desc{
-  font-size:clamp(12px, 2.35vmin, 16px);
+  font-size:clamp(11.5px, 2.15vmin, 15px);
   color:#d5dee8;
-  line-height:1.48;
-  display:-webkit-box;
-  -webkit-line-clamp:2;
-  -webkit-box-orient:vertical;
-  overflow:hidden;
+  line-height:1.4;
+  overflow-wrap:anywhere;
 }
 
 /* ========== Quake ========== */

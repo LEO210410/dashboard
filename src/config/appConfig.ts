@@ -2,6 +2,8 @@ export type ProfileMode = 'home' | 'facility';
 
 export type CardKey = 'weather' | 'train' | 'news' | 'quake' | 'calendar';
 
+export type TrainMarqueeMode = 'oneway' | 'pause-scroll' | 'seamless';
+
 export interface CardVisibility {
   weather: boolean;
   train: boolean;
@@ -17,6 +19,8 @@ export interface AppConfig {
   show: CardVisibility;
   /** 表示する鉄道路線のID一覧 */
   selectedLines: string[];
+  /** 鉄道運行情報の詳細テキストのスクロール方式 */
+  trainMarqueeMode: TrainMarqueeMode;
   /** 運行情報中継 URL（Google Apps Script ウェブアプリの公開URL） */
   gasUrl: string;
   /** Googleカレンダー iCal URL（非公開URLまたは公開URLの .ics リンク） */
@@ -110,6 +114,9 @@ export const PROFILES: Record<ProfileMode, AppConfig> = {
       'tokaido_shinkansen',   // 東海道新幹線
     ],
 
+    // 鉄道運行情報のスクロール方式（'oneway' | 'pause-scroll' | 'seamless'）
+    trainMarqueeMode: 'oneway',
+
     // 3. 運行情報中継 URL（Google Apps Script ウェブアプリの公開URL）
     gasUrl: 'https://script.google.com/macros/s/AKfycbz0TFWGaL7GzNdM4R48vz1Lj-rNAxXiciCurd--pBuLb_433CjXRfGrOJHSmdxktA-1/exec',
 
@@ -166,6 +173,9 @@ export const PROFILES: Record<ProfileMode, AppConfig> = {
       'jy_yamanote',          // 山手線
       'tokaido_shinkansen',   // 東海道新幹線
     ],
+
+    // 鉄道運行情報のスクロール方式（'oneway' | 'pause-scroll' | 'seamless'）
+    trainMarqueeMode: 'oneway',
 
     // 3. 運行情報中継 URL（Google Apps Script ウェブアプリの公開URL）
     gasUrl: 'https://script.google.com/macros/s/AKfycbz0TFWGaL7GzNdM4R48vz1Lj-rNAxXiciCurd--pBuLb_433CjXRfGrOJHSmdxktA-1/exec',
@@ -272,6 +282,10 @@ export function loadProfileConfig(mode: ProfileMode): AppConfig {
     // 過去に保存された空の gasUrl でコード内の有効なURLが上書きされないよう補完する
     if (!merged.gasUrl || !merged.gasUrl.trim()) {
       merged.gasUrl = def.gasUrl;
+    }
+    const validMarqueeModes: TrainMarqueeMode[] = ['oneway', 'pause-scroll', 'seamless'];
+    if (!validMarqueeModes.includes(merged.trainMarqueeMode)) {
+      merged.trainMarqueeMode = def.trainMarqueeMode;
     }
     return merged;
   } catch (_) {
