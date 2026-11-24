@@ -3,9 +3,8 @@ import {
   AppConfig,
   CardKey,
   cloneConfig,
+  DEFAULT_CONFIG,
   NEWS_PRESETS,
-  ProfileMode,
-  PROFILES,
   TrainMarqueeMode,
 } from '../../config/appConfig';
 import { KANTO_MAIN_LINES, RAILWAY_CATALOG } from '../../config/railwayCatalog';
@@ -14,13 +13,12 @@ import { YahooTroublesResult } from '../../services/trainService';
 
 export interface SettingsDrawerProps {
   isOpen: boolean;
-  mode: ProfileMode;
   config: AppConfig;
   trainDiag: YahooTroublesResult | null;
   onOpen: () => void;
   onClose: () => void;
-  onSave: (nextMode: ProfileMode, nextConfig: AppConfig) => void;
-  onResetProfile: (targetMode: ProfileMode) => AppConfig;
+  onSave: (nextConfig: AppConfig) => void;
+  onReset: () => AppConfig;
   onToggleFullscreen: () => void;
 }
 
@@ -33,23 +31,17 @@ const CARD_LABELS: { key: CardKey; label: string }[] = [
 ];
 
 const TRAIN_MARQUEE_OPTIONS: { value: TrainMarqueeMode; label: string }[] = [
-  { value: 'oneway', label: 'パターン1：右から左へ' },
-  { value: 'pause-scroll', label: 'パターン2：冒頭静止後に左へスライド' },
-  { value: 'seamless', label: 'パターン3：シームレス循環ループ' },
+  { value: 'oneway', label: 'パターン1：右から左へ一方向（標準・デフォルト）' },
+  { value: 'pause-scroll', label: 'パターン2：冒頭静止後に左へスライド（電車内LED風）' },
+  { value: 'seamless', label: 'パターン3：シームレス循環ループ（途切れなし）' },
 ];
 
-type IconName = 'home' | 'building' | 'refresh' | 'pin' | 'warn' | 'check';
+type IconName = 'refresh' | 'pin' | 'warn' | 'check';
 
 /** 絵文字の代わりに使うインラインSVGアイコン（currentColor 追従） */
 const Icon: React.FC<{ name: IconName }> = ({ name }) => {
   let body: React.ReactNode;
   switch (name) {
-    case 'home':
-      body = <path d="M3 11l9-8 9 8M5 10v10h5v-6h4v6h5V10" />;
-      break;
-    case 'building':
-      body = <path d="M4 21V4h10v17M14 9h6v12M8 8h2M8 12h2M8 16h2M3 21h18" />;
-      break;
     case 'refresh':
       body = <path d="M21 12a9 9 0 1 1-3-6.7L21 8M21 3v5h-5" />;
       break;
@@ -79,16 +71,14 @@ const Icon: React.FC<{ name: IconName }> = ({ name }) => {
 
 export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({
   isOpen,
-  mode,
   config,
   trainDiag,
   onOpen,
   onClose,
   onSave,
-  onResetProfile,
+  onReset,
   onToggleFullscreen,
 }) => {
-  const [draftMode, setDraftMode] = useState<ProfileMode>(mode);
   const [draft, setDraft] = useState<AppConfig>(() => cloneConfig(config));
   const [geoLoading, setGeoLoading] = useState(false);
   const [geoMsg, setGeoMsg] = useState<{ text: string; isError?: boolean } | null>(
@@ -97,11 +87,10 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({
 
   useEffect(() => {
     if (isOpen) {
-      setDraftMode(mode);
       setDraft(cloneConfig(config));
       setGeoMsg(null);
     }
-  }, [isOpen, mode, config]);
+  }, [isOpen, config]);
 
   useEffect(() => {
     document.body.classList.toggle('open', isOpen);
@@ -110,20 +99,11 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({
     };
   }, [isOpen]);
 
-  const handleSelectProfile = (targetMode: ProfileMode) => {
-    setDraftMode(targetMode);
-    // 切り替えた際は該当プロファイルの初期値をフォームに反映する
-    setDraft(cloneConfig(PROFILES[targetMode]));
-    setGeoMsg({
-      text: `「${PROFILES[targetMode].profileName}」プロファイルの初期値をフォームに読み込みました（「保存して更新」で確定）`,
-    });
-  };
-
   const handleResetToDefault = () => {
-    const resetCfg = onResetProfile(draftMode);
+    const resetCfg = onReset();
     setDraft(cloneConfig(resetCfg));
     setGeoMsg({
-      text: `「${PROFILES[draftMode].profileName}」プロファイルの初期値にリセットしました`,
+      text: '初期設定にリセットしました',
     });
   };
 
@@ -209,18 +189,18 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({
       isNaN(draft.autoScrollSeconds) || draft.autoScrollSeconds < 0
         ? 0
         : Math.round(draft.autoScrollSeconds);
-    const latVal = isNaN(draft.lat) ? PROFILES[draftMode].lat : draft.lat;
-    const lonVal = isNaN(draft.lon) ? PROFILES[draftMode].lon : draft.lon;
+    const latVal = isNaN(draft.lat) ? DEFAULT_CONFIG.lat : draft.lat;
+    const lonVal = isNaN(draft.lon) ? DEFAULT_CONFIG.lon : draft.lon;
     const ns =
       !isNaN(draft.nightStartHour) &&
-        draft.nightStartHour >= 0 &&
-        draft.nightStartHour <= 23
+      draft.nightStartHour >= 0 &&
+      draft.nightStartHour <= 23
         ? Math.round(draft.nightStartHour)
         : 23;
     const ne =
       !isNaN(draft.nightEndHour) &&
-        draft.nightEndHour >= 0 &&
-        draft.nightEndHour <= 23
+      draft.nightEndHour >= 0 &&
+      draft.nightEndHour <= 23
         ? Math.round(draft.nightEndHour)
         : 6;
 
@@ -231,7 +211,6 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({
 
     const sanitized: AppConfig = {
       ...draft,
-      profileName: PROFILES[draftMode].profileName,
       trainMarqueeMode: TRAIN_MARQUEE_OPTIONS.some(
         (o) => o.value === draft.trainMarqueeMode
       )
@@ -249,7 +228,7 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({
       show: nextShow,
     };
 
-    onSave(draftMode, sanitized);
+    onSave(sanitized);
   };
 
   const matchedPreset = NEWS_PRESETS.some((p) => p.url === draft.newsRss)
@@ -263,46 +242,15 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({
       <aside id="drawer" aria-label="設定">
         <h3>
           <span>設定</span>
-          <span className="profile-badge">
-            <Icon name={draftMode === 'facility' ? 'building' : 'home'} />
-            現在: {draftMode === 'facility' ? '施設用' : '自宅用'}
-          </span>
+          <button
+            type="button"
+            className="btn-reset"
+            onClick={handleResetToDefault}
+          >
+            <Icon name="refresh" />
+            初期値にリセット
+          </button>
         </h3>
-
-        <fieldset>
-          <legend>プロファイル切り替え（初期設定プリセット）</legend>
-          <div className="profile-seg">
-            <button
-              type="button"
-              className={draftMode === 'home' ? 'active' : ''}
-              onClick={() => handleSelectProfile('home')}
-            >
-              <Icon name="home" />
-              自宅用モード
-            </button>
-            <button
-              type="button"
-              className={draftMode === 'facility' ? 'active' : ''}
-              onClick={() => handleSelectProfile('facility')}
-            >
-              <Icon name="building" />
-              施設用モード
-            </button>
-          </div>
-          <div className="profile-actions">
-            <button
-              type="button"
-              className="btn-sub"
-              onClick={handleResetToDefault}
-            >
-              <Icon name="refresh" />
-              プロファイル初期値にリセット
-            </button>
-          </div>
-          <small className="hint-text">
-            URLパラメータ <code>?mode=home</code> または <code>?mode=facility</code> でも起動モードを自動切り替えできます。
-          </small>
-        </fieldset>
 
         <label>
           自動スクロールの間隔

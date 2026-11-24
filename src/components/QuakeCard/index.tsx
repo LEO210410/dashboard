@@ -8,10 +8,13 @@ export interface QuakeCardProps {
 const pad = (n: number): string => String(n).padStart(2, '0');
 
 const fmtTime = (tStr: string): string => {
-  const d = new Date(tStr);
-  return isNaN(d.getTime())
-    ? tStr || ''
-    : `${d.getMonth() + 1}/${d.getDate()} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  if (!tStr) return '';
+  const normalized = tStr.replace(/\.\d+$/, '').replace(/-/g, '/');
+  const d = new Date(normalized);
+  const d2 = isNaN(d.getTime()) ? new Date(tStr) : d;
+  return isNaN(d2.getTime())
+    ? tStr
+    : `${d2.getMonth() + 1}/${d2.getDate()} ${pad(d2.getHours())}:${pad(d2.getMinutes())}`;
 };
 
 export const QuakeCard: React.FC<QuakeCardProps> = ({ items }) => {

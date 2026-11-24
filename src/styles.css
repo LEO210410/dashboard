@@ -26,6 +26,9 @@ html,body,#root{
   -webkit-touch-callout:none;
   font-family:"Hiragino Sans","Noto Sans JP","Yu Gothic UI",system-ui,sans-serif;
 }
+@supports (height:100dvh){
+  html,body,#root{height:100dvh}
+}
 body{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
 body.hide-cursor, body.hide-cursor * { cursor: none !important; }
 
@@ -633,38 +636,8 @@ body.open #scrim{opacity:1;pointer-events:auto}
 #drawer button:hover{border-color:var(--acc)}
 #drawer #save{background:var(--acc);color:#08202b;border:0;font-weight:700}
 
-.profile-badge{
-  display:inline-flex;
-  align-items:center;
-  gap:6px;
-  font-size:12px;
-  font-weight:600;
-  color:var(--acc);
-  background:var(--panel2);
-  border:1px solid var(--line);
-  padding:4px 10px;
-  border-radius:999px;
-}
-.profile-seg{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:8px;
-}
-.profile-seg button{
-  font-weight:600;
-  padding:9px 10px !important;
-}
-.profile-seg button.active{
-  background:rgba(143, 208, 232, 0.2) !important;
-  border-color:var(--acc) !important;
-  color:#ffffff !important;
-}
-.profile-actions{
-  display:flex;
-  justify-content:flex-end;
-}
-.profile-actions .btn-sub{
-  padding:6px 12px !important;
+.btn-reset{
+  padding:5px 10px !important;
   font-size:12px !important;
   color:var(--sub) !important;
 }
@@ -703,8 +676,7 @@ body.open #scrim{opacity:1;pointer-events:auto}
   vertical-align:-0.2em;
   margin-right:.4em;
 }
-.profile-badge .ico{margin-right:0}
-.profile-seg button,.profile-actions .btn-sub,.btn-geo{
+.btn-reset,.btn-geo{
   display:inline-flex;
   align-items:center;
   justify-content:center;

@@ -2,12 +2,9 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   AppConfig,
   CardKey,
-  loadProfileConfig,
-  ProfileMode,
-  resetProfileConfig,
-  resolveInitialMode,
-  saveActiveMode,
-  saveProfileConfig,
+  loadConfig,
+  resetConfig,
+  saveConfig,
   STORAGE_KEYS,
 } from './config/appConfig';
 import { CalendarCard } from './components/CalendarCard';
@@ -51,9 +48,9 @@ const CARD_DEFS: { key: CardKey; title: string; header: string }[] = [
   { key: 'calendar', title: '予定', header: 'カレンダーの予定' },
 ];
 
-function loadCachedData(mode: ProfileMode): CachedDashboardData | null {
+function loadCachedData(): CachedDashboardData | null {
   try {
-    const raw = localStorage.getItem(STORAGE_KEYS.cache[mode]);
+    const raw = localStorage.getItem(STORAGE_KEYS.cache);
     if (!raw) return null;
     return JSON.parse(raw) as CachedDashboardData;
   } catch (_) {
@@ -61,20 +58,19 @@ function loadCachedData(mode: ProfileMode): CachedDashboardData | null {
   }
 }
 
-function saveCachedData(mode: ProfileMode, payload: CachedDashboardData): void {
+function saveCachedData(payload: CachedDashboardData): void {
   try {
-    localStorage.setItem(STORAGE_KEYS.cache[mode], JSON.stringify(payload));
+    localStorage.setItem(STORAGE_KEYS.cache, JSON.stringify(payload));
   } catch (_) {
     // ignore
   }
 }
 
 export const App: React.FC = () => {
-  const [mode, setMode] = useState<ProfileMode>(() => resolveInitialMode());
-  const [cfg, setCfg] = useState<AppConfig>(() => loadProfileConfig(resolveInitialMode()));
+  const [cfg, setCfg] = useState<AppConfig>(() => loadConfig());
   const [drawerOpen, setDrawerOpen] = useState(false);
 
-  const initialCache = useMemo(() => loadCachedData(mode), [mode]);
+  const initialCache = useMemo(() => loadCachedData(), []);
 
   const [weather, setWeather] = useState<WeatherData | null>(
     () => initialCache?.data?.weather ?? null
@@ -185,95 +181,92 @@ export const App: React.FC = () => {
   }, [cfg.autoScrollSeconds, visibleCards.length, goCard]);
 
   // データ一括取得処理（1分毎 + 設定変更時）
-  const loadData = useCallback(
-    async (activeMode: ProfileMode, activeCfg: AppConfig) => {
-      if (busyRef.current) return;
-      busyRef.current = true;
-      setWxBgClass(getWeatherBgClass());
+  const loadData = useCallback(async (activeCfg: AppConfig) => {
+    if (busyRef.current) return;
+    busyRef.current = true;
+    setWxBgClass(getWeatherBgClass());
 
-      try {
-        // 1. 位置情報の解決（useAutoLocation が true の場合は Geolocation + 逆ジオコーディング、失敗時は固定座標へフォールバック）
-        let targetLat = activeCfg.lat;
-        let targetLon = activeCfg.lon;
-        let targetCityName = activeCfg.cityName;
+    try {
+      // 1. 位置情報の解決（useAutoLocation が true の場合は Geolocation + 逆ジオコーディング、失敗時は固定座標へフォールバック）
+      let targetLat = activeCfg.lat;
+      let targetLon = activeCfg.lon;
+      let targetCityName = activeCfg.cityName;
 
-        if (activeCfg.useAutoLocation) {
-          const resolved = await resolveLocationWithFallback({
-            lat: activeCfg.lat,
-            lon: activeCfg.lon,
-            cityName: activeCfg.cityName,
-          });
-          targetLat = resolved.lat;
-          targetLon = resolved.lon;
-          targetCityName = resolved.cityName;
-        }
-
-        // 2. 各APIの並列取得
-        const [weatherData, yahooRes, newsData, quakeData, calData] =
-          await Promise.all([
-            fetchWeatherData(targetLat, targetLon, targetCityName),
-            fetchYahooTrainTroubles(activeCfg.gasUrl),
-            fetchNewsWithFallback(activeCfg.newsRss),
-            fetchQuakeData(),
-            fetchCalendarEvents(activeCfg.calUrl, activeCfg.gasUrl),
-          ]);
-
-        setTrainDiag(yahooRes);
-
-        const trainData = buildTrainStatusList(
-          activeCfg.selectedLines,
-          yahooRes
-        );
-
-        const prevCache = loadCachedData(activeMode)?.data || {};
-        const nextWeather = weatherData || prevCache.weather || null;
-        const nextNews = newsData.length ? newsData : prevCache.news || [];
-        const nextQuake = quakeData.length ? quakeData : prevCache.quake || [];
-        const nextCal = calData.length ? calData : prevCache.calendar || [];
-
-        setWeather(nextWeather);
-        setNews(nextNews);
-        setQuake(nextQuake);
-        setCalendar(nextCal);
-
-        // 鉄道運行情報は内容が変化していない場合、state参照を更新せず <TrainCard /> のDOM・マーキーを再マウントさせない
-        const curTrainHash = JSON.stringify(trainData);
-        if (curTrainHash !== prevTrainHashRef.current) {
-          prevTrainHashRef.current = curTrainHash;
-          setTrain(trainData);
-        }
-
-        const nowTs = Date.now();
-        setStatusOk(true);
-        setLastUpdated(nowTs);
-
-        saveCachedData(activeMode, {
-          t: nowTs,
-          data: {
-            weather: nextWeather,
-            train: trainData,
-            news: nextNews,
-            quake: nextQuake,
-            calendar: nextCal,
-          },
+      if (activeCfg.useAutoLocation) {
+        const resolved = await resolveLocationWithFallback({
+          lat: activeCfg.lat,
+          lon: activeCfg.lon,
+          cityName: activeCfg.cityName,
         });
-      } catch (_) {
-        setStatusOk(false);
-      } finally {
-        busyRef.current = false;
+        targetLat = resolved.lat;
+        targetLon = resolved.lon;
+        targetCityName = resolved.cityName;
       }
-    },
-    []
-  );
+
+      // 2. 各APIの並列取得
+      const [weatherData, yahooRes, newsData, quakeData, calData] =
+        await Promise.all([
+          fetchWeatherData(targetLat, targetLon, targetCityName),
+          fetchYahooTrainTroubles(activeCfg.gasUrl),
+          fetchNewsWithFallback(activeCfg.newsRss),
+          fetchQuakeData(),
+          fetchCalendarEvents(activeCfg.calUrl, activeCfg.gasUrl),
+        ]);
+
+      setTrainDiag(yahooRes);
+
+      const trainData = buildTrainStatusList(
+        activeCfg.selectedLines,
+        yahooRes
+      );
+
+      const prevCache = loadCachedData()?.data || {};
+      const nextWeather = weatherData || prevCache.weather || null;
+      const nextNews = newsData.length ? newsData : prevCache.news || [];
+      const nextQuake = quakeData.length ? quakeData : prevCache.quake || [];
+      const nextCal = calData.length ? calData : prevCache.calendar || [];
+
+      setWeather(nextWeather);
+      setNews(nextNews);
+      setQuake(nextQuake);
+      setCalendar(nextCal);
+
+      // 鉄道運行情報は内容が変化していない場合、state参照を更新せず <TrainCard /> のDOM・マーキーを再マウントさせない
+      const curTrainHash = JSON.stringify(trainData);
+      if (curTrainHash !== prevTrainHashRef.current) {
+        prevTrainHashRef.current = curTrainHash;
+        setTrain(trainData);
+      }
+
+      const nowTs = Date.now();
+      setStatusOk(true);
+      setLastUpdated(nowTs);
+
+      saveCachedData({
+        t: nowTs,
+        data: {
+          weather: nextWeather,
+          train: trainData,
+          news: nextNews,
+          quake: nextQuake,
+          calendar: nextCal,
+        },
+      });
+    } catch (_) {
+      setStatusOk(false);
+    } finally {
+      busyRef.current = false;
+    }
+  }, []);
 
   // 初回ロード ＆ 60秒ごとの定期更新
   useEffect(() => {
-    loadData(mode, cfg);
+    loadData(cfg);
     const id = window.setInterval(() => {
-      loadData(mode, cfg);
+      loadData(cfg);
     }, 60000);
     return () => window.clearInterval(id);
-  }, [mode, cfg, loadData]);
+  }, [cfg, loadData]);
 
   const handlePagerScroll = () => {
     const pager = pagerRef.current;
@@ -285,18 +278,20 @@ export const App: React.FC = () => {
     }
   };
 
-  const handleSaveSettings = (nextMode: ProfileMode, nextConfig: AppConfig) => {
-    saveActiveMode(nextMode);
-    saveProfileConfig(nextMode, nextConfig);
-    setMode(nextMode);
+  const handleSaveSettings = (nextConfig: AppConfig) => {
+    saveConfig(nextConfig);
     setCfg(nextConfig);
     setDrawerOpen(false);
     busyRef.current = false;
-    loadData(nextMode, nextConfig);
+    loadData(nextConfig);
   };
 
-  const handleResetProfile = (targetMode: ProfileMode): AppConfig => {
-    return resetProfileConfig(targetMode);
+  const handleResetConfig = (): AppConfig => {
+    const def = resetConfig();
+    setCfg(def);
+    busyRef.current = false;
+    loadData(def);
+    return def;
   };
 
   return (
@@ -415,13 +410,12 @@ export const App: React.FC = () => {
 
       <SettingsDrawer
         isOpen={drawerOpen}
-        mode={mode}
         config={cfg}
         trainDiag={trainDiag}
         onOpen={() => setDrawerOpen(true)}
         onClose={() => setDrawerOpen(false)}
         onSave={handleSaveSettings}
-        onResetProfile={handleResetProfile}
+        onReset={handleResetConfig}
         onToggleFullscreen={toggleFullscreen}
       />
     </>
